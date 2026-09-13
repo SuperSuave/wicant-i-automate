@@ -2187,6 +2187,18 @@ static const httpd_uri_t load_can_do_catalog_uri = {
     .handler = load_can_do_catalog_handler,
     .user_ctx = NULL};
 
+static const httpd_uri_t load_cando_catalog_ha_uri = {
+    .uri = "/load_cando_catalog",
+    .method = HTTP_GET,
+    .handler = load_can_do_catalog_handler,
+    .user_ctx = NULL};
+
+static const httpd_uri_t can_do_catalog_json_uri = {
+    .uri = "/can_do_catalog.json",
+    .method = HTTP_GET,
+    .handler = load_can_do_catalog_handler,
+    .user_ctx = NULL};
+
 static const httpd_uri_t test_can_do_action_uri = {
     .uri = "/test_can_do_action",
     .method = HTTP_POST,
@@ -3106,6 +3118,8 @@ static httpd_handle_t config_server_init(void) {
     httpd_register_uri_handler(server, &load_can_do_uri);
     httpd_register_uri_handler(server, &store_can_do_catalog_uri);
     httpd_register_uri_handler(server, &load_can_do_catalog_uri);
+    httpd_register_uri_handler(server, &load_cando_catalog_ha_uri);
+    httpd_register_uri_handler(server, &can_do_catalog_json_uri);
     httpd_register_uri_handler(server, &test_can_do_action_uri);
     httpd_register_uri_handler(server, &set_capture_mode_uri);
     httpd_register_uri_handler(server, &get_time_uri);

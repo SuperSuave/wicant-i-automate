@@ -615,7 +615,7 @@ function getCommandTaxonomy(cmd) {
     return { domain: "system_automation", subdomain: "network_integrations" };
 }
 
-const DEFAULT_CAN_DO_CATALOG_URL = "https://github.com/SuperSuave/CAN-Do-Message-Catalog/blob/main/can_do_catalog.json";
+const DEFAULT_CAN_DO_CATALOG_URL = "https://raw.githubusercontent.com/SuperSuave/CAN-Do-Message-Catalog/refs/heads/main/can_do_catalog.json";
 
 function getCanDoCatalogUrl() {
     let url = localStorage.getItem("wican_can_do_catalog_url") || DEFAULT_CAN_DO_CATALOG_URL;
