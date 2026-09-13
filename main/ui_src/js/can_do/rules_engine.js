@@ -3562,12 +3562,18 @@ function applyCanDoActionPreset(selectElem) {
                             </div>`;
         }
         const activeOpt = preset.options[defaultOptIdx] || preset.options[0];
-        if (activeOpt && activeOpt.payload) {
+        if (activeOpt) {
             const stepsContainer = item.querySelector(".can-do-payload-steps-container");
             if (stepsContainer) {
                 stepsContainer.innerHTML = "";
-                renderCanDoPayloadStep(stepsContainer, { payload: activeOpt.payload, repeat: 3 });
-                renderCanDoPayloadStep(stepsContainer, { payload: "00 00 00 00 00 00 00 00", repeat: 3 });
+                if (activeOpt.steps && Array.isArray(activeOpt.steps)) {
+                    activeOpt.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
+                } else if (activeOpt.payload) {
+                    renderCanDoPayloadStep(stepsContainer, { payload: activeOpt.payload, repeat: 3 });
+                    renderCanDoPayloadStep(stepsContainer, { payload: "00 00 00 00 00 00 00 00", repeat: 3 });
+                } else if (preset.steps && Array.isArray(preset.steps)) {
+                    preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
+                }
             }
         }
         if (activeOpt && (activeOpt.target_temp_c !== undefined || activeOpt.target_temp_f !== undefined)) {
@@ -3627,12 +3633,16 @@ function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
     }
 
     // Apply payload to byte steps (3x burst + idle release)
-    if (opt.payload) {
-        const stepsContainer = item.querySelector(".can-do-payload-steps-container");
-        if (stepsContainer) {
-            stepsContainer.innerHTML = "";
+    const stepsContainer = item.querySelector(".can-do-payload-steps-container");
+    if (stepsContainer) {
+        stepsContainer.innerHTML = "";
+        if (opt.steps && Array.isArray(opt.steps)) {
+            opt.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
+        } else if (opt.payload) {
             renderCanDoPayloadStep(stepsContainer, { payload: opt.payload, repeat: 3 });
             renderCanDoPayloadStep(stepsContainer, { payload: "00 00 00 00 00 00 00 00", repeat: 3 });
+        } else if (preset.steps && Array.isArray(preset.steps)) {
+            preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
         }
     }
 

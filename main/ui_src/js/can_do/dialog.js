@@ -186,12 +186,16 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
                                 picker.setAttribute("data-selected-preset", `${catIdx}:${pIdx}`);
                                 applyCanDoActionPreset(picker);
                             }
-                            if (stateOpt && stateOpt.payload) {
-                                const stepsContainer = lastItem.querySelector(".can-do-payload-steps-container");
-                                if (stepsContainer) {
-                                    stepsContainer.innerHTML = "";
-                                    renderCanDoPayloadStep(stepsContainer, { payload: stateOpt.payload, repeat: 3 });
-                                    renderCanDoPayloadStep(stepsContainer, { payload: "00 00 00 00 00 00 00 00", repeat: 3 });
+                            if (stateOpt) {
+                                const optIdx = p.options ? p.options.findIndex(o => o.label === stateOpt.label) : -1;
+                                if (optIdx >= 0) {
+                                    const optsBox = lastItem.querySelector(".can-do-act-options-container");
+                                    if (optsBox) {
+                                        const btns = optsBox.querySelectorAll(".can-do-opt-pill-btn");
+                                        if (btns && btns[optIdx]) {
+                                            applyCanDoOptionPill(btns[optIdx], catIdx, pIdx, optIdx);
+                                        }
+                                    }
                                 }
                             }
                             const titleSpan = lastItem.querySelector(".can-do-subitem-title-act");
