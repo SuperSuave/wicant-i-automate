@@ -7,17 +7,18 @@ window._canDoStateCache = {};
 const DASH_WIDGET_CATALOG = {
     batt_12v: {
         id: "batt_12v", name: "12V Auxiliary Battery", icon: "", category: "Power",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-battery-12v"/></svg> 12V Aux Battery</span>
                     <div class="dash-card-actions"><div id="dash_batt_status_badge" class="dash-status"><span class="status-dot green"></span> Healthy</div></div></div>
                     <div><div class="dash-metric-row"><span id="dash_batt_voltage_val" class="dash-metric-val">--.- V</span></div>
                     <div class="dash-progress-track" style="margin-bottom: 0.6rem; height: 4px;"><div id="dash_batt_gauge" class="dash-progress-fill dash-gauge-level-good" style="width: 75%;"></div></div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.4rem;"><span>Low (12.0V)</span><span>Normal (12.6V)</span><span>Charging</span></div></div>`;
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.4rem;"><span>Low (12.0V)</span><span>Normal (12.6V)</span><span>Charging</span></div></div>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const el = document.getElementById("dash_batt_voltage_val"), bad = document.getElementById("dash_batt_status_badge"), gauge = document.getElementById("dash_batt_gauge");
             if (!obj || obj.batt_voltage === undefined || obj.batt_voltage === null) return;
-            if (el) el.textContent = obj.batt_voltage + " V";
+            if (el) el.textContent = obj.batt_voltage + "V";
             const v = parseFloat(obj.batt_voltage);
             if (!isNaN(v)) {
                 if (bad) {
@@ -32,12 +33,13 @@ const DASH_WIDGET_CATALOG = {
     },
     hv_battery: {
         id: "hv_battery", name: "HV Traction Battery", icon: "", category: "EV Battery",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-battery-hv"/></svg> HV Traction Battery</span>
                     <div class="dash-card-actions"><div id="dash_hv_state_badge" class="dash-status"><span class="status-dot blue"></span> Active</div></div></div>
                     <div><div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 0.2rem;"><span id="dash_hv_temp_val" class="dash-metric-val">--.-°C</span><span id="dash_hv_temp_unit_label" class="dash-metric-label">Cell Temp</span></div>
                     <div id="dash_hv_subtext" class="dash-subtext" style="margin-bottom: 0.6rem;">Waiting for CAN bus telemetry...</div>
-                    <div style="padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.4rem;"><div style="display: flex; align-items: baseline; gap: 6px;"><span id="dash_hv_soc_val" class="dash-metric-val" style="font-size: 1.5rem;">--%</span><span class="dash-metric-label">State of Charge</span></div></div></div>`;
+                    <div style="padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.4rem;"><div style="display: flex; align-items: baseline; gap: 6px;"><span id="dash_hv_soc_val" class="dash-metric-val" style="font-size: 1.5rem;">--%</span><span class="dash-metric-label">State of Charge</span></div></div></div>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const hvBadgeEl = document.getElementById("dash_hv_state_badge");
@@ -55,6 +57,17 @@ const DASH_WIDGET_CATALOG = {
                 }
             }
             if (tempValEl && obj.battery_temp_valid && obj.battery_temp_min_c !== undefined && obj.battery_temp_max_c !== undefined) {
+                const isImp = (typeof getUnitSystem === 'function' && getUnitSystem() === 'imperial');
+                let minT = parseFloat(obj.battery_temp_min_c);
+                let maxT = parseFloat(obj.battery_temp_max_c);
+                if (isImp) {
+                    minT = (minT * 9/5) + 32;
+                    maxT = (maxT * 9/5) + 32;
+                    tempValEl.textContent = `${minT.toFixed(1)}°F - ${maxT.toFixed(1)}°F`;
+                } else {
+                    tempValEl.textContent = `${minT.toFixed(1)}°C - ${maxT.toFixed(1)}°C`;
+                }
+            } else if (false) {
                 tempValEl.textContent = `${obj.battery_temp_min_c}°C - ${obj.battery_temp_max_c}°C`;
             }
             if (socValEl && obj.battery_soc_valid && obj.battery_soc_pct !== undefined) {
@@ -67,11 +80,12 @@ const DASH_WIDGET_CATALOG = {
     },
     precon: {
         id: "precon", name: "EV Preconditioning", icon: "", category: "Quick Action",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-radiator"/></svg> Preconditioning</span>
                     <div class="dash-card-actions"><div id="dash_precon_badge" class="dash-status"><span class="status-dot gray"></span> Inactive</div></div></div>
                     <div><div style="margin-bottom: 0.8rem;"><div class="settings-desc">Heats HV traction battery pack to optimal DC fast charging temperature.</div></div></div>
-                    <button type="button" id="dash_precon_toggle_btn" onclick="preconActivate()" class="dash-outline-btn" style="width: 100%;">Activate Preconditioning</button>`;
+                    <button type="button" id="dash_precon_toggle_btn" onclick="preconActivate()" class="dash-outline-btn" style="width: 100%;">Activate Preconditioning</button>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const preconBadge = document.getElementById("dash_precon_badge"), preconBtn = document.getElementById("dash_precon_toggle_btn");
@@ -87,12 +101,13 @@ const DASH_WIDGET_CATALOG = {
     },
     network: {
         id: "network", name: "Network & Wireless", icon: "", category: "System",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-network"/></svg> Network</span>
                     <div class="dash-card-actions"><div id="dash_net_badge" class="dash-status"><span class="status-dot blue"></span> AP Mode</div></div></div>
                     <div><div class="dash-kv-list"><div class="dash-kv-row"><span class="dash-kv-label">Mode:</span><strong id="dash_wifi_mode_text" class="dash-kv-val">AP</strong></div>
                     <div class="dash-kv-row"><span class="dash-kv-label">Station IP:</span><strong id="dash_sta_ip_text" class="dash-kv-val" style="font-family: monospace;">192.168.3.1</strong></div></div></div>
-                    <button type="button" onclick="openTab(event, 'connectivity_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Configure Networks</button>`;
+                    <button type="button" onclick="openTab(event, 'connectivity_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Configure Networks</button>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const modeText = document.getElementById("dash_wifi_mode_text");
@@ -110,14 +125,15 @@ const DASH_WIDGET_CATALOG = {
     },
     can_hw: {
         id: "can_hw", name: "CAN Bus Status", icon: "", category: "Hardware",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-broadcast"/></svg> CAN Bus</span>
                     <div class="dash-card-actions"><div id="dash_can_mode_status" class="dash-status"><span class="status-dot green"></span> Normal</div></div></div>
                     <div><div class="dash-kv-list">
                         <div class="dash-kv-row"><span class="dash-kv-label">Bitrate:</span><strong id="dash_can_bitrate_val" class="dash-kv-val">500K</strong></div>
                         <div class="dash-kv-row"><span class="dash-kv-label">TCP/UDP Port:</span><strong id="dash_can_port_val" class="dash-kv-val" style="font-family: monospace;">3333</strong></div>
                     </div></div>
-                    <button type="button" onclick="openTab(event, 'can_hardware_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">CAN Settings</button>`;
+                    <button type="button" onclick="openTab(event, 'can_hardware_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">CAN Settings</button>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const br = document.getElementById("dash_can_bitrate_val");
@@ -135,13 +151,27 @@ const DASH_WIDGET_CATALOG = {
     },
     can_do: {
         id: "can_do", name: "CAN Do Automations", icon: "", category: "Automations",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-play"/></svg> CAN Do Automations</span>
                     <div class="dash-card-actions"><span id="can_do_dash_badge" class="dash-status"><span class="status-dot green"></span> Active</span></div></div>
-                    <div><div class="dash-subtext" style="margin-bottom: 0.8rem;">Automate actions, triggers, and vehicle telemetry hooks.</div></div>
-                    <button type="button" onclick="openTab(event, 'automate')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Open Automations</button>`;
+                    <div><div class="dash-subtext" id="can_do_dash_subtext" style="margin-bottom: 0.8rem;">Automate actions, triggers, and vehicle telemetry hooks.</div></div>
+                    <button type="button" onclick="openTab(event, 'automate')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Open Automations</button>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
-        update: function (obj) { }
+        update: function (obj) { 
+            const badge = document.getElementById("can_do_dash_badge");
+            const subtext = document.getElementById("can_do_dash_subtext");
+            if (typeof getCanDoRules === "function") {
+                const rules = getCanDoRules();
+                const activeCount = rules.filter(r => r.enabled).length;
+                if (badge) {
+                    badge.innerHTML = activeCount > 0 ? `<span class="status-dot green"></span> ${activeCount} Active` : `<span class="status-dot gray"></span> Inactive`;
+                }
+                if (subtext) {
+                    subtext.textContent = `${activeCount} of ${rules.length} automations enabled.`;
+                }
+            }
+        }
     },
     can_state_monitor: {
         id: "can_state_monitor", name: "CAN State Monitor", icon: "", category: "Monitoring",
@@ -866,6 +896,13 @@ function addDashboardWidget(widgetId) {
         let nextIdx = 0;
         while (layout.includes(`can_state_${nextIdx}`)) nextIdx++;
         const newInstId = `can_state_${nextIdx}`;
+        
+        try {
+            const store = JSON.parse(localStorage.getItem("wican_state_widgets") || "{}");
+            store[newInstId] = [];
+            localStorage.setItem("wican_state_widgets", JSON.stringify(store));
+        } catch(e) {}
+        
         layout.push(newInstId);
         saveDashboardWidgetLayout(layout);
         if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
@@ -877,6 +914,13 @@ function addDashboardWidget(widgetId) {
         let nextIdx = 0;
         while (layout.includes(`can_do_btn_${nextIdx}`)) nextIdx++;
         const newInstId = `can_do_btn_${nextIdx}`;
+        
+        try {
+            const store = JSON.parse(localStorage.getItem("wican_dash_can_do_buttons") || "{}");
+            store[newInstId] = [];
+            localStorage.setItem("wican_dash_can_do_buttons", JSON.stringify(store));
+        } catch(e) {}
+        
         layout.push(newInstId);
         saveDashboardWidgetLayout(layout);
         if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
