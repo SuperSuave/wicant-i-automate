@@ -454,7 +454,7 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
             if (item.options && Array.isArray(item.options) && item.options.length > 0) {
                 stateChipsHTML = `
                                     <div class="ha-target-state-chips" onclick="event.stopPropagation();">
-                                        ${item.options.slice(0, 4).map(opt => `
+                                        ${item.options.map(opt => `
                                             <span class="ha-target-state-chip" onclick="handleTargetSelection(window._targetItemSelectMap['${item.id}'], window._targetItemOptionMap['${item.id}_${opt.label.replace(/[^a-zA-Z0-9]/g, '')}'])">
                                                 ${opt.label}
                                             </span>

@@ -1416,6 +1416,7 @@
         .ha-add-element-dialog {
             width: 100%;
             max-width: 640px;
+            height: 85vh;
             max-height: 85vh;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -2339,3 +2340,56 @@
                 box-shadow: 0 6px 24px rgba(2, 132, 199, 0.7), 0 0 0 5px rgba(2, 132, 199, 0.3) !important;
             }
         }
+.can-do-opt-pill-btn {
+    background: var(--md-sys-color-surface-container);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.can-do-opt-pill-btn:hover {
+    background: var(--md-sys-color-surface-container-high);
+}
+
+.can-do-opt-pill-btn.active {
+    background: var(--ha-primary-color) !important;
+    color: white !important;
+    border-color: var(--ha-primary-color) !important;
+    font-weight: 600;
+}
+
+.can-do-options-grid {
+    display: grid;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.can-do-options-grid.grid-few {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+.can-do-options-grid.grid-many {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+dialog.ha-native-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+.ha-add-element-dialog {
+    max-width: 600px;
+    width: 90vw;
+    margin: 0 auto;
+    position: relative;
+    height: 85vh;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}

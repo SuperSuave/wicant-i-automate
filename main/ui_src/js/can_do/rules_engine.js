@@ -3669,6 +3669,12 @@ function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
         if (pop) pop.value = opt.popup;
     }
 
+    // Apply CAN ID
+    const cid = item.querySelector(".can-do-act-can-id");
+    if (cid && (opt.action_can_id || preset.action_can_id || preset.state_can_id)) {
+        cid.value = opt.action_can_id || preset.action_can_id || preset.state_can_id;
+    }
+
     const label = (isImperial && opt.label_imperial) ? opt.label_imperial : opt.label;
     const pName = (isImperial && preset.name_imperial) ? preset.name_imperial : preset.name;
     showNotification(`Selected ${pName}: ${label}`, "green", 2500);

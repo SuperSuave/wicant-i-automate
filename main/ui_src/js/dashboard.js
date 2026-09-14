@@ -18,7 +18,7 @@ const DASH_WIDGET_CATALOG = {
         update: function (obj) {
             const el = document.getElementById("dash_batt_voltage_val"), bad = document.getElementById("dash_batt_status_badge"), gauge = document.getElementById("dash_batt_gauge");
             if (!obj || obj.batt_voltage === undefined || obj.batt_voltage === null) return;
-            if (el) el.textContent = obj.batt_voltage + "V";
+            if (el) el.textContent = obj.batt_voltage;
             const v = parseFloat(obj.batt_voltage);
             if (!isNaN(v)) {
                 if (bad) {
