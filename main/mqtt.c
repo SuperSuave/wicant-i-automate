@@ -100,6 +100,12 @@ typedef struct {
 static CANFilter *mqtt_canflt_values = NULL;
 static uint32_t mqtt_canflt_size = 0;
 
+static void ha_discovery_task(void *pvParameters) {
+  vTaskDelay(pdMS_TO_TICKS(500));
+  can_do_publish_ha_discovery();
+  vTaskDelete(NULL);
+}
+
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
                                int32_t event_id, void *event_data) {
   ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%ld", base,
@@ -126,9 +132,8 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
     esp_mqtt_client_publish(client, mqtt_status_topic,
                             "{\"status\": \"online\"}", 0, 0, 1);
 
-    can_do_publish_ha_discovery();
-
     xEventGroupSetBits(s_mqtt_event_group, MQTT_CONNECTED_BIT);
+    xTaskCreate(ha_discovery_task, "ha_disc_task", 1024 * 4, NULL, 5, NULL);
     break;
   case MQTT_EVENT_DISCONNECTED:
     ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
@@ -512,6 +517,9 @@ static void mqtt_task(void *pvParameters) {
           strcat((char *)json_buffer, "]}");
 
           mqtt_publish(mqtt_topic, json_buffer, 0, 0, 0);
+        } else {
+          // Discard frame from queue so task does not spin in an infinite tight loop
+          xQueueReceive(*xmqtt_tx_queue, (void *)&tx_frame, 0);
         }
       } else {
         xQueueReceive(*xmqtt_tx_queue, (void *)&tx_frame, 0);
