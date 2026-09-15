@@ -18,8 +18,10 @@ static time_sync_config_t g_time_config = {
     .sntp_enabled = false, .sntp_server = "pool.ntp.org", .timezone = "UTC0"};
 
 static bool s_sntp_running = false;
+static bool s_sntp_synced = false;
 
 static void sntp_sync_notification_cb(struct timeval *tv) {
+  s_sntp_synced = true;
   ESP_LOGI(TAG, "SNTP time synchronized successfully");
 }
 
@@ -30,7 +32,7 @@ void time_sync_init(void) {
 }
 
 void time_sync_start_sntp(void) {
-  if (s_sntp_running) {
+  if (s_sntp_running || esp_sntp_is_enabled()) {
     esp_sntp_stop();
     s_sntp_running = false;
   }
@@ -39,22 +41,21 @@ void time_sync_start_sntp(void) {
     return;
   }
 
-  if (can_do_get_reverse_engineering_mode()) {
-    ESP_LOGI(TAG, "Reverse engineering mode active: SNTP skipped");
-    return;
-  }
+  const char *srv = (g_time_config.sntp_server[0] != '\0')
+                        ? g_time_config.sntp_server
+                        : "pool.ntp.org";
 
-  ESP_LOGI(TAG, "Initializing SNTP client with server: %s",
-           g_time_config.sntp_server);
+  ESP_LOGI(TAG, "Initializing SNTP client with server: %s", srv);
   esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
-  esp_sntp_setservername(0, g_time_config.sntp_server);
+  esp_sntp_setsyncmode(SNTP_SYNC_MODE_IMMED);
+  esp_sntp_setservername(0, srv);
   sntp_set_time_sync_notification_cb(sntp_sync_notification_cb);
   esp_sntp_init();
   s_sntp_running = true;
 }
 
 void time_sync_stop_sntp(void) {
-  if (s_sntp_running) {
+  if (s_sntp_running || esp_sntp_is_enabled()) {
     ESP_LOGI(TAG, "Stopping SNTP client");
     esp_sntp_stop();
     s_sntp_running = false;
@@ -89,13 +90,23 @@ bool time_sync_is_synced(void) {
   return (now > 1700000000);
 }
 
+bool time_sync_is_sntp_synced(void) {
+  return s_sntp_synced;
+}
+
 void time_sync_get_formatted(char *buf, size_t max_len) {
   if (!buf || max_len == 0)
     return;
   time_t now = time(NULL);
   struct tm timeinfo;
   localtime_r(&now, &timeinfo);
-  strftime(buf, max_len, "%Y-%m-%d %H:%M:%S", &timeinfo);
+  int hour12 = timeinfo.tm_hour % 12;
+  if (hour12 == 0)
+    hour12 = 12;
+  const char *ampm = (timeinfo.tm_hour >= 12) ? "PM" : "AM";
+  snprintf(buf, max_len, "%d/%d/%02d %d:%02d:%02d %s", timeinfo.tm_mon + 1,
+           timeinfo.tm_mday, timeinfo.tm_year % 100, hour12, timeinfo.tm_min,
+           timeinfo.tm_sec, ampm);
 }
 
 time_sync_config_t *time_sync_get_config(void) { return &g_time_config; }

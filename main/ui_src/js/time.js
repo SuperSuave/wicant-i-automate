@@ -4,13 +4,16 @@ function fetchDeviceTime() {
         if (data) {
             const disp = document.getElementById("device_time_display");
             const badge = document.getElementById("device_time_sync_badge");
-            if (disp) disp.textContent = data.time_str || "--:--:--";
+            if (disp) disp.textContent = data.time_str || "--/--/-- --:--:-- --";
             if (badge) {
                 badge.className = "";
                 badge.style.background = "";
                 badge.style.color = "";
-                if (data.synced) {
-                    badge.textContent = "✓ Synced";
+                if (data.sntp_synced) {
+                    badge.textContent = "✓ SNTP Synced";
+                    badge.classList.add("badge-green");
+                } else if (data.synced) {
+                    badge.textContent = "✓ Clock Set";
                     badge.classList.add("badge-green");
                 } else {
                     badge.textContent = "⚠ Unset / Not Synced";
@@ -24,19 +27,11 @@ function fetchDeviceTime() {
             }
             const srvInput = document.getElementById("sntp_server");
             if (srvInput && data.sntp_server) srvInput.value = data.sntp_server;
-            const tzInput = document.getElementById("sntp_timezone");
             const tzSelect = document.getElementById("tz_preset");
-            if (data.timezone) {
-                if (tzInput) tzInput.value = data.timezone;
-                if (tzSelect) {
-                    const hasOption = Array.from(tzSelect.options).some(o => o.value === data.timezone);
-                    if (hasOption) {
-                        tzSelect.value = data.timezone;
-                        if (tzInput) tzInput.style.display = "none";
-                    } else {
-                        tzSelect.value = "custom";
-                        if (tzInput) tzInput.style.display = "block";
-                    }
+            if (tzSelect && data.timezone) {
+                const hasOption = Array.from(tzSelect.options).some(o => o.value === data.timezone);
+                if (hasOption) {
+                    tzSelect.value = data.timezone;
                 }
             }
         }
@@ -45,16 +40,12 @@ function fetchDeviceTime() {
 
 function toggleSntpFields(val) {
     const row = document.getElementById("sntp_server_row");
-    if (row) row.classList.toggle("hidden", val !== "enable");
+    if (row) row.style.display = (val === "enable") ? "block" : "none";
 }
 
 function getSelectedTimezone() {
     const select = document.getElementById("tz_preset");
-    const tzInput = document.getElementById("sntp_timezone");
-    if (select && select.value && select.value !== "custom") {
-        return select.value;
-    }
-    return tzInput?.value?.trim() || "UTC0";
+    return select?.value || "UTC0";
 }
 
 function syncTimeFromBrowser() {
@@ -92,18 +83,6 @@ function saveTimeConfigUI() {
 }
 
 function onTzSelectChange(select) {
-    const tzInput = document.getElementById("sntp_timezone");
-    if (select.value === "custom") {
-        if (tzInput) {
-            tzInput.style.display = "block";
-            tzInput.focus();
-        }
-    } else {
-        if (tzInput) {
-            tzInput.style.display = "none";
-            tzInput.value = select.value;
-        }
-        saveTimeConfigUI();
-    }
+    saveTimeConfigUI();
 }
 const applyTzPreset = onTzSelectChange;

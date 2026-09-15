@@ -588,6 +588,71 @@
                 </div>
             </div>
 
+            <div class="section-title">Real-Time Clock &amp; Time Sync</div>
+            <div class="settings-card">
+                <div class="settings-row">
+                    <div class="settings-label">
+                        <span class="settings-title">Current Device Time</span>
+                        <span class="settings-desc">Internal system clock (12-hour format M/D/YY).</span>
+                    </div>
+                    <div class="settings-control" style="display: flex; gap: 10px; align-items: center;">
+                        <span id="device_time_display" style="font-family: monospace; font-weight: 700; font-size: 1.05rem; color: var(--text-heading);">--/--/-- --:--:-- --</span>
+                        <span id="device_time_sync_badge" class="badge-yellow">⚠ Unset / Not Synced</span>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">
+                        <span class="settings-title">Sync Clock from Browser</span>
+                        <span class="settings-desc">One-click instant clock setting from browser time.</span>
+                    </div>
+                    <div class="settings-control">
+                        <button type="button" onclick="syncTimeFromBrowser()" class="dash-outline-btn" style="padding: 6px 14px; font-size: 0.85rem;">
+                            Sync from Browser
+                        </button>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">
+                        <span class="settings-title">SNTP Network Time Sync</span>
+                        <span class="settings-desc">Automatically synchronize clock over Wi-Fi network.</span>
+                    </div>
+                    <div class="settings-control">
+                        <select id="sntp_enabled" onchange="toggleSntpFields(this.value);">
+                            <option value="disable">Disable</option>
+                            <option value="enable">Enable</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="sntp_server_row">
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">NTP Server</span></div>
+                        <div class="settings-control">
+                            <input type="text" id="sntp_server" placeholder="pool.ntp.org" value="pool.ntp.org">
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">Timezone Preset</span></div>
+                        <div class="settings-control">
+                            <select id="tz_preset" onchange="onTzSelectChange(this)">
+                                <option value="UTC0">UTC (Universal Coordinated Time)</option>
+                                <option value="PST8PDT,M3.2.0,M11.1.0">US Pacific (PST/PDT)</option>
+                                <option value="MST7MDT,M3.2.0,M11.1.0">US Mountain (MST/MDT)</option>
+                                <option value="MST7">US Mountain - Arizona (No DST)</option>
+                                <option value="CST6CDT,M3.2.0,M11.1.0">US Central (CST/CDT)</option>
+                                <option value="EST5EDT,M3.2.0,M11.1.0">US Eastern (EST/EDT)</option>
+                                <option value="GMT0BST,M3.5.0/1,M10.5.0">UK London (GMT/BST)</option>
+                                <option value="CET-1CEST,M3.5.0,M10.5.0/3">Central Europe (CET/CEST)</option>
+                                <option value="JST-9">Japan (JST)</option>
+                                <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Australia Eastern (AEST/AEDT)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-row" style="justify-content: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" onclick="saveTimeConfigUI()" class="dash-action-btn" style="padding: 6px 18px; font-size: 0.85rem; font-weight: 600;">Save Time Settings</button>
+                </div>
+            </div>
+
             <div class="section-title">Configuration Backup &amp; Restore</div>
             <div class="settings-card">
                 <div class="settings-row">

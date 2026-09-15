@@ -1101,6 +1101,7 @@ static esp_err_t get_time_handler(httpd_req_t *req) {
 
   cJSON *root = cJSON_CreateObject();
   cJSON_AddBoolToObject(root, "synced", time_sync_is_synced());
+  cJSON_AddBoolToObject(root, "sntp_synced", time_sync_is_sntp_synced());
   cJSON_AddNumberToObject(root, "epoch", (double)now);
   cJSON_AddStringToObject(root, "time_str", time_buf);
   cJSON_AddBoolToObject(root, "sntp_enabled", cfg ? cfg->sntp_enabled : false);

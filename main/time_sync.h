@@ -22,6 +22,7 @@ void time_sync_start_sntp(void);
 void time_sync_stop_sntp(void);
 esp_err_t time_sync_set_time(int64_t epoch_sec, const char *tz);
 bool time_sync_is_synced(void);
+bool time_sync_is_sntp_synced(void);
 void time_sync_get_formatted(char *buf, size_t max_len);
 time_sync_config_t *time_sync_get_config(void);
 esp_err_t time_sync_save_config(const time_sync_config_t *cfg);
