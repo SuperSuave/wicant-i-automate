@@ -145,6 +145,7 @@ typedef struct {
   can_do_sequence_step_t *steps;
   uint8_t step_count;
   uint32_t delay_ms; // Duration in ms for CAN_DO_ACT_DELAY step
+  char webhook_url[192];        // Optional target webhook URL for Home Assistant
 } can_do_action_t;
 
 typedef struct {

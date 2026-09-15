@@ -20,6 +20,7 @@
 
 #include "can.h"
 #include "config_server.h"
+#include "ha_webhooks.h"
 #include "hw_config.h"
 #include "mqtt.h"
 #include "persistent_settings.h"
@@ -40,6 +41,8 @@
 
 static can_do_rule_set_t g_can_do_rules = {0};
 static char g_device_id[32] = {0};
+static char g_can_do_last_trigger[64] = {0};
+static int64_t g_can_do_last_trigger_us = 0;
 
 // Cache for E-GMP live cabin temperatures and seatbelt occupant status
 static uint8_t g_climate_driver_raw = 0;    // 0x380 byte 3
@@ -401,6 +404,20 @@ static void can_do_execute_action(can_do_action_t *act,
     return;
   }
 
+  if (act->type == CAN_DO_ACT_WEBHOOK) {
+    ha_webhook_config_t wh_cfg;
+    memset(&wh_cfg, 0, sizeof(wh_cfg));
+    const char *target_url = NULL;
+    if (act->webhook_url[0] != '\0') {
+      target_url = act->webhook_url;
+    } else if (ha_webhooks_get_config(&wh_cfg) == ESP_OK && wh_cfg.enabled && wh_cfg.url_count > 0) {
+      target_url = wh_cfg.urls[0];
+    }
+    if (target_url && target_url[0] != '\0') {
+      ESP_LOGI(TAG, "CAN Do firing webhook action to: %s", target_url);
+    }
+  }
+
   if (act->type == CAN_DO_ACT_CAN_TX || act->type == 0) {
     for (uint8_t s = 0; s < act->step_count; s++) {
       can_do_sequence_step_t *step = &act->steps[s];
@@ -440,6 +457,14 @@ static void can_do_execute_rule_actions(can_do_rule_t *rule,
                                         int64_t now_us) {
   if (!rule)
     return;
+
+  if (matched_id && matched_id[0] != '\0') {
+    strlcpy(g_can_do_last_trigger, matched_id, sizeof(g_can_do_last_trigger));
+    g_can_do_last_trigger_us = now_us;
+  } else if (rule->name && rule->name[0] != '\0') {
+    strlcpy(g_can_do_last_trigger, rule->name, sizeof(g_can_do_last_trigger));
+    g_can_do_last_trigger_us = now_us;
+  }
 
   if (rule->exec_mode == CAN_DO_EXEC_TOGGLE) {
     if (!rule->is_active_state) {
@@ -1173,10 +1198,20 @@ static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
       act->type = CAN_DO_ACT_CLIMATE_TARGET;
     else if (strcmp(act_type_obj->valuestring, "delay") == 0)
       act->type = CAN_DO_ACT_DELAY;
+    else if (strcmp(act_type_obj->valuestring, "webhook") == 0)
+      act->type = CAN_DO_ACT_WEBHOOK;
+    else if (strcmp(act_type_obj->valuestring, "mqtt") == 0)
+      act->type = CAN_DO_ACT_MQTT;
     else
       act->type = CAN_DO_ACT_CAN_TX;
   } else {
     act->type = CAN_DO_ACT_CAN_TX;
+  }
+
+  cJSON *wh_url = act_obj ? cJSON_GetObjectItem(act_obj, "webhook_url")
+                          : cJSON_GetObjectItem(r, "webhook_url");
+  if (wh_url && wh_url->valuestring) {
+    strlcpy(act->webhook_url, wh_url->valuestring, sizeof(act->webhook_url));
   }
 
   cJSON *tt = act_obj ? cJSON_GetObjectItem(act_obj, "target_temp_c")
@@ -1709,6 +1744,19 @@ void can_do_get_stats_json(cJSON *root) {
     cJSON_AddItemToArray(can_do_stats, st);
   }
   cJSON_AddItemToObject(root, "can_do_stats", can_do_stats);
+  if (g_can_do_last_trigger[0] != '\0') {
+    cJSON_AddStringToObject(root, "last_trigger", g_can_do_last_trigger);
+    cJSON_AddNumberToObject(
+        root, "last_trigger_age_ms",
+        (esp_timer_get_time() - g_can_do_last_trigger_us) / 1000);
+    cJSON *triggers_obj = cJSON_CreateObject();
+    if (triggers_obj) {
+      cJSON *trig_info = cJSON_CreateObject();
+      cJSON_AddStringToObject(trig_info, "event_type", "triggered");
+      cJSON_AddItemToObject(triggers_obj, g_can_do_last_trigger, trig_info);
+      cJSON_AddItemToObject(root, "triggers", triggers_obj);
+    }
+  }
   cJSON_AddNumberToObject(root, "capture_mode",
                           (int)g_can_do_rules.capture_mode);
   cJSON_AddBoolToObject(root, "capture_active", can_do_is_capture_active());

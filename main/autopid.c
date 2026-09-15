@@ -20,6 +20,7 @@
 
 #include "autopid.h"
 #include "cJSON.h"
+#include "can.h"
 #include "can_do.h"
 #include "config_server.h"
 #include "debug_logs.h"
@@ -2365,6 +2366,44 @@ static void autopid_webhook_task(void *pvParameters) {
                   cJSON_AddItemToObject(root_obj, "autopid_data", auto_payload);
                 else if (auto_payload)
                   cJSON_Delete(auto_payload);
+
+                // CAN_STATES for Home Assistant door locks, condition sensors, and status
+                can_state_entry_t can_states_snap[CAN_STATE_CACHE_SIZE];
+                can_state_cache_lock();
+                const can_state_entry_t *cache = can_state_cache_get();
+                if (cache) {
+                  memcpy(can_states_snap, cache, sizeof(can_states_snap));
+                }
+                can_state_cache_unlock();
+
+                cJSON *can_states_obj = cJSON_CreateObject();
+                if (can_states_obj) {
+                  uint32_t now_ms = (uint32_t)(esp_timer_get_time() / 1000);
+                  for (int i = 0; i < CAN_STATE_CACHE_SIZE; i++) {
+                    if (can_states_snap[i].id == 0)
+                      continue;
+                    char hex[17] = {0};
+                    for (int b = 0; b < can_states_snap[i].dlc && b < 8; b++) {
+                      snprintf(hex + b * 2, 3, "%02X", can_states_snap[i].data[b]);
+                    }
+                    uint32_t age = (now_ms >= can_states_snap[i].timestamp_ms)
+                                       ? (now_ms - can_states_snap[i].timestamp_ms)
+                                       : 0;
+                    cJSON *entry_obj = cJSON_CreateObject();
+                    cJSON_AddStringToObject(entry_obj, "data", hex);
+                    cJSON_AddNumberToObject(entry_obj, "dlc", can_states_snap[i].dlc);
+                    cJSON_AddNumberToObject(entry_obj, "bus", can_states_snap[i].bus);
+                    cJSON_AddNumberToObject(entry_obj, "age_ms", age);
+                    char id_str[16];
+                    snprintf(id_str, sizeof(id_str), "0x%X", (unsigned int)can_states_snap[i].id);
+                    cJSON_AddItemToObject(can_states_obj, id_str, entry_obj);
+                  }
+                  if (cJSON_GetArraySize(can_states_obj) > 0) {
+                    cJSON_AddItemToObject(root_obj, "can_states", can_states_obj);
+                  } else {
+                    cJSON_Delete(can_states_obj);
+                  }
+                }
 
                 // Always include GPS block (mock for now)
                 // cJSON *gps = cJSON_CreateObject();
