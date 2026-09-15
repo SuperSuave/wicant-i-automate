@@ -515,17 +515,30 @@ function extractCanDoActionData(item) {
     const presetPicker = item.querySelector(".can-do-act-preset-picker");
     const selectedPresetVal = presetPicker?.value || "";
     const selectedPresetName = presetPicker?.selectedOptions[0]?.dataset?.name || "";
+    let presetObj = null;
+
+    let optIdx = undefined;
+    let optLabel = undefined;
+    const activeOptBtn = item.querySelector(".can-do-act-options-container .can-do-opt-pill-btn.active");
+    if (activeOptBtn) {
+        if (activeOptBtn.dataset.optIdx !== undefined) optIdx = parseInt(activeOptBtn.dataset.optIdx);
+        if (activeOptBtn.dataset.optLabel) optLabel = activeOptBtn.dataset.optLabel;
+    }
 
     if (actType === "preset") {
         if (selectedPresetVal && typeof getFilteredActionPresets === "function") {
             const parts = selectedPresetVal.split(/[:_]/);
             const cats = getFilteredActionPresets();
-            const presetObj = cats[parseInt(parts[0])]?.presets[parseInt(parts[1])];
+            presetObj = cats[parseInt(parts[0])]?.presets[parseInt(parts[1])];
             if (presetObj) {
-                if (presetObj.type === "climate_target" || presetObj.target_temp_c !== undefined || presetObj.target_temp_f !== undefined) {
+                if (presetObj.type) {
+                    actType = presetObj.type;
+                } else if (presetObj.target_temp_c !== undefined || presetObj.target_temp_f !== undefined) {
                     actType = "climate_target";
-                } else if (presetObj.type === "precondition" || presetObj.precon_mode !== undefined) {
+                } else if (presetObj.precon_mode !== undefined || (presetObj.options && presetObj.options.some(o => o.precon_mode))) {
                     actType = "precondition";
+                } else if (presetObj.popup_message !== undefined || (presetObj.options && presetObj.options.some(o => o.popup || o.popup_message))) {
+                    actType = "popup";
                 } else {
                     actType = "can_tx";
                 }
@@ -558,10 +571,16 @@ function extractCanDoActionData(item) {
         passTempF = Math.round(passTempC * 9 / 5 + 32);
     }
 
+    const canIdInput = item.querySelector(".can-do-act-can-id")?.value.trim() || "";
+    const effectiveCanId = canIdInput || (presetObj ? (presetObj.action_can_id || presetObj.can_id || presetObj.state_can_id || "") : "");
+
     return {
         trigger_id: item.querySelector(".can-do-act-trig-id")?.value.trim() || "",
+        preset_id: presetObj ? (presetObj.id || "") : "",
         preset_val: selectedPresetVal,
         preset_name: selectedPresetName,
+        opt_idx: optIdx,
+        opt_label: optLabel,
         popup_message: item.querySelector(".can-do-act-popup-msg")?.value.trim() || "",
         type: actType,
         precon_mode: item.querySelector(".can-do-act-precon-mode")?.value || "persistent",
@@ -573,7 +592,8 @@ function extractCanDoActionData(item) {
         climate_zone: item.querySelector(".can-do-act-climate-zone")?.value || "driver",
         climate_sync_on: item.querySelector(".can-do-act-climate-sync")?.checked !== false,
         climate_driver_only: item.querySelector(".can-do-act-climate-drv-only")?.checked === true,
-        can_id: item.querySelector(".can-do-act-can-id")?.value || "",
+        can_id: effectiveCanId,
+        action_can_id: effectiveCanId,
         steps: steps,
         payload: payloadLines.join("\n"),
         bus: parseInt(item.querySelector(".can-do-act-bus")?.value || "0"),

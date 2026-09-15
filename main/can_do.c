@@ -1019,15 +1019,33 @@ static void can_do_parse_single_trigger(cJSON *r, cJSON *trig_obj,
 
   cJSON *cid = trig_obj ? cJSON_GetObjectItem(trig_obj, "can_id")
                         : cJSON_GetObjectItem(r, "can_id");
+  if (!cid && trig_obj) {
+    cid = cJSON_GetObjectItem(trig_obj, "state_can_id");
+  }
+  if (!cid && r) {
+    cid = cJSON_GetObjectItem(r, "state_can_id");
+  }
+  if (!cid && trig_obj) {
+    cid = cJSON_GetObjectItem(trig_obj, "action_can_id");
+  }
+  if (!cid && r) {
+    cid = cJSON_GetObjectItem(r, "action_can_id");
+  }
   cJSON *bus_item = trig_obj ? cJSON_GetObjectItem(trig_obj, "bus")
                              : cJSON_GetObjectItem(r, "bus");
   cJSON *from_p = trig_obj ? cJSON_GetObjectItem(trig_obj, "from_payload")
-                           : cJSON_GetObjectItem(r, "from_payload");
+                            : cJSON_GetObjectItem(r, "from_payload");
   cJSON *to_p = trig_obj ? cJSON_GetObjectItem(trig_obj, "to_payload") : NULL;
   if (!to_p && trig_obj)
     to_p = cJSON_GetObjectItem(trig_obj, "match_payload");
+  if (!to_p && trig_obj)
+    to_p = cJSON_GetObjectItem(trig_obj, "payload");
+  if (!to_p)
+    to_p = cJSON_GetObjectItem(r, "to_payload");
   if (!to_p)
     to_p = cJSON_GetObjectItem(r, "match_payload");
+  if (!to_p)
+    to_p = cJSON_GetObjectItem(r, "payload");
 
   if (cid && cid->valuestring && strlen(cid->valuestring) > 0) {
     trig->can_id = strtoul(cid->valuestring, NULL, 0);
@@ -1209,6 +1227,18 @@ static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
 
   cJSON *txid = act_obj ? cJSON_GetObjectItem(act_obj, "can_id")
                         : cJSON_GetObjectItem(r, "tx_can_id");
+  if (!txid && act_obj) {
+    txid = cJSON_GetObjectItem(act_obj, "action_can_id");
+  }
+  if (!txid && r) {
+    txid = cJSON_GetObjectItem(r, "action_can_id");
+  }
+  if (!txid && act_obj) {
+    txid = cJSON_GetObjectItem(act_obj, "state_can_id");
+  }
+  if (!txid && r) {
+    txid = cJSON_GetObjectItem(r, "state_can_id");
+  }
   cJSON *act_bus = act_obj ? cJSON_GetObjectItem(act_obj, "bus") : NULL;
   cJSON *act_delay = act_obj ? cJSON_GetObjectItem(act_obj, "delay_ms") : NULL;
   cJSON *steps_arr = act_obj ? cJSON_GetObjectItem(act_obj, "steps") : NULL;

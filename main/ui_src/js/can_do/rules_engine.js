@@ -332,48 +332,93 @@ function renderTrigPresetOptionsHTML(selectedIdxStr = "") {
     return html;
 }
 
-function findMatchingActionPresetVal(data) {
+function findMatchingTriggerPresetVal(data) {
     if (!data) return "";
     if (data.preset_val) return data.preset_val;
+    const { builtIn, custom } = getFilteredTriggerPresets();
+    if (data.id) {
+        const cIdx = custom.findIndex(p => p.id === data.id);
+        if (cIdx !== -1) return `c_${cIdx}`;
+        const bIdx = builtIn.findIndex(p => p.id === data.id);
+        if (bIdx !== -1) return `b_${bIdx}`;
+    }
+    const dataCanId = (data.can_id || data.state_can_id || data.action_can_id || "").toLowerCase();
+    const dataFrom = data.from_payload || "";
+    const dataTo = data.to_payload || data.match_payload || "";
+    if (dataCanId) {
+        for (let i = 0; i < custom.length; i++) {
+            const p = custom[i];
+            const pCanId = (p.state_can_id || p.action_can_id || p.can_id || "").toLowerCase();
+            if (pCanId === dataCanId) {
+                if (!dataTo || p.to_payload === dataTo || p.match_payload === dataTo || (p.options && p.options.some(o => (o.to_payload === dataTo || o.match_payload === dataTo)))) {
+                    return `c_${i}`;
+                }
+            }
+        }
+        for (let i = 0; i < builtIn.length; i++) {
+            const p = builtIn[i];
+            const pCanId = (p.state_can_id || p.action_can_id || p.can_id || "").toLowerCase();
+            if (pCanId === dataCanId) {
+                if (!dataTo || p.to_payload === dataTo || p.match_payload === dataTo || (p.options && p.options.some(o => (o.to_payload === dataTo || o.match_payload === dataTo)))) {
+                    return `b_${i}`;
+                }
+            }
+        }
+    }
+    return "";
+}
+
+function findMatchingActionPresetVal(data) {
+    if (!data) return "";
     const cats = getFilteredActionPresets();
 
-    // 1. Check by explicit preset_name / preset_id
-    if (data.preset_name || data.preset_id) {
+    // 1. Check by explicit preset_id / id / preset_name
+    const targetId = data.preset_id || data.id;
+    const targetName = data.preset_name || data.name;
+    if (targetId || targetName) {
         for (let cIdx = 0; cIdx < cats.length; cIdx++) {
             const cat = cats[cIdx];
             for (let pIdx = 0; pIdx < cat.presets.length; pIdx++) {
                 const p = cat.presets[pIdx];
-                if ((data.preset_id && p.id === data.preset_id) || (data.preset_name && (p.name === data.preset_name || p.name_imperial === data.preset_name))) {
+                if ((targetId && p.id === targetId) || (targetName && (p.name === targetName || p.name_imperial === targetName))) {
                     return `${cIdx}:${pIdx}`;
                 }
             }
         }
     }
 
-    // 2. Smart Fingerprint Match: type / can_id / popup_message / precon_mode
+    // 2. Validate data.preset_val
+    if (data.preset_val) {
+        const parts = data.preset_val.split(/[:_]/);
+        const pObj = cats[parseInt(parts[0])]?.presets[parseInt(parts[1])];
+        if (pObj) return data.preset_val;
+    }
+
+    // 3. Smart Fingerprint Match: type / action_can_id / precon_mode / popup_message
+    const dataCanId = (data.action_can_id || data.can_id || "").toLowerCase();
     for (let cIdx = 0; cIdx < cats.length; cIdx++) {
         const cat = cats[cIdx];
         for (let pIdx = 0; pIdx < cat.presets.length; pIdx++) {
             const p = cat.presets[pIdx];
-            if (p.type === "precondition" && data.type === "precondition") {
-                if (p.precon_mode === (data.precon_mode || "persistent")) return `${cIdx}:${pIdx}`;
+            const pCanId = (p.action_can_id || p.can_id || p.state_can_id || "").toLowerCase();
+
+            if (p.type === "precondition" || (p.options && p.options.some(o => o.precon_mode))) {
+                if (data.type === "precondition" || data.precon_mode) return `${cIdx}:${pIdx}`;
             }
-            if (p.type === "climate_target" && (data.type === "climate_target" || data.target_temp_c !== undefined)) {
+            if ((p.type === "climate_target" || p.target_temp_c !== undefined) && (data.type === "climate_target" || data.target_temp_c !== undefined)) {
                 return `${cIdx}:${pIdx}`;
             }
-            if (p.type === "popup" && (data.type === "popup" || data.popup_message)) {
-                if (p.popup_message && data.popup_message && (p.popup_message === data.popup_message || p.popup_message_imperial === data.popup_message)) {
-                    return `${cIdx}:${pIdx}`;
-                }
+            if ((p.type === "popup" || p.popup_message || (p.options && p.options.some(o => o.popup || o.popup_message))) && (data.type === "popup" || data.popup_message)) {
+                if (p.popup_message && (p.popup_message === data.popup_message || p.popup_message_imperial === data.popup_message)) return `${cIdx}:${pIdx}`;
+                if (p.options && p.options.some(o => (o.popup && o.popup === data.popup_message) || (o.popup_message && o.popup_message === data.popup_message))) return `${cIdx}:${pIdx}`;
             }
-            if (p.state_can_id && data.can_id && p.state_can_id.toLowerCase() === data.can_id.toLowerCase()) {
-                if (p.popup_message && data.popup_message && p.popup_message === data.popup_message) {
-                    return `${cIdx}:${pIdx}`;
+
+            if (pCanId && dataCanId && pCanId === dataCanId) {
+                if (p.options && Array.isArray(p.options)) {
+                    if (data.opt_label && p.options.some(o => o.label === data.opt_label)) return `${cIdx}:${pIdx}`;
+                    if (data.payload && p.options.some(o => (o.payload && data.payload.includes(o.payload)) || (o.steps && o.steps.some(s => data.payload.includes(s.payload))))) return `${cIdx}:${pIdx}`;
                 }
-                if (p.options && Array.isArray(p.options) && data.payload) {
-                    const hasMatchingPayload = p.options.some(o => o.payload && data.payload.includes(o.payload));
-                    if (hasMatchingPayload) return `${cIdx}:${pIdx}`;
-                }
+                return `${cIdx}:${pIdx}`;
             }
         }
     }
@@ -412,12 +457,14 @@ function findMatchingConditionPresetVal(data) {
             }
         }
     }
+    const dataCanId = (data.can_id || data.state_can_id || "").toLowerCase();
     for (let cIdx = 0; cIdx < cats.length; cIdx++) {
         const cat = cats[cIdx];
         for (let pIdx = 0; pIdx < cat.presets.length; pIdx++) {
             const p = cat.presets[pIdx];
+            const pCanId = (p.state_can_id || p.action_can_id || p.can_id || "").toLowerCase();
             if (p.type === "speed_zero" && data.type === "speed_zero") return `${cIdx}:${pIdx}`;
-            if (p.state_can_id && data.can_id && p.state_can_id.toLowerCase() === data.can_id.toLowerCase()) {
+            if (pCanId && dataCanId && pCanId === dataCanId) {
                 if (!p.match_payload || p.match_payload === data.match_payload) return `${cIdx}:${pIdx}`;
                 if (p.options && Array.isArray(p.options) && data.match_payload) {
                     const hasMatch = p.options.some(o => o.match_payload === data.match_payload);
@@ -615,10 +662,11 @@ function applyCanDoTrigPreset(selectElem, notify = true) {
     }
 
     if (preset) {
-        if (preset.state_can_id) {
-        const cid = item.querySelector(".can-do-trig-can-id");
-        if (cid) cid.value = preset.state_can_id;
-    }
+        const triggerCanId = preset.state_can_id || preset.action_can_id || preset.can_id;
+        if (triggerCanId) {
+            const cid = item.querySelector(".can-do-trig-can-id");
+            if (cid) cid.value = triggerCanId;
+        }
         if (preset.bus !== undefined) {
             const b = item.querySelector(".can-do-trig-bus");
             if (b) b.value = preset.bus.toString();
@@ -626,8 +674,9 @@ function applyCanDoTrigPreset(selectElem, notify = true) {
         if (preset.from_payload !== undefined) {
             setByteGridString(item, "can-do-trig-from", preset.from_payload);
         }
-        if (preset.to_payload !== undefined) {
-            setByteGridString(item, "can-do-trig-to", preset.to_payload);
+        const toP = preset.to_payload !== undefined ? preset.to_payload : (preset.match_payload !== undefined ? preset.match_payload : preset.payload);
+        if (toP !== undefined) {
+            setByteGridString(item, "can-do-trig-to", toP);
         }
         if (preset.id) {
             const idInput = item.querySelector(".can-do-trig-id");
@@ -713,7 +762,13 @@ function applyCanDoTrigOptionPill(btn, pType, pIdx, optIdx) {
 
     // Apply payloads to byte grids
     if (opt.from_payload !== undefined) setByteGridString(item, "can-do-trig-from", opt.from_payload);
-    if (opt.to_payload !== undefined) setByteGridString(item, "can-do-trig-to", opt.to_payload);
+    const optTo = opt.to_payload !== undefined ? opt.to_payload : (opt.match_payload !== undefined ? opt.match_payload : opt.payload);
+    if (optTo !== undefined) setByteGridString(item, "can-do-trig-to", optTo);
+    const optCanId = opt.state_can_id || opt.action_can_id || opt.can_id;
+    if (optCanId) {
+        const cid = item.querySelector(".can-do-trig-can-id");
+        if (cid) cid.value = optCanId;
+    }
 
     showNotification(`Selected ${preset.name}: ${opt.label}`, "blue", 2500);
     const card = item.closest(".can-do-rule-card");
@@ -1430,32 +1485,26 @@ function renderCanDoTriggerItem(container, data = {}) {
         }
     });
 
-    // Match initial preset index if data.id matches a known preset
+    // Match initial preset index if data matches a known preset
     const { builtIn, custom } = getFilteredTriggerPresets();
-    let selectedPresetVal = "";
+    let selectedPresetVal = findMatchingTriggerPresetVal(data);
     let matchedPreset = null;
-    if (data.id) {
-        const cIdx = custom.findIndex(p => p.id === data.id);
-        if (cIdx !== -1) {
-            selectedPresetVal = `c_${cIdx}`;
-            matchedPreset = custom[cIdx];
-        } else {
-            const bIdx = builtIn.findIndex(p => p.id === data.id);
-            if (bIdx !== -1) {
-                selectedPresetVal = `b_${bIdx}`;
-                matchedPreset = builtIn[bIdx];
-            }
-        }
+    if (selectedPresetVal.startsWith("c_")) {
+        const cIdx = parseInt(selectedPresetVal.replace("c_", ""));
+        matchedPreset = custom[cIdx];
+    } else if (selectedPresetVal.startsWith("b_")) {
+        const bIdx = parseInt(selectedPresetVal.replace("b_", ""));
+        matchedPreset = builtIn[bIdx];
     }
     if (!selectedPresetVal && (source === "preset" || !data.source) && builtIn.length > 0) {
         selectedPresetVal = "b_0";
         matchedPreset = builtIn[0];
     }
 
-    const canId = data.can_id || (matchedPreset ? matchedPreset.state_can_id : "0x448");
+    const canId = data.can_id || (matchedPreset ? (matchedPreset.state_can_id || matchedPreset.action_can_id || matchedPreset.can_id) : "0x448");
     const busVal = data.bus !== undefined ? data.bus : (matchedPreset && matchedPreset.bus !== undefined ? matchedPreset.bus : 0);
     const fromPayload = data.from_payload !== undefined ? data.from_payload : (matchedPreset ? (matchedPreset.from_payload || "") : "");
-    const toPayload = data.to_payload !== undefined ? data.to_payload : (data.match_payload !== undefined ? data.match_payload : (matchedPreset ? (matchedPreset.to_payload || "") : ""));
+    const toPayload = data.to_payload !== undefined ? data.to_payload : (data.match_payload !== undefined ? data.match_payload : (matchedPreset ? (matchedPreset.to_payload || matchedPreset.match_payload || "") : ""));
 
     itemDiv.innerHTML = `
                     <div class="can-do-subitem-header trig-header" onclick="toggleCanDoItemBody(this, event)" style="cursor: pointer;">
@@ -2686,11 +2735,14 @@ function renderCanDoActionItem(container, data = {}) {
                             <!-- CAN ID -->
                             <div class="ha-form-row act-field-can ${type === "can_tx" ? "" : "hidden"}">
                                 <div class="ha-form-label-col">
-                                    <span class="ha-form-label">Response CAN ID (Hex)</span>
-                                    <span class="ha-form-sublabel">Arbitration ID to transmit on vehicle CAN network.</span>
+                                    <span class="ha-form-label">Action CAN ID (Tx)</span>
+                                    <span class="ha-form-sublabel">Arbitration ID transmitted to the vehicle bus.</span>
                                 </div>
                                 <div class="ha-form-control-col">
-                                    <input type="text" class="ha-form-input can-do-act-can-id" value="${data.can_id || "0x652"}" placeholder="0x652" oninput="updateCanDoRuleSummaryPill(this.closest('.can-do-rule-card'))">
+                                    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                                        <input type="text" class="ha-form-input can-do-act-can-id" value="${data.action_can_id || data.can_id || "0x652"}" placeholder="0x652" oninput="updateCanDoRuleSummaryPill(this.closest('.can-do-rule-card'))">
+                                        <span class="can-do-act-state-note" style="font-size: 0.76rem; color: var(--text-muted); white-space: nowrap;"></span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -2841,6 +2893,15 @@ function renderCanDoActionItem(container, data = {}) {
         renderCanDoPayloadStep(stepsContainer, { payload: "", repeat: 3 });
     }
     renumberCanDoPayloadSteps(stepsContainer);
+
+    // If preset is selected, initialize preset UI and options container
+    if (type === "preset" && selectedPresetVal) {
+        const picker = itemDiv.querySelector(".can-do-act-preset-picker");
+        if (picker) {
+            const requestedOpt = (data.opt_idx !== undefined) ? data.opt_idx : (data.opt_label || data.selected_option);
+            applyCanDoActionPreset(picker, false, requestedOpt);
+        }
+    }
 }
 
 function toggleCanDoActItemUI(selectElem) {
@@ -3415,10 +3476,80 @@ function addCanDoActionToIfThen(btn, branch) {
     updateCanDoSectionCountBadges(card);
 }
 
-function applyCanDoActionPreset(selectElem) {
+function renderCanDoActionOptionsGrid(preset, activeOptIdx, catIdx, pIdx, isImperial) {
+    const opts = preset.options || [];
+    if (opts.length === 0) return "";
+
+    let groups = null;
+    if (preset.id === "ev_charge_limits" || opts.every(o => o.label.startsWith("AC ") || o.label.startsWith("DC ") || o.label.startsWith("Both "))) {
+        groups = [
+            { title: "🔌 Level 2 (AC) Charging Limits", filter: o => o.label.startsWith("AC ") },
+            { title: "⚡ DC Fast Charging Limits", filter: o => o.label.startsWith("DC ") },
+            { title: "🔄 Combined (AC & DC) Limits", filter: o => o.label.startsWith("Both ") }
+        ];
+    } else if (preset.id.includes("seat") && opts.some(o => o.label.includes("Heat")) && opts.some(o => o.label.includes("Cool"))) {
+        groups = [
+            { title: "Power", filter: o => o.label === "Off" },
+            { title: "🔥 Seat Heating", filter: o => o.label.includes("Heat") },
+            { title: "❄️ Seat Ventilation", filter: o => o.label.includes("Cool") }
+        ];
+    }
+
+    const renderBtn = (opt, i) => {
+        const label = (isImperial && opt.label_imperial) ? opt.label_imperial : opt.label;
+        const isCur = (i === activeOptIdx);
+        return `
+            <button type="button" class="can-do-state-tile-btn can-do-opt-pill-btn ${isCur ? 'active' : ''}" 
+                data-opt-idx="${i}" data-opt-label="${opt.label}"
+                onclick="applyCanDoOptionPill(this, ${catIdx}, ${pIdx}, ${i})">
+                ${label}
+            </button>
+        `;
+    };
+
+    if (groups) {
+        return `
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+                <div class="can-do-options-label" style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted);">
+                    <span>Select Target Setting:</span>
+                </div>
+                ${groups.map(grp => {
+                    const grpOpts = [];
+                    opts.forEach((o, i) => {
+                        if (grp.filter(o)) grpOpts.push({ opt: o, idx: i });
+                    });
+                    if (grpOpts.length === 0) return "";
+                    return `
+                        <div class="can-do-opt-group" style="background: rgba(0,0,0,0.03); border-radius: 6px; padding: 6px 8px; border: 1px solid var(--border-color);">
+                            <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-heading); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">${grp.title}</div>
+                            <div class="can-do-options-grid grid-many" style="gap: 4px;">
+                                ${grpOpts.map(({ opt, idx }) => renderBtn(opt, idx)).join("")}
+                            </div>
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+        `;
+    }
+
+    const gridClass = opts.length > 4 ? "grid-many" : "grid-few";
+    return `
+        <div style="width: 100%;">
+            <div class="can-do-options-label" style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">
+                <span>Select Target Setting:</span>
+            </div>
+            <div class="can-do-options-grid ${gridClass}">
+                ${opts.map((opt, i) => renderBtn(opt, i)).join("")}
+            </div>
+        </div>
+    `;
+}
+
+function applyCanDoActionPreset(selectElem, notify = true, requestedOpt = undefined) {
     const val = selectElem.value;
     const item = selectElem.closest(".can-do-action-item");
     if (!item) return;
+
     if (!val) {
         item.querySelectorAll(".act-field-climate").forEach(el => el.classList.add("hidden"));
         item.querySelectorAll(".act-field-precon").forEach(el => el.classList.add("hidden"));
@@ -3426,6 +3557,7 @@ function applyCanDoActionPreset(selectElem) {
         item.querySelectorAll(".act-field-popup").forEach(el => el.classList.add("hidden"));
         const optionsBox = item.querySelector(".can-do-act-options-container");
         if (optionsBox) optionsBox.style.display = "none";
+        togglePresetToolbarButtons(item);
         return;
     }
 
@@ -3442,9 +3574,9 @@ function applyCanDoActionPreset(selectElem) {
 
     // Determine which parameter sections to display
     const showClimate = (preset.type === "climate_target" || preset.target_temp_c !== undefined || preset.target_temp_f !== undefined);
-    const showPrecon = (preset.type === "precondition" || preset.precon_mode !== undefined);
-    const showCan = (preset.type === "can_tx" || (preset.action_can_id !== undefined || preset.state_can_id !== undefined) || preset.steps !== undefined || (preset.options && preset.options.some(o => o.payload)));
-    const showPopup = (preset.type === "popup" || preset.popup_message !== undefined || (preset.options && preset.options.some(o => o.popup)));
+    const showPrecon = (preset.type === "precondition" || preset.precon_mode !== undefined || (preset.options && preset.options.some(o => o.precon_mode)));
+    const showCan = (preset.type === "can_tx" || (preset.action_can_id !== undefined || preset.state_can_id !== undefined) || preset.steps !== undefined || (preset.options && preset.options.some(o => o.payload || o.steps)));
+    const showPopup = (preset.type === "popup" || preset.popup_message !== undefined || (preset.options && preset.options.some(o => o.popup || o.popup_message)));
 
     const isDetailsOpen = item.dataset.detailsOpen === "true";
     item.querySelectorAll(".act-field-climate").forEach(el => el.classList.toggle("hidden", !showClimate));
@@ -3454,15 +3586,31 @@ function applyCanDoActionPreset(selectElem) {
 
     const optionsBox = item.querySelector(".can-do-act-options-container");
 
+    // Determine active option index
+    let activeOptIdx = -1;
+    if (preset.options && Array.isArray(preset.options) && preset.options.length > 0) {
+        if (typeof requestedOpt === "number" && requestedOpt >= 0 && requestedOpt < preset.options.length) {
+            activeOptIdx = requestedOpt;
+        } else if (typeof requestedOpt === "string" && requestedOpt) {
+            activeOptIdx = preset.options.findIndex(o => o.label === requestedOpt || o.label_imperial === requestedOpt);
+        }
+        if (activeOptIdx === -1) {
+            activeOptIdx = Math.max(0, preset.options.findIndex(o => o.default === true));
+        }
+    }
+    const activeOpt = (activeOptIdx >= 0) ? preset.options[activeOptIdx] : null;
+
     // Climate Target
     if (showClimate) {
         const tt = item.querySelector(".can-do-act-target-temp");
         if (tt) {
+            const tempValC = activeOpt?.target_temp_c !== undefined ? activeOpt.target_temp_c : preset.target_temp_c;
+            const tempValF = activeOpt?.target_temp_f !== undefined ? activeOpt.target_temp_f : preset.target_temp_f;
             if (isImperial) {
-                const f = preset.target_temp_f !== undefined ? preset.target_temp_f : (preset.target_temp_c !== undefined ? Math.round(preset.target_temp_c * 9 / 5 + 32) : 72);
+                const f = tempValF !== undefined ? tempValF : (tempValC !== undefined ? Math.round(tempValC * 9 / 5 + 32) : 72);
                 tt.value = Math.min(82, Math.max(62, f));
             } else {
-                const c = preset.target_temp_c !== undefined ? preset.target_temp_c : (preset.target_temp_f !== undefined ? Math.round(((preset.target_temp_f - 32) * 5 / 9) * 2) / 2 : 21.0);
+                const c = tempValC !== undefined ? tempValC : (tempValF !== undefined ? Math.round(((tempValF - 32) * 5 / 9) * 2) / 2 : 21.0);
                 tt.value = Math.min(28.0, Math.max(17.0, c));
             }
         }
@@ -3488,28 +3636,39 @@ function applyCanDoActionPreset(selectElem) {
     }
 
     // Preconditioning
-    if (preset.precon_mode) {
+    const preconMode = activeOpt?.precon_mode || preset.precon_mode;
+    if (preconMode) {
         const pm = item.querySelector(".can-do-act-precon-mode");
-        if (pm) pm.value = preset.precon_mode;
+        if (pm) pm.value = preconMode;
     }
-    if (preset.precon_press) {
+    const preconPress = activeOpt?.precon_press || preset.precon_press;
+    if (preconPress) {
         const pp = item.querySelector(".can-do-act-precon-press");
-        if (pp) pp.value = preset.precon_press;
+        if (pp) pp.value = preconPress;
     }
 
     // Popup message
-    if (preset.popup_message !== undefined) {
+    const popMsg = activeOpt ? ((isImperial && (activeOpt.popup_message_imperial || activeOpt.popup_imperial)) ? (activeOpt.popup_message_imperial || activeOpt.popup_imperial) : (activeOpt.popup_message || activeOpt.popup)) : ((isImperial && preset.popup_message_imperial) ? preset.popup_message_imperial : preset.popup_message);
+    if (popMsg !== undefined) {
         const pop = item.querySelector(".can-do-act-popup-msg");
-        if (pop) {
-            pop.value = (isImperial && preset.popup_message_imperial) ? preset.popup_message_imperial : preset.popup_message;
-        }
+        if (pop) pop.value = popMsg;
     }
 
     // CAN ID, bus, delay
-    if (preset.action_can_id || preset.state_can_id) {
+    const effectiveCanId = activeOpt?.action_can_id || preset.action_can_id || preset.can_id || preset.state_can_id;
+    if (effectiveCanId) {
         const cid = item.querySelector(".can-do-act-can-id");
-        if (cid) cid.value = preset.action_can_id || preset.state_can_id;
+        if (cid) cid.value = effectiveCanId;
     }
+    const stateNote = item.querySelector(".can-do-act-state-note");
+    if (stateNote) {
+        if (preset.state_can_id) {
+            stateNote.innerHTML = `<span class="ha-status-pill green" style="font-size: 0.72rem; padding: 1px 6px;">Rx: ${preset.state_can_id}</span>`;
+        } else {
+            stateNote.innerHTML = "";
+        }
+    }
+
     if (preset.bus !== undefined) {
         const b = item.querySelector(".can-do-act-bus");
         if (b) b.value = preset.bus.toString();
@@ -3536,82 +3695,50 @@ function applyCanDoActionPreset(selectElem) {
         if (wu) wu.value = preset.webhook_url;
     }
 
-    // Check if preset has options
+    // Populate steps & options UI
+    const stepsContainer = item.querySelector(".can-do-payload-steps-container");
     if (preset.options && Array.isArray(preset.options) && preset.options.length > 0) {
-        const defaultOptIdx = Math.max(0, preset.options.findIndex(o => o.default === true));
         if (optionsBox) {
             optionsBox.style.display = "block";
-            const gridClass = preset.options.length > 4 ? "grid-many" : "grid-few";
-            optionsBox.innerHTML = `
-                            <div style="width: 100%;">
-                                <div class="can-do-options-label">
-                                    <span>Target Value:</span>
-                                </div>
-                                <div class="can-do-options-grid ${gridClass}">
-                                    ${preset.options.map((opt, i) => {
-                const label = (isImperial && opt.label_imperial) ? opt.label_imperial : opt.label;
-                const isCur = (i === defaultOptIdx);
-                return `
-                                        <button type="button" class="can-do-state-tile-btn can-do-opt-pill-btn ${isCur ? 'active' : ''}" 
-                                            onclick="applyCanDoOptionPill(this, ${catIdx}, ${pIdx}, ${i})">
-                                            ${label}
-                                        </button>
-                                        `;
-            }).join("")}
-                                </div>
-                            </div>`;
+            optionsBox.innerHTML = renderCanDoActionOptionsGrid(preset, activeOptIdx, catIdx, pIdx, isImperial);
         }
-        const activeOpt = preset.options[defaultOptIdx] || preset.options[0];
-        if (activeOpt) {
-            const stepsContainer = item.querySelector(".can-do-payload-steps-container");
-            if (stepsContainer) {
-                stepsContainer.innerHTML = "";
-                if (activeOpt.steps && Array.isArray(activeOpt.steps)) {
-                    activeOpt.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
-                } else if (activeOpt.payload) {
-                    renderCanDoPayloadStep(stepsContainer, { payload: activeOpt.payload, repeat: 3 });
-                    renderCanDoPayloadStep(stepsContainer, { payload: "00 00 00 00 00 00 00 00", repeat: 3 });
-                } else if (preset.steps && Array.isArray(preset.steps)) {
-                    preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
-                }
+        if (stepsContainer && activeOpt) {
+            stepsContainer.innerHTML = "";
+            if (activeOpt.steps && Array.isArray(activeOpt.steps)) {
+                activeOpt.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
+            } else if (activeOpt.payload) {
+                renderCanDoPayloadStep(stepsContainer, { payload: activeOpt.payload, repeat: 3 });
+            } else if (preset.steps && Array.isArray(preset.steps)) {
+                preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
             }
-        }
-        if (activeOpt && (activeOpt.target_temp_c !== undefined || activeOpt.target_temp_f !== undefined)) {
-            const tt = item.querySelector(".can-do-act-target-temp");
-            if (tt) {
-                if (isImperial) {
-                    const f = activeOpt.target_temp_f !== undefined ? activeOpt.target_temp_f : Math.round(activeOpt.target_temp_c * 9 / 5 + 32);
-                    tt.value = Math.min(82, Math.max(62, f));
-                } else {
-                    const c = activeOpt.target_temp_c !== undefined ? activeOpt.target_temp_c : Math.round(((activeOpt.target_temp_f - 32) * 5 / 9) * 2) / 2;
-                    tt.value = Math.min(28.0, Math.max(17.0, c));
-                }
-            }
-        }
-        if (activeOpt) {
-            const pop = item.querySelector(".can-do-act-popup-msg");
-            if (pop) {
-                if (isImperial && activeOpt.popup_imperial) pop.value = activeOpt.popup_imperial;
-                else if (activeOpt.popup) pop.value = activeOpt.popup;
-            }
+            renumberCanDoPayloadSteps(stepsContainer);
         }
     } else {
         if (optionsBox) {
             optionsBox.innerHTML = "";
             optionsBox.style.display = "none";
         }
-        if (preset.steps && Array.isArray(preset.steps)) {
-            const stepsContainer = item.querySelector(".can-do-payload-steps-container");
-            if (stepsContainer) {
-                stepsContainer.innerHTML = "";
-                preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
-            }
+        if (stepsContainer && preset.steps && Array.isArray(preset.steps)) {
+            stepsContainer.innerHTML = "";
+            preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
+            renumberCanDoPayloadSteps(stepsContainer);
         }
     }
 
+    // Update Header Title with active option badge
+    const titleSpan = item.querySelector(".can-do-subitem-title-act");
     const pName = (isImperial && preset.name_imperial) ? preset.name_imperial : preset.name;
-    showNotification("Applied action template: " + pName, "green", 3500);
+    const optLabel = activeOpt ? ((isImperial && activeOpt.label_imperial) ? activeOpt.label_imperial : activeOpt.label) : "";
+    if (titleSpan) {
+        titleSpan.innerHTML = `<span>${pName}</span>${optLabel ? ` <span class="ha-status-pill blue" style="font-size: 0.72rem; padding: 1px 7px;">${optLabel}</span>` : ""}`;
+    }
+
+    if (notify) showNotification("Applied action template: " + pName + (optLabel ? " (" + optLabel + ")" : ""), "green", 3500);
     togglePresetToolbarButtons(item);
+    const card = item.closest(".can-do-rule-card");
+    if (card && typeof updateCanDoRuleSummaryPill === "function") {
+        updateCanDoRuleSummaryPill(card);
+    }
 }
 
 function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
@@ -3626,13 +3753,14 @@ function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
     // Update active tile styling
     const box = item.querySelector(".can-do-act-options-container");
     if (box) {
-        box.querySelectorAll(".can-do-opt-pill-btn").forEach((b, i) => {
-            b.classList.toggle("active", i === optIdx);
+        box.querySelectorAll(".can-do-opt-pill-btn").forEach((b) => {
+            const idx = parseInt(b.dataset.optIdx);
+            b.classList.toggle("active", idx === optIdx);
             b.removeAttribute("style");
         });
     }
 
-    // Apply payload to byte steps (3x burst + idle release)
+    // Apply payload to byte steps
     const stepsContainer = item.querySelector(".can-do-payload-steps-container");
     if (stepsContainer) {
         stepsContainer.innerHTML = "";
@@ -3640,10 +3768,20 @@ function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
             opt.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
         } else if (opt.payload) {
             renderCanDoPayloadStep(stepsContainer, { payload: opt.payload, repeat: 3 });
-            renderCanDoPayloadStep(stepsContainer, { payload: "00 00 00 00 00 00 00 00", repeat: 3 });
         } else if (preset.steps && Array.isArray(preset.steps)) {
             preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
         }
+        renumberCanDoPayloadSteps(stepsContainer);
+    }
+
+    // Apply preconditioning mode / press
+    if (opt.precon_mode) {
+        const pm = item.querySelector(".can-do-act-precon-mode");
+        if (pm) pm.value = opt.precon_mode;
+    }
+    if (opt.precon_press) {
+        const pp = item.querySelector(".can-do-act-precon-press");
+        if (pp) pp.value = opt.precon_press;
     }
 
     // Apply target temp
@@ -3661,22 +3799,31 @@ function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
     }
 
     // Apply popup
-    if (isImperial && opt.popup_imperial) {
-        const pop = item.querySelector(".can-do-act-popup-msg");
-        if (pop) pop.value = opt.popup_imperial;
-    } else if (opt.popup) {
-        const pop = item.querySelector(".can-do-act-popup-msg");
-        if (pop) pop.value = opt.popup;
+    const pop = item.querySelector(".can-do-act-popup-msg");
+    if (pop) {
+        const popupMsg = (isImperial && (opt.popup_message_imperial || opt.popup_imperial)) ? (opt.popup_message_imperial || opt.popup_imperial) : (opt.popup_message || opt.popup);
+        if (popupMsg) pop.value = popupMsg;
     }
 
     // Apply CAN ID
+    const targetCanId = opt.action_can_id || preset.action_can_id || preset.can_id || preset.state_can_id;
     const cid = item.querySelector(".can-do-act-can-id");
-    if (cid && (opt.action_can_id || preset.action_can_id || preset.state_can_id)) {
-        cid.value = opt.action_can_id || preset.action_can_id || preset.state_can_id;
+    if (cid && targetCanId) {
+        cid.value = targetCanId;
     }
 
-    const label = (isImperial && opt.label_imperial) ? opt.label_imperial : opt.label;
+    // Update title and pill
+    const titleSpan = item.querySelector(".can-do-subitem-title-act");
     const pName = (isImperial && preset.name_imperial) ? preset.name_imperial : preset.name;
+    const label = (isImperial && opt.label_imperial) ? opt.label_imperial : opt.label;
+    if (titleSpan) {
+        titleSpan.innerHTML = `<span>${pName}</span> <span class="ha-status-pill blue" style="font-size: 0.72rem; padding: 1px 7px;">${label}</span>`;
+    }
+
+    const card = item.closest(".can-do-rule-card");
+    if (card && typeof updateCanDoRuleSummaryPill === "function") {
+        updateCanDoRuleSummaryPill(card);
+    }
     showNotification(`Selected ${pName}: ${label}`, "green", 2500);
 }
 

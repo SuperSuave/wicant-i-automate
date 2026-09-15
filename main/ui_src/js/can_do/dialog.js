@@ -69,22 +69,25 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
         const { builtIn, custom } = getFilteredTriggerPresets();
         (custom || []).forEach((p, idx) => {
             const tax = getCommandTaxonomy(p);
+            const canId = p.state_can_id || p.action_can_id || p.can_id;
             allItems.push({
                 id: `custom_trig_${idx}`,
                 name: p.name || `Custom Trigger #${idx + 1}`,
-                desc: p.description || (p.state_can_id ? `CAN ID: ${p.state_can_id}` : "Saved Trigger Preset"),
+                desc: p.description || (canId ? `CAN ID: ${canId}` : "Saved Trigger Preset"),
                 domain: tax.domain,
                 subdomain: tax.subdomain,
                 icon: "star",
                 options: p.options,
                 onSelect: (stateOpt) => {
+                    const fromP = stateOpt ? (stateOpt.from_payload !== undefined ? stateOpt.from_payload : p.from_payload) : p.from_payload;
+                    const toP = stateOpt ? (stateOpt.to_payload || stateOpt.match_payload || stateOpt.payload || p.to_payload || p.match_payload) : (p.to_payload || p.match_payload);
                     renderCanDoTriggerItem(targetContainer, {
                         source: "preset",
                         id: p.id,
-                        can_id: p.state_can_id,
-                        bus: p.bus,
-                        from_payload: stateOpt ? stateOpt.from_payload : p.from_payload,
-                        to_payload: stateOpt ? stateOpt.to_payload : p.to_payload
+                        can_id: canId,
+                        bus: p.bus !== undefined ? p.bus : 0,
+                        from_payload: fromP || "",
+                        to_payload: toP || ""
                     });
                 }
             });
@@ -92,22 +95,26 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
 
         (builtIn || []).forEach(p => {
             const tax = getCommandTaxonomy(p);
+            const canId = p.state_can_id || p.action_can_id || p.can_id;
+            const idDesc = (p.state_can_id && p.action_can_id) ? `Tx: ${p.action_can_id} · Rx: ${p.state_can_id}` : (p.state_can_id ? `Rx: ${p.state_can_id}` : (p.action_can_id ? `CAN ID: ${p.action_can_id}` : (canId ? `CAN ID: ${canId}` : "Vehicle Trigger")));
             allItems.push({
                 id: p.id || p.name,
                 name: p.name || "Trigger Preset",
-                desc: p.description || (p.state_can_id ? `CAN ID: ${p.state_can_id}` : "Vehicle Trigger"),
+                desc: p.description || idDesc,
                 domain: tax.domain,
                 subdomain: tax.subdomain,
                 icon: "",
                 options: p.options,
                 onSelect: (stateOpt) => {
+                    const fromP = stateOpt ? (stateOpt.from_payload !== undefined ? stateOpt.from_payload : p.from_payload) : p.from_payload;
+                    const toP = stateOpt ? (stateOpt.to_payload || stateOpt.match_payload || stateOpt.payload || p.to_payload || p.match_payload) : (p.to_payload || p.match_payload);
                     renderCanDoTriggerItem(targetContainer, {
                         source: "preset",
                         id: p.id,
-                        can_id: p.state_can_id,
-                        bus: p.bus,
-                        from_payload: stateOpt ? stateOpt.from_payload : p.from_payload,
-                        to_payload: stateOpt ? stateOpt.to_payload : p.to_payload
+                        can_id: canId,
+                        bus: p.bus !== undefined ? p.bus : 0,
+                        from_payload: fromP || "",
+                        to_payload: toP || ""
                     });
                 }
             });
@@ -128,20 +135,23 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
         condCats.forEach(cat => {
             (cat.presets || []).forEach(p => {
                 const tax = getCommandTaxonomy(p);
+                const canId = p.state_can_id || p.action_can_id || p.can_id;
+                const idDesc = (p.state_can_id && p.action_can_id) ? `Tx: ${p.action_can_id} · Rx: ${p.state_can_id}` : (p.state_can_id ? `Rx: ${p.state_can_id}` : (p.action_can_id ? `CAN ID: ${p.action_can_id}` : (canId ? `CAN ID: ${canId}` : "Preset Condition")));
                 allItems.push({
                     id: p.id || p.name,
                     name: p.name || "Condition Preset",
-                    desc: p.description || p.expression || (p.state_can_id ? `CAN ID: ${p.state_can_id}` : "Preset Condition"),
+                    desc: p.description || p.expression || idDesc,
                     domain: tax.domain,
                     subdomain: tax.subdomain,
                     icon: "",
                     options: p.options,
                     onSelect: (stateOpt) => {
+                        const mP = stateOpt ? (stateOpt.match_payload || stateOpt.to_payload || stateOpt.payload || p.match_payload) : p.match_payload;
                         renderCanDoConditionItem(targetContainer, {
                             type: p.type || "preset",
                             expression: stateOpt ? (stateOpt.expression !== undefined ? stateOpt.expression : p.expression) : p.expression,
-                            can_id: p.state_can_id,
-                            match_payload: stateOpt ? stateOpt.match_payload : p.match_payload,
+                            can_id: canId,
+                            match_payload: mP,
                             days: p.days,
                             start_time: p.start_time,
                             end_time: p.end_time,
@@ -168,10 +178,11 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
         actCats.forEach((cat, catIdx) => {
             (cat.presets || []).forEach((p, pIdx) => {
                 const tax = getCommandTaxonomy(p);
+                const descStr = p.description || (p.action_can_id && p.state_can_id ? `Tx: ${p.action_can_id} · Rx: ${p.state_can_id}` : (p.action_can_id ? `Tx: ${p.action_can_id}` : (p.state_can_id ? `Rx: ${p.state_can_id}` : (p.popup_message || (p.type === "precondition" ? "Precondition Routine" : "Preset Template")))));
                 allItems.push({
                     id: p.id || p.name,
                     name: p.name || "Action Preset",
-                    desc: p.description || (p.action_can_id ? `CAN ID: ${p.action_can_id}` : (p.state_can_id ? `CAN ID: ${p.state_can_id}` : (p.popup_message || "Preset Template"))),
+                    desc: descStr,
                     domain: tax.domain,
                     subdomain: tax.subdomain,
                     icon: "",
@@ -184,19 +195,7 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
                             if (picker) {
                                 picker.value = `${catIdx}:${pIdx}`;
                                 picker.setAttribute("data-selected-preset", `${catIdx}:${pIdx}`);
-                                applyCanDoActionPreset(picker);
-                            }
-                            if (stateOpt) {
-                                const optIdx = p.options ? p.options.findIndex(o => o.label === stateOpt.label) : -1;
-                                if (optIdx >= 0) {
-                                    const optsBox = lastItem.querySelector(".can-do-act-options-container");
-                                    if (optsBox) {
-                                        const btns = optsBox.querySelectorAll(".can-do-opt-pill-btn");
-                                        if (btns && btns[optIdx]) {
-                                            applyCanDoOptionPill(btns[optIdx], catIdx, pIdx, optIdx);
-                                        }
-                                    }
-                                }
+                                applyCanDoActionPreset(picker, true, stateOpt ? stateOpt.label : undefined);
                             }
                             const titleSpan = lastItem.querySelector(".can-do-subitem-title-act");
                             if (titleSpan && p.name) {
@@ -452,13 +451,21 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
 
             let stateChipsHTML = "";
             if (item.options && Array.isArray(item.options) && item.options.length > 0) {
+                const maxChips = 5;
+                const visibleOpts = item.options.slice(0, maxChips);
+                const hasMore = item.options.length > maxChips;
                 stateChipsHTML = `
                                     <div class="ha-target-state-chips" onclick="event.stopPropagation();">
-                                        ${item.options.map(opt => `
-                                            <span class="ha-target-state-chip" onclick="handleTargetSelection(window._targetItemSelectMap['${item.id}'], window._targetItemOptionMap['${item.id}_${opt.label.replace(/[^a-zA-Z0-9]/g, '')}'])">
+                                        ${visibleOpts.map((opt, optIdx) => `
+                                            <span class="ha-target-state-chip" onclick="handleTargetSelection(window._targetItemSelectMap['${item.id}'], window._targetItemOptionMap['${item.id}'][${optIdx}])">
                                                 ${opt.label}
                                             </span>
                                         `).join("")}
+                                        ${hasMore ? `
+                                            <span class="ha-target-state-chip ha-chip-more" style="opacity: 0.8; font-style: italic;" onclick="handleTargetSelection(window._targetItemSelectMap['${item.id}'], null)">
+                                                +${item.options.length - maxChips} more...
+                                            </span>
+                                        ` : ""}
                                     </div>
                                 `;
             }
@@ -479,11 +486,7 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
             window._targetItemSelectMap = window._targetItemSelectMap || {};
             window._targetItemOptionMap = window._targetItemOptionMap || {};
             window._targetItemSelectMap[item.id] = item;
-            if (item.options) {
-                item.options.forEach(opt => {
-                    window._targetItemOptionMap[`${item.id}_${opt.label.replace(/[^a-zA-Z0-9]/g, '')}`] = opt;
-                });
-            }
+            window._targetItemOptionMap[item.id] = item.options || [];
 
             card.onclick = () => {
                 handleTargetSelection(item, null);

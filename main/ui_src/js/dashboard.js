@@ -551,7 +551,8 @@ function getCanDoMonitorableItems() {
     if (typeof CAN_DO_CATALOG === "undefined" || !CAN_DO_CATALOG || !Array.isArray(CAN_DO_CATALOG.commands)) return items;
 
     CAN_DO_CATALOG.commands.forEach(cmd => {
-        if (!cmd || !cmd.can_id) return;
+        const canId = cmd.state_can_id || cmd.can_id || cmd.action_can_id;
+        if (!cmd || !canId) return;
         const roles = cmd.roles || [];
         if (roles.length > 0 && !roles.includes("trigger") && !roles.includes("condition")) {
             return;
@@ -565,7 +566,7 @@ function getCanDoMonitorableItems() {
                 id: cmd.id || cmd.name,
                 name: cmd.name,
                 category: cmd.category || "General",
-                can_id: cmd.can_id,
+                can_id: canId,
                 match_payload: matchPattern,
                 options: cmd.options
             });

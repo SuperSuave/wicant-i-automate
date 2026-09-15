@@ -136,6 +136,7 @@ async function loadCanDoCatalog() {
                 data = mergeCatalogData(data, JSON.parse(customSaved));
             } catch (e) { }
         }
+        data = normalizeCatalogCommands(data);
         CAN_DO_CATALOG = data;
         updateDynamicTaxonomy(data);
         try {
@@ -248,6 +249,37 @@ function syncCatalogFromGitHub(manual = true) {
         .catch(err => {
             showNotification("Could not reach repository (" + catalogUrl + "). Keeping current presets.", "red", 4500);
         });
+}
+
+function normalizeCatalogCommands(data) {
+    if (!data) return data;
+    if (Array.isArray(data.commands)) {
+        data.commands.forEach(cmd => {
+            if (!cmd.state_can_id && cmd.action_can_id) {
+                cmd.state_can_id = cmd.action_can_id;
+            } else if (!cmd.state_can_id && cmd.can_id) {
+                cmd.state_can_id = cmd.can_id;
+            }
+            if (!cmd.action_can_id && cmd.state_can_id) {
+                cmd.action_can_id = cmd.state_can_id;
+            } else if (!cmd.action_can_id && cmd.can_id) {
+                cmd.action_can_id = cmd.can_id;
+            }
+            if (!cmd.can_id) {
+                cmd.can_id = cmd.state_can_id || cmd.action_can_id;
+            }
+            if (Array.isArray(cmd.options)) {
+                cmd.options.forEach(opt => {
+                    if (!opt.state_can_id && opt.action_can_id) opt.state_can_id = opt.action_can_id;
+                    else if (!opt.state_can_id && opt.can_id) opt.state_can_id = opt.can_id;
+                    if (!opt.action_can_id && opt.state_can_id) opt.action_can_id = opt.state_can_id;
+                    else if (!opt.action_can_id && opt.can_id) opt.action_can_id = opt.can_id;
+                    if (!opt.can_id) opt.can_id = opt.state_can_id || opt.action_can_id || cmd.can_id;
+                });
+            }
+        });
+    }
+    return data;
 }
 
 function mergeCatalogData(base, custom) {
@@ -639,10 +671,12 @@ function getFilteredTriggerPresets() {
     if (Array.isArray(CAN_DO_CATALOG.commands)) {
         CAN_DO_CATALOG.commands.forEach(cmd => {
             const roles = cmd.roles || [];
-            const isTrig = roles.length === 0 || roles.includes("trigger");
+            const isPureSoftware = ["webhook", "mqtt", "popup", "climate_target"].includes(cmd.type);
+            const hasCan = !!(cmd.state_can_id || cmd.action_can_id || cmd.can_id || cmd.from_payload || cmd.to_payload || cmd.match_payload);
+            const isTrig = roles.includes("trigger") || (!isPureSoftware && hasCan) || roles.length === 0;
             if (!isTrig) return;
 
-            const targetModels = cmd.supported_models || cmd.vehicle_models || [];
+            const targetModels = cmd.tags || cmd.supported_models || cmd.vehicle_models || [];
             if (
                 targetModels.length === 0 ||
                 targetModels.includes("all") ||
@@ -654,7 +688,7 @@ function getFilteredTriggerPresets() {
         });
     } else if (Array.isArray(CAN_DO_CATALOG.trigger_presets)) {
         CAN_DO_CATALOG.trigger_presets.forEach(preset => {
-            const targetModels = preset.supported_models || preset.vehicle_models || [];
+            const targetModels = preset.tags || preset.supported_models || preset.vehicle_models || [];
             if (
                 targetModels.length === 0 ||
                 targetModels.includes("all") ||
@@ -679,7 +713,7 @@ function getFilteredConditionPresets() {
             const isCond = roles.length === 0 || roles.includes("condition");
             if (!isCond) return;
 
-            const targetModels = cmd.supported_models || cmd.vehicle_models || [];
+            const targetModels = cmd.tags || cmd.supported_models || cmd.vehicle_models || [];
             if (
                 targetModels.length > 0 &&
                 !targetModels.includes("all") &&
@@ -698,7 +732,7 @@ function getFilteredConditionPresets() {
     } else if (CAN_DO_CATALOG && Array.isArray(CAN_DO_CATALOG.condition_presets)) {
         CAN_DO_CATALOG.condition_presets.forEach(cat => {
             const validPresets = (cat.presets || []).filter(preset => {
-                const targetModels = preset.supported_models || preset.vehicle_models || [];
+                const targetModels = preset.tags || preset.supported_models || preset.vehicle_models || [];
                 return (
                     targetModels.length === 0 ||
                     targetModels.includes("all") ||
@@ -730,7 +764,7 @@ function getFilteredActionPresets() {
             const isAct = roles.length === 0 || roles.includes("action");
             if (!isAct) return;
 
-            const targetModels = cmd.supported_models || cmd.vehicle_models || [];
+            const targetModels = cmd.tags || cmd.supported_models || cmd.vehicle_models || [];
             if (
                 targetModels.length > 0 &&
                 !targetModels.includes("all") &&
@@ -749,7 +783,7 @@ function getFilteredActionPresets() {
     } else if (CAN_DO_CATALOG && Array.isArray(CAN_DO_CATALOG.action_presets)) {
         CAN_DO_CATALOG.action_presets.forEach(cat => {
             const validPresets = (cat.presets || []).filter(preset => {
-                const targetModels = preset.supported_models || preset.vehicle_models || [];
+                const targetModels = preset.tags || preset.supported_models || preset.vehicle_models || [];
                 return (
                     targetModels.length === 0 ||
                     targetModels.includes("all") ||
