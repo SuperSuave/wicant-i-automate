@@ -147,21 +147,63 @@ const DASH_WIDGET_CATALOG = {
         id: "can_state_monitor", name: "CAN State Monitor", icon: "", category: "Monitoring",
         render: function (isEditMode, instanceId) {
             const watched = getWatchedCanDoSignals(instanceId);
-            let itemsHtml = watched.map(w => `
+            const items = (typeof getCanDoMonitorableItems === "function") ? getCanDoMonitorableItems() : [];
+
+            let itemsHtml = watched.map((w, idx) => {
+                const itemDef = items.find(i => i.id === w.catalogId);
+                const displayTitle = escapeHtml(w.customLabel || (itemDef ? itemDef.name : w.catalogId));
+                return `
                 <div class="dash-kv-row">
-                    <span class="dash-kv-label">${escapeHtml(w.customLabel || w.catalogId)}</span>
+                    <span class="dash-kv-label" style="display: flex; align-items: center; gap: 4px;">
+                        ${displayTitle}
+                        ${isEditMode ? `<button type="button" class="dash-widget-btn" onclick="removeWatchedCanDoSignal('${instanceId}', ${idx})" title="Remove signal" style="padding: 1px 5px; font-size: 0.7rem; border: none; background: rgba(239,68,68,0.2); color: #ef4444; border-radius: 4px; cursor: pointer; margin-left: 4px;">✕</button>` : ''}
+                    </span>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <span class="can-do-age-label" style="font-size: 0.7rem; color: var(--text-muted);">Age: --</span>
                         <span class="dash-badge badge-gray can-do-state-badge">Waiting...</span>
                     </div>
                 </div>
-            `).join("");
+            `}).join("");
+
+            let pickerSectionHtml = "";
+            if (isEditMode || watched.length === 0) {
+                const optionsGrouped = {};
+                items.forEach(item => {
+                    const cat = item.category || "General";
+                    if (!optionsGrouped[cat]) optionsGrouped[cat] = [];
+                    optionsGrouped[cat].push(item);
+                });
+
+                let optionsHtml = "";
+                for (const cat in optionsGrouped) {
+                    optionsHtml += `<optgroup label="${escapeHtml(cat)}">`;
+                    optionsGrouped[cat].forEach(item => {
+                        optionsHtml += `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`;
+                    });
+                    optionsHtml += `</optgroup>`;
+                }
+
+                pickerSectionHtml = `
+                    <div style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px dashed var(--border-color); display: flex; flex-direction: column; gap: 6px;">
+                        <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-heading);">Select Signal / CAN State:</div>
+                        <select class="can-do-signal-picker" style="width: 100%; font-size: 0.8rem; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-heading);">
+                            <option value="">-- Select Signal or CAN ID --</option>
+                            ${optionsHtml}
+                        </select>
+                        <div style="display: flex; gap: 6px;">
+                            <input type="text" class="can-do-signal-label" placeholder="Custom Label (optional)" style="flex: 1; font-size: 0.8rem; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-heading);">
+                            <button type="button" class="dash-action-btn" onclick="addWatchedCanDoSignal('${instanceId}', this)" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 600;">+ Add</button>
+                        </div>
+                    </div>`;
+            }
 
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-broadcast"/></svg> State Monitor</span>
                     <div class="dash-card-actions"><div id="can_do_live_indicator_${instanceId}" class="dash-status"><span class="status-dot green"></span> Live</div></div></div>
                     <div><div class="can-do-watched-container dash-kv-list" style="margin-bottom: 0.5rem;">
                         ${itemsHtml || '<div class="dash-subtext">No signals configured to watch.</div>'}
-                    </div></div>
+                    </div>
+                    ${pickerSectionHtml}
+                    </div>
                     ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) { }
@@ -170,14 +212,53 @@ const DASH_WIDGET_CATALOG = {
         id: "can_do_buttons", name: "CAN Do Action Buttons", icon: "", category: "Quick Action",
         render: function (isEditMode, instanceId) {
             const buttons = getCanDoActionButtons(instanceId);
+            const availableRules = getAvailableCanDoRulesList();
+
             let btnsHtml = buttons.map((b, idx) => `
-                <button type="button" class="dash-outline-btn" style="width: 100%; margin-bottom: 0.4rem;" onclick="executeDashboardCanDoButton('${instanceId}', ${idx}, this)">
-                    ${escapeHtml(b.customLabel || b.ruleName)}
-                </button>
+                <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 0.4rem;">
+                    <button type="button" class="dash-outline-btn" style="flex: 1;" onclick="executeDashboardCanDoButton('${instanceId}', ${idx}, this)">
+                        ${escapeHtml(b.customLabel || b.ruleName)}
+                    </button>
+                    ${isEditMode ? `<button type="button" class="dash-widget-btn" onclick="removeDashboardCanDoButton('${instanceId}', ${idx})" title="Remove button" style="padding: 4px 8px; font-size: 0.75rem; border: none; background: rgba(239,68,68,0.2); color: #ef4444; border-radius: 4px; cursor: pointer;">✕</button>` : ''}
+                </div>
             `).join("");
 
+            let pickerSectionHtml = "";
+            if (isEditMode || buttons.length === 0) {
+                const optionsGrouped = {};
+                availableRules.forEach(r => {
+                    const cat = r.category || "Automations";
+                    if (!optionsGrouped[cat]) optionsGrouped[cat] = [];
+                    optionsGrouped[cat].push(r);
+                });
+
+                let optionsHtml = "";
+                for (const cat in optionsGrouped) {
+                    optionsHtml += `<optgroup label="${escapeHtml(cat)}">`;
+                    optionsGrouped[cat].forEach(r => {
+                        optionsHtml += `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`;
+                    });
+                    optionsHtml += `</optgroup>`;
+                }
+
+                pickerSectionHtml = `
+                    <div style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px dashed var(--border-color); display: flex; flex-direction: column; gap: 6px;">
+                        <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-heading);">Add Action Button:</div>
+                        <select class="dash-can-do-rule-select" style="width: 100%; font-size: 0.8rem; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-heading);">
+                            <option value="">-- Select Action or Automation --</option>
+                            ${optionsHtml}
+                        </select>
+                        <div style="display: flex; gap: 6px;">
+                            <input type="text" class="dash-can-do-btn-label" placeholder="Button Label (optional)" style="flex: 1; font-size: 0.8rem; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-heading);">
+                            <button type="button" class="dash-action-btn" onclick="addDashboardCanDoButton('${instanceId}', this)" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 600;">+ Add</button>
+                        </div>
+                    </div>`;
+            }
+
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-star"/></svg> Action Buttons</span></div>
-                    <div>${btnsHtml || '<div class="dash-subtext">No quick action buttons added.</div>'}</div>
+                    <div>${btnsHtml || '<div class="dash-subtext">No quick action buttons added.</div>'}
+                    ${pickerSectionHtml}
+                    </div>
                     ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) { }
@@ -518,46 +599,65 @@ function checkStatus() {
 
 function getCanDoMonitorableItems() {
     const items = [];
-    if (typeof CAN_DO_CATALOG === "undefined" || !CAN_DO_CATALOG || !Array.isArray(CAN_DO_CATALOG.commands)) return items;
+    const addedIds = new Set();
 
-    CAN_DO_CATALOG.commands.forEach(cmd => {
-        if (!cmd || !cmd.can_id) return;
-        const roles = cmd.roles || [];
-        if (roles.length > 0 && !roles.includes("trigger") && !roles.includes("condition")) {
-            return;
-        }
+    // 1. Catalog signal definitions
+    if (typeof CAN_DO_CATALOG !== "undefined" && CAN_DO_CATALOG && Array.isArray(CAN_DO_CATALOG.commands)) {
+        CAN_DO_CATALOG.commands.forEach(cmd => {
+            if (!cmd) return;
+            const itemId = cmd.id || cmd.name;
+            const matchPattern = cmd.match_payload || cmd.to_payload || cmd.from_payload || (cmd.trigger && (cmd.trigger.from || cmd.trigger.to));
+            const hasOptions = Array.isArray(cmd.options) && cmd.options.length > 0;
+            if (cmd.can_id || matchPattern || hasOptions) {
+                items.push({
+                    id: itemId,
+                    name: cmd.name || itemId,
+                    category: cmd.category || "Vehicle Signals",
+                    can_id: cmd.can_id,
+                    match_payload: matchPattern,
+                    options: cmd.options
+                });
+                addedIds.add(itemId);
+                if (cmd.can_id) addedIds.add(cmd.can_id.toLowerCase());
+            }
+        });
+    }
 
-        const matchPattern = cmd.match_payload || cmd.to_payload || cmd.from_payload;
-        const hasOptions = Array.isArray(cmd.options) && cmd.options.some(o => o.match_payload || o.payload || o.to_payload || o.from_payload);
-
-        if (matchPattern || hasOptions) {
-            items.push({
-                id: cmd.id || cmd.name,
-                name: cmd.name,
-                category: cmd.category || "General",
-                can_id: cmd.can_id,
-                match_payload: matchPattern,
-                options: cmd.options
-            });
-        }
-    });
-
+    // 2. Custom Condition Presets
     if (typeof getCustomCondPresets === "function") {
         const custom = getCustomCondPresets();
         if (Array.isArray(custom)) {
             custom.forEach((cp, idx) => {
-                if (cp && cp.can_id) {
+                if (cp) {
+                    const cpId = `custom_cond_${idx}`;
                     items.push({
-                        id: `custom_cond_${idx}`,
+                        id: cpId,
                         name: cp.name || `Custom Condition #${idx + 1}`,
                         category: "My Saved Conditions",
                         can_id: cp.can_id,
                         match_payload: cp.match_payload,
                         options: cp.options
                     });
+                    addedIds.add(cpId);
                 }
             });
         }
+    }
+
+    // 3. Live CAN bus states from /api/can_states cache
+    if (window._canDoStateCache && typeof window._canDoStateCache === "object") {
+        Object.keys(window._canDoStateCache).forEach(canIdKey => {
+            const lowKey = canIdKey.toLowerCase();
+            if (!addedIds.has(lowKey) && !addedIds.has(canIdKey)) {
+                items.push({
+                    id: canIdKey,
+                    name: `CAN Frame ${canIdKey}`,
+                    category: "Active CAN Bus IDs (/api/can_states)",
+                    can_id: canIdKey
+                });
+                addedIds.add(lowKey);
+            }
+        });
     }
 
     return items;
@@ -589,20 +689,61 @@ function saveCanDoActionButtons(instanceId, list) {
 }
 
 function getAvailableCanDoRulesList() {
-    if (Array.isArray(window._cachedCanDoRules) && window._cachedCanDoRules.length > 0) {
-        return window._cachedCanDoRules.map((r, idx) => ({ id: `rule_${idx}`, name: r.name || `Rule #${idx + 1}`, data: r }));
+    const list = [];
+    const addedNames = new Set();
+
+    // 1. Configured CAN Do automation rules
+    let rules = Array.isArray(window._cachedCanDoRules) ? window._cachedCanDoRules : [];
+    if (rules.length === 0) {
+        const cards = document.querySelectorAll("#can_do_rules_container .can-do-rule-card");
+        if (cards.length > 0) {
+            cards.forEach((c) => {
+                const rData = (typeof extractCanDoRuleData === "function") ? extractCanDoRuleData(c) : null;
+                if (rData) rules.push(rData);
+            });
+        }
     }
-    const cards = document.querySelectorAll("#can_do_rules_container .can-do-rule-card");
-    if (cards.length > 0) {
-        const list = [];
-        cards.forEach((c, idx) => {
-            const rData = (typeof extractCanDoRuleData === "function") ? extractCanDoRuleData(c) : null;
-            if (rData) list.push({ id: `rule_${idx}`, name: rData.name || `Rule #${idx + 1}`, data: rData });
+
+    rules.forEach((r, idx) => {
+        const name = r.name || `Rule #${idx + 1}`;
+        list.push({
+            id: `rule_${idx}`,
+            name: name,
+            category: "Automations",
+            data: r
         });
-        if (list.length > 0) return list;
+        addedNames.add(name.toLowerCase());
+    });
+
+    // 2. Actionable commands from CAN_DO_CATALOG
+    if (typeof CAN_DO_CATALOG !== "undefined" && CAN_DO_CATALOG && Array.isArray(CAN_DO_CATALOG.commands)) {
+        CAN_DO_CATALOG.commands.forEach((cmd, idx) => {
+            if (!cmd) return;
+            const name = cmd.name || cmd.id;
+            if (name && !addedNames.has(name.toLowerCase())) {
+                const ruleData = {
+                    name: name,
+                    enabled: true,
+                    trigger: cmd.trigger || { source: "manual" },
+                    action: cmd.action || { type: "precondition", trigger_id: cmd.id }
+                };
+                list.push({
+                    id: `cat_cmd_${cmd.id || idx}`,
+                    name: name,
+                    category: cmd.category || "Vehicle Actions",
+                    data: ruleData
+                });
+                addedNames.add(name.toLowerCase());
+            }
+        });
     }
-    const defaultRule = (typeof getDefaultPreconditionRule === "function") ? getDefaultPreconditionRule() : {};
-    return [{ id: "rule_0", name: "E-GMP Battery Preconditioning", data: defaultRule }];
+
+    if (list.length === 0) {
+        const defaultRule = (typeof getDefaultPreconditionRule === "function") ? getDefaultPreconditionRule() : {};
+        list.push({ id: "rule_0", name: "E-GMP Battery Preconditioning", category: "Automations", data: defaultRule });
+    }
+
+    return list;
 }
 
 async function executeDashboardCanDoButton(instanceId, idx, btn) {
@@ -624,11 +765,18 @@ async function executeDashboardCanDoButton(instanceId, idx, btn) {
     btn.disabled = true;
 
     try {
-        const res = await fetch("/test_can_do_rule", {
+        let res = await fetch("/test_can_do_action", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(ruleData)
         });
+        if (!res.ok) {
+            res = await fetch("/test_can_do_rule", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(ruleData)
+            });
+        }
         if (!res.ok) throw new Error("Status " + res.status);
         btn.innerHTML = `<span>Done!</span>`;
         btn.style.background = "var(--m3-tonal-act-color)";
