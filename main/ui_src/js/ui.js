@@ -39,27 +39,40 @@ function submit_enable() {
 
     const bleEl = document.getElementById("ble_status");
     const apAutoDisable = document.getElementById("ap_auto_disable");
+    const warn = document.getElementById("ble_warning_div");
+    const mqttEl = document.getElementById("mqtt_en");
+    const mqttDiv = document.getElementById("mqtt_en_div");
 
     if (bleEl) {
         if (isAp) {
-            bleEl.disabled = false;
+            if (mqttEl && mqttEl.checked) {
+                bleEl.disabled = true;
+                bleEl.checked = false;
+            } else {
+                bleEl.disabled = false;
+            }
             if (apAutoDisable) apAutoDisable.disabled = true;
         } else {
             bleEl.disabled = true;
             bleEl.checked = false;
+            if (apAutoDisable) apAutoDisable.disabled = false;
         }
+    }
 
-        const warn = document.getElementById("ble_warning_div");
-        const mqttEl = document.getElementById("mqtt_en");
-        const mqttDiv = document.getElementById("mqtt_en_div");
-
-        if (!bleEl.checked) {
-            if (warn) warn.style.display = "block";
-            if (mqttEl) { mqttEl.checked = false; mqttEl.disabled = true; }
-            if (mqttDiv) mqttDiv.style.display = "none";
-        } else {
-            if (warn) warn.style.display = "none";
-            if (mqttEl) mqttEl.disabled = false;
+    if (bleEl && bleEl.checked) {
+        if (warn) warn.style.display = "block";
+        if (mqttEl) {
+            mqttEl.checked = false;
+            mqttEl.disabled = true;
+        }
+        if (mqttDiv) mqttDiv.style.display = "none";
+    } else {
+        if (warn) warn.style.display = "none";
+        if (mqttEl) {
+            mqttEl.disabled = false;
+            if (mqttDiv) {
+                mqttDiv.style.display = mqttEl.checked ? "block" : "none";
+            }
         }
     }
 

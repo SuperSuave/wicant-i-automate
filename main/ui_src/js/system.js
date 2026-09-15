@@ -333,10 +333,7 @@ function Load() {
                 }
 
                 if (typeof submit_enable === "function") {
-                    // Update disabled/enabled states based on wifi_mode & ble
-                    const isAp = (obj.wifi_mode === "AP");
-                    const bleEl = document.getElementById("ble_status");
-                    if (bleEl) bleEl.disabled = !isAp;
+                    submit_enable();
                 }
 
                 if (typeof checkStatus === "function") checkStatus();

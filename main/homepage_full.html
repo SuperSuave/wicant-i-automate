@@ -2415,6 +2415,130 @@ dialog.ha-native-dialog::backdrop {
     flex-direction: column;
 }
 
+/* --- Trigger Mode & Combine Bar --- */
+.can-do-trig-combine-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 0.45rem 0.75rem;
+    margin-bottom: 0.75rem;
+    background: var(--m3-tonal-when-bg, #fff1e5);
+    border: 1px solid var(--m3-tonal-when-border, #fed7aa);
+    border-radius: var(--m3-shape-sm, 6px);
+}
+
+[data-theme="dark"] .can-do-trig-combine-wrap {
+    background: rgba(194, 65, 12, 0.12);
+    border-color: rgba(251, 146, 60, 0.25);
+}
+
+.can-do-trig-mode-group {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.can-do-trig-mode-btn {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--m3-shape-xs, 4px);
+    border: 1px solid var(--border-color);
+    background: var(--md-sys-color-surface-container);
+    color: var(--text-color);
+    transition: var(--transition, all 0.2s ease);
+}
+
+.can-do-trig-mode-btn:hover {
+    background: var(--md-sys-color-surface-container-high);
+}
+
+.can-do-trig-mode-btn.active {
+    background: var(--ha-primary-color, #0284c7) !important;
+    border-color: var(--ha-primary-color, #0284c7) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.3);
+}
+
+/* --- Connector Dividers Between Automation Items --- */
+.can-do-connector-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.35rem 0;
+    user-select: none;
+}
+
+.can-do-connector-line {
+    height: 1.5px;
+    flex: 1;
+    background: var(--border-color);
+}
+.can-do-connector-line.trig { background: var(--m3-tonal-when-border, #fed7aa); }
+.can-do-connector-line.cond { background: var(--m3-tonal-cond-border, #bfdbfe); }
+.can-do-connector-line.act { background: var(--m3-tonal-act-border, #a7f3d0); }
+.can-do-connector-line.choose { background: var(--m3-tonal-choose-border, #99f6e4); }
+.can-do-connector-line.group-and { background: var(--m3-tonal-cond-border, #bfdbfe); }
+.can-do-connector-line.group-or { background: #cbd5e1; }
+
+.can-do-connector-pill {
+    padding: 2px 12px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    border-radius: var(--m3-shape-full, 9999px);
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.can-do-connector-pill.trig {
+    background: var(--m3-tonal-when-bg, #fff1e5);
+    border: 1px solid var(--m3-tonal-when-border, #fed7aa);
+    color: var(--m3-tonal-when-color, #c2410c);
+}
+
+.can-do-connector-pill.trig.active-and {
+    background: #e0f2fe;
+    border: 1px solid #7dd3fc;
+    color: #0369a1;
+}
+
+[data-theme="dark"] .can-do-connector-pill.trig {
+    background: rgba(194, 65, 12, 0.2);
+    border-color: rgba(251, 146, 60, 0.4);
+    color: #fdba74;
+}
+
+[data-theme="dark"] .can-do-connector-pill.trig.active-and {
+    background: rgba(2, 132, 199, 0.2);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #7dd3fc;
+}
+
+.can-do-connector-pill.cond {
+    background: var(--m3-tonal-cond-bg, #e8f2fe);
+    border: 1px solid var(--m3-tonal-cond-border, #bfdbfe);
+    color: var(--m3-tonal-cond-color, #0369a1);
+}
+
+.can-do-connector-pill.act {
+    background: var(--m3-tonal-act-bg, #e6f6f2);
+    border: 1px solid var(--m3-tonal-act-border, #a7f3d0);
+    color: var(--m3-tonal-act-color, #047857);
+}
+
+.can-do-connector-pill.choose {
+    background: var(--m3-tonal-choose-bg, #e0f7fa);
+    border: 1px solid var(--m3-tonal-choose-border, #99f6e4);
+    color: var(--m3-tonal-choose-color, #0f766e);
+}
+
+
 </style>
 
 </head>
@@ -3238,27 +3362,40 @@ function submit_enable() {
 
     const bleEl = document.getElementById("ble_status");
     const apAutoDisable = document.getElementById("ap_auto_disable");
+    const warn = document.getElementById("ble_warning_div");
+    const mqttEl = document.getElementById("mqtt_en");
+    const mqttDiv = document.getElementById("mqtt_en_div");
 
     if (bleEl) {
         if (isAp) {
-            bleEl.disabled = false;
+            if (mqttEl && mqttEl.checked) {
+                bleEl.disabled = true;
+                bleEl.checked = false;
+            } else {
+                bleEl.disabled = false;
+            }
             if (apAutoDisable) apAutoDisable.disabled = true;
         } else {
             bleEl.disabled = true;
             bleEl.checked = false;
+            if (apAutoDisable) apAutoDisable.disabled = false;
         }
+    }
 
-        const warn = document.getElementById("ble_warning_div");
-        const mqttEl = document.getElementById("mqtt_en");
-        const mqttDiv = document.getElementById("mqtt_en_div");
-
-        if (!bleEl.checked) {
-            if (warn) warn.style.display = "block";
-            if (mqttEl) { mqttEl.checked = false; mqttEl.disabled = true; }
-            if (mqttDiv) mqttDiv.style.display = "none";
-        } else {
-            if (warn) warn.style.display = "none";
-            if (mqttEl) mqttEl.disabled = false;
+    if (bleEl && bleEl.checked) {
+        if (warn) warn.style.display = "block";
+        if (mqttEl) {
+            mqttEl.checked = false;
+            mqttEl.disabled = true;
+        }
+        if (mqttDiv) mqttDiv.style.display = "none";
+    } else {
+        if (warn) warn.style.display = "none";
+        if (mqttEl) {
+            mqttEl.disabled = false;
+            if (mqttDiv) {
+                mqttDiv.style.display = mqttEl.checked ? "block" : "none";
+            }
         }
     }
 
@@ -3921,10 +4058,7 @@ function Load() {
                 }
 
                 if (typeof submit_enable === "function") {
-                    // Update disabled/enabled states based on wifi_mode & ble
-                    const isAp = (obj.wifi_mode === "AP");
-                    const bleEl = document.getElementById("ble_status");
-                    if (bleEl) bleEl.disabled = !isAp;
+                    submit_enable();
                 }
 
                 if (typeof checkStatus === "function") checkStatus();
@@ -7583,10 +7717,14 @@ function updateCanDoItemConnectors(card) {
     if (trigContainer) {
         trigContainer.querySelectorAll(".can-do-connector-divider").forEach(el => el.remove());
         const trigItems = Array.from(trigContainer.querySelectorAll(".can-do-trigger-item"));
+        const combineMode = card.querySelector(".can-do-trig-combine-mode")?.value || "any";
+        const isAnd = (combineMode === "all" || combineMode === "and" || combineMode === "combo");
+        const modeLabel = isAnd ? "AND" : "OR";
+        const modeClass = isAnd ? "trig active-and" : "trig";
         for (let i = 0; i < trigItems.length - 1; i++) {
             const div = document.createElement("div");
             div.className = "can-do-connector-divider";
-            div.innerHTML = `<span class="can-do-connector-line trig"></span><span class="can-do-connector-pill trig" style="padding: 2px 12px; font-weight: 800;">OR</span><span class="can-do-connector-line trig"></span>`;
+            div.innerHTML = `<span class="can-do-connector-line trig"></span><span class="can-do-connector-pill ${modeClass}" style="padding: 2px 12px; font-weight: 800; cursor: pointer;" title="Click to toggle AND / OR" onclick="toggleCanDoTriggerCombineMode(this)">${modeLabel}</span><span class="can-do-connector-line trig"></span>`;
             trigContainer.insertBefore(div, trigItems[i + 1]);
         }
     }
@@ -7793,7 +7931,10 @@ function updateCanDoRuleSummaryPill(card) {
         }
     });
 
-    const trigText = trigSummaries.length > 0 ? trigSummaries.slice(0, 2).join(" • ") + (trigSummaries.length > 2 ? ` (+${trigSummaries.length - 2})` : "") : "No Trigger";
+    const combineMode = card.querySelector(".can-do-trig-combine-mode")?.value || "any";
+    const isAnd = (combineMode === "all" || combineMode === "and" || combineMode === "combo");
+    const trigJoiner = isAnd ? " + " : " OR ";
+    const trigText = trigSummaries.length > 0 ? trigSummaries.slice(0, 2).join(trigJoiner) + (trigSummaries.length > 2 ? ` (+${trigSummaries.length - 2})` : "") : "No Trigger";
     const condText = condSummaries.length > 0 ? condSummaries.slice(0, 2).join(" • ") + (condSummaries.length > 2 ? ` (+${condSummaries.length - 2})` : "") : "";
     const actText = actSummaries.length > 0 ? actSummaries.slice(0, 2).join(" • ") + (actSummaries.length > 2 ? ` (+${actSummaries.length - 2})` : "") : "No Action";
 
@@ -7984,6 +8125,8 @@ function extractCanDoActionData(item) {
 
     const canIdInput = item.querySelector(".can-do-act-can-id")?.value.trim() || "";
     const effectiveCanId = canIdInput || (presetObj ? (presetObj.action_can_id || presetObj.can_id || presetObj.state_can_id || "") : "");
+    const stateCanIdInput = item.querySelector(".can-do-act-state-can-id")?.value.trim() || "";
+    const effectiveStateCanId = stateCanIdInput || (presetObj ? (presetObj.state_can_id || "") : "");
 
     return {
         trigger_id: item.querySelector(".can-do-act-trig-id")?.value.trim() || "",
@@ -8005,6 +8148,7 @@ function extractCanDoActionData(item) {
         climate_driver_only: item.querySelector(".can-do-act-climate-drv-only")?.checked === true,
         can_id: effectiveCanId,
         action_can_id: effectiveCanId,
+        state_can_id: effectiveStateCanId,
         steps: steps,
         payload: payloadLines.join("\n"),
         bus: parseInt(item.querySelector(".can-do-act-bus")?.value || "0"),
@@ -9807,6 +9951,16 @@ function addCanDoRuleUI(ruleData = {}, isCollapsed = true, shouldScroll = false,
                                 </div>
                             </div>
                             <div class="can-do-section-body">
+                                <div class="can-do-trig-combine-wrap">
+                                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                                        <span style="font-size: 0.82rem; font-weight: 700; color: var(--m3-tonal-when-color);">Trigger Mode:</span>
+                                    </div>
+                                    <div class="can-do-trig-mode-group">
+                                        <input type="hidden" class="can-do-trig-combine-mode" value="${(ruleData.trigger_mode === 'all' || ruleData.trigger_mode === 'and' || ruleData.trigger_mode === 'combo') ? 'all' : 'any'}">
+                                        <button type="button" class="system-button can-do-trig-mode-btn ${(!ruleData.trigger_mode || ruleData.trigger_mode === 'any' || ruleData.trigger_mode === 'or') ? 'active' : ''}" onclick="setCanDoTriggerMode(this, 'any')">OR (Any Trigger)</button>
+                                        <button type="button" class="system-button can-do-trig-mode-btn ${(ruleData.trigger_mode === 'all' || ruleData.trigger_mode === 'and' || ruleData.trigger_mode === 'combo') ? 'active' : ''}" onclick="setCanDoTriggerMode(this, 'all')">AND (All Held / Combo)</button>
+                                    </div>
+                                </div>
                                 <div class="can-do-triggers-container can-do-tree-connect"></div>
                                 <button type="button" class="ha-section-add-btn accent-trig" onclick="openAddAutomationElementDialog('trigger', this.closest('.can-do-section-box').querySelector('.can-do-triggers-container'), this.closest('.can-do-rule-card'))">
                                     <svg><use href="#icon-plus"/></svg>
@@ -11175,7 +11329,30 @@ function setCanDoTriggerMode(btn, mode) {
     const hidden = group.querySelector(".can-do-trig-combine-mode");
     if (hidden) hidden.value = mode;
     const card = btn.closest(".can-do-rule-card");
-    if (card) updateCanDoRuleSummaryPill(card);
+    if (card) {
+        updateCanDoItemConnectors(card);
+        updateCanDoRuleSummaryPill(card);
+        if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
+    }
+}
+
+function toggleCanDoTriggerCombineMode(pillElem) {
+    const card = pillElem.closest(".can-do-rule-card");
+    if (!card) return;
+    const hidden = card.querySelector(".can-do-trig-combine-mode");
+    const current = hidden?.value || "any";
+    const next = (current === "all" || current === "and" || current === "combo") ? "any" : "all";
+    if (hidden) hidden.value = next;
+    const group = card.querySelector(".can-do-trig-mode-group");
+    if (group) {
+        group.querySelectorAll(".can-do-trig-mode-btn").forEach(btn => {
+            const isAnyBtn = btn.getAttribute("onclick")?.includes("'any'");
+            btn.classList.toggle("active", next === "any" ? isAnyBtn : !isAnyBtn);
+        });
+    }
+    updateCanDoItemConnectors(card);
+    updateCanDoRuleSummaryPill(card);
+    if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
 }
 
 function cloneCanDoTriggerItem(btn) {
@@ -12475,6 +12652,17 @@ function renderCanDoActionItem(container, data = {}) {
                                 </div>
                             </div>
 
+                            <!-- State CAN ID -->
+                            <div class="ha-form-row act-field-can ${type === "can_tx" ? "" : "hidden"}">
+                                <div class="ha-form-label-col">
+                                    <span class="ha-form-label">State CAN ID (Rx / Feedback)</span>
+                                    <span class="ha-form-sublabel">Optional CAN arbitration ID where vehicle reports resulting state.</span>
+                                </div>
+                                <div class="ha-form-control-col">
+                                    <input type="text" class="ha-form-input can-do-act-state-can-id" value="${data.state_can_id || (matchedPreset ? (matchedPreset.state_can_id || "") : "")}" placeholder="e.g. 0x448 (Optional)" oninput="updateCanDoRuleSummaryPill(this.closest('.can-do-rule-card'))">
+                                </div>
+                            </div>
+
                             <!-- Target Bus -->
                             <div class="ha-form-row act-field-can ${type === "can_tx" ? "" : "hidden"}">
                                 <div class="ha-form-label-col">
@@ -13389,10 +13577,15 @@ function applyCanDoActionPreset(selectElem, notify = true, requestedOpt = undefi
         const cid = item.querySelector(".can-do-act-can-id");
         if (cid) cid.value = effectiveCanId;
     }
+    const targetStateCanId = activeOpt?.state_can_id || preset.state_can_id || "";
+    const scid = item.querySelector(".can-do-act-state-can-id");
+    if (scid && targetStateCanId) {
+        scid.value = targetStateCanId;
+    }
     const stateNote = item.querySelector(".can-do-act-state-note");
     if (stateNote) {
-        if (preset.state_can_id) {
-            stateNote.innerHTML = `<span class="ha-status-pill green" style="font-size: 0.72rem; padding: 1px 6px;">Rx: ${preset.state_can_id}</span>`;
+        if (targetStateCanId) {
+            stateNote.innerHTML = `<span class="ha-status-pill green" style="font-size: 0.72rem; padding: 1px 6px;">Rx: ${targetStateCanId}</span>`;
         } else {
             stateNote.innerHTML = "";
         }
@@ -13539,6 +13732,11 @@ function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
     const cid = item.querySelector(".can-do-act-can-id");
     if (cid && targetCanId) {
         cid.value = targetCanId;
+    }
+    const targetStateCanId = opt.state_can_id || preset.state_can_id || "";
+    const scid = item.querySelector(".can-do-act-state-can-id");
+    if (scid && targetStateCanId) {
+        scid.value = targetStateCanId;
     }
 
     // Update title and pill
