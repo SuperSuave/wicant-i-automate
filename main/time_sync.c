@@ -32,7 +32,7 @@ void time_sync_init(void) {
 }
 
 void time_sync_start_sntp(void) {
-  if (s_sntp_running || esp_sntp_is_enabled()) {
+  if (s_sntp_running || esp_sntp_enabled()) {
     esp_sntp_stop();
     s_sntp_running = false;
   }
@@ -47,7 +47,7 @@ void time_sync_start_sntp(void) {
 
   ESP_LOGI(TAG, "Initializing SNTP client with server: %s", srv);
   esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
-  esp_sntp_setsyncmode(SNTP_SYNC_MODE_IMMED);
+  esp_sntp_set_sync_mode(SNTP_SYNC_MODE_IMMED);
   esp_sntp_setservername(0, srv);
   sntp_set_time_sync_notification_cb(sntp_sync_notification_cb);
   esp_sntp_init();
@@ -55,7 +55,7 @@ void time_sync_start_sntp(void) {
 }
 
 void time_sync_stop_sntp(void) {
-  if (s_sntp_running || esp_sntp_is_enabled()) {
+  if (s_sntp_running || esp_sntp_enabled()) {
     ESP_LOGI(TAG, "Stopping SNTP client");
     esp_sntp_stop();
     s_sntp_running = false;
