@@ -170,8 +170,11 @@ function getByteGridString(container, prefixClass) {
         }
     });
     if (!hasAny) return "";
-    while (bytes.length > 0 && bytes[bytes.length - 1] === "**") {
-        bytes.pop();
+    // Only strip trailing wildcards for triggers/conditions, NEVER for action payload steps (action steps need all 8 bytes)
+    if (!prefixClass.includes("step")) {
+        while (bytes.length > 0 && bytes[bytes.length - 1] === "**") {
+            bytes.pop();
+        }
     }
     return bytes.join(" ");
 }

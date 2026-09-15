@@ -8,6 +8,7 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 #include <ctype.h>
@@ -20,6 +21,7 @@
 
 #include "can.h"
 #include "config_server.h"
+#include "ha_webhooks.h"
 #include "hw_config.h"
 #include "mqtt.h"
 #include "persistent_settings.h"
@@ -40,6 +42,8 @@
 
 static can_do_rule_set_t g_can_do_rules = {0};
 static char g_device_id[32] = {0};
+static char g_can_do_last_trigger[64] = {0};
+static int64_t g_can_do_last_trigger_us = 0;
 
 // Cache for E-GMP live cabin temperatures and seatbelt occupant status
 static uint8_t g_climate_driver_raw = 0;    // 0x380 byte 3
@@ -47,6 +51,98 @@ static uint8_t g_climate_passenger_raw = 0; // 0x380 byte 4
 static bool g_climate_has_reading = false;
 static bool g_passenger_seatbelt_buckled =
     false; // 0x320 occupant sensor tracking
+
+#define CAN_DO_ASYNC_MAX_STEPS 32
+
+typedef struct {
+  uint32_t tx_can_id;
+  uint32_t state_can_id;
+  bool is_ext;
+  uint8_t target_bus;
+  uint8_t tx_data[8];
+  uint8_t tx_mask[8];
+  uint32_t delay_ms;
+  int8_t roll_byte_idx;
+  can_do_roll_mode_t roll_mode;
+} can_do_async_step_t;
+
+typedef struct {
+  uint8_t step_count;
+  can_do_async_step_t steps[CAN_DO_ASYNC_MAX_STEPS];
+} can_do_async_job_t;
+
+static QueueHandle_t s_can_do_action_queue = NULL;
+
+static void can_do_action_worker_task(void *pvParameters) {
+  can_do_async_job_t job;
+  while (1) {
+    if (xQueueReceive(s_can_do_action_queue, &job, portMAX_DELAY) == pdTRUE) {
+      for (uint8_t s = 0; s < job.step_count; s++) {
+        can_do_async_step_t *step = &job.steps[s];
+        uint8_t payload[8] = {0};
+
+        // 1. Retrieve last known state for this CAN ID from can_state_cache (recorded from live bus)
+        uint32_t lookup_id = (step->state_can_id > 0) ? step->state_can_id : step->tx_can_id;
+        can_state_cache_lock();
+        const can_state_entry_t *cache = can_state_cache_get();
+        if (cache) {
+          for (int c_idx = 0; c_idx < CAN_STATE_CACHE_SIZE; c_idx++) {
+            if (cache[c_idx].id == lookup_id && cache[c_idx].id != 0) {
+              memcpy(payload, cache[c_idx].data, 8);
+              break;
+            }
+          }
+        }
+        can_state_cache_unlock();
+
+        // 2. Merge step payload with cached state using tx_mask
+        for (uint8_t b = 0; b < 8; b++) {
+          if (step->tx_mask[b] == 0xFF) {
+            payload[b] = step->tx_data[b];
+          } else if (step->tx_mask[b] != 0) {
+            payload[b] = (payload[b] & ~step->tx_mask[b]) |
+                         (step->tx_data[b] & step->tx_mask[b]);
+          }
+        }
+
+        // 3. Dynamic rolling counters if configured
+        if (step->roll_byte_idx >= 0 && step->roll_byte_idx < 8) {
+          static uint8_t s_roll_seq = 0;
+          if (step->roll_mode == CAN_DO_ROLL_SEQ3) {
+            payload[step->roll_byte_idx] =
+                (uint8_t)(((s_roll_seq % 3) << 4) | 0x0F);
+            s_roll_seq = (s_roll_seq + 1) % 3;
+          } else if (step->roll_mode == CAN_DO_ROLL_BYTE_INC) {
+            payload[step->roll_byte_idx] = s_roll_seq++;
+          } else if (step->roll_mode == CAN_DO_ROLL_NIBBLE_INC) {
+            payload[step->roll_byte_idx] =
+                (uint8_t)((payload[step->roll_byte_idx] & 0xF0) |
+                          (s_roll_seq & 0x0F));
+            s_roll_seq = (s_roll_seq + 1) & 0x0F;
+          }
+        }
+
+        twai_message_t tx_msg = {
+            .identifier = step->tx_can_id,
+            .extd = step->is_ext ? 1 : 0,
+            .data_length_code = 8,
+        };
+        memcpy(tx_msg.data, payload, 8);
+
+        esp_err_t err = can_send((can_bus_t)step->target_bus, &tx_msg,
+                                 pdMS_TO_TICKS(20));
+        if (err != ESP_OK) {
+          ESP_LOGW(TAG, "CAN Do TX failed: bus %d id 0x%lx err %d",
+                   step->target_bus, (unsigned long)step->tx_can_id, err);
+        }
+
+        if (step->delay_ms > 0 && s < (job.step_count - 1)) {
+          vTaskDelay(pdMS_TO_TICKS(step->delay_ms));
+        }
+      }
+    }
+  }
+}
 
 // Forward declarations
 static void can_do_init_default_precondition_rule(void);
@@ -61,6 +157,13 @@ void can_do_init(const char *device_id_str) {
 
   if (g_can_do_rules.mutex == NULL) {
     g_can_do_rules.mutex = xSemaphoreCreateMutex();
+  }
+
+  if (s_can_do_action_queue == NULL) {
+    s_can_do_action_queue = xQueueCreate(8, sizeof(can_do_async_job_t));
+    if (s_can_do_action_queue) {
+      xTaskCreate(can_do_action_worker_task, "can_do_act", 3072, NULL, 5, NULL);
+    }
   }
 
   can_do_load_config();
@@ -371,9 +474,11 @@ static void can_do_execute_action(can_do_action_t *act,
   if (!act)
     return;
 
-  if (act->trigger_id[0] != '\0' && strcmp(act->trigger_id, "any") != 0) {
-    if (!matched_trig_id || strcmp(act->trigger_id, matched_trig_id) != 0) {
-      return;
+  if (matched_trig_id && strcmp(matched_trig_id, "test_action") != 0) {
+    if (act->trigger_id[0] != '\0' && strcmp(act->trigger_id, "any") != 0) {
+      if (strcmp(act->trigger_id, matched_trig_id) != 0) {
+        return;
+      }
     }
   }
 
@@ -401,35 +506,40 @@ static void can_do_execute_action(can_do_action_t *act,
     return;
   }
 
-  if (act->type == CAN_DO_ACT_CAN_TX || act->type == 0) {
-    for (uint8_t s = 0; s < act->step_count; s++) {
-      can_do_sequence_step_t *step = &act->steps[s];
-      uint8_t payload[8] = {0};
-      if (step->tx_len > 0) {
-        memcpy(payload, step->tx_data, step->tx_len <= 8 ? step->tx_len : 8);
-      }
-      if (step->roll_byte_idx >= 0 && step->roll_byte_idx < step->tx_len) {
-        if (step->roll_mode == CAN_DO_ROLL_SEQ3) {
-          payload[step->roll_byte_idx] =
-              (uint8_t)(((step->roll_counter % 3) << 4) | 0x0F);
-          step->roll_counter = (step->roll_counter + 1) % 3;
-        } else if (step->roll_mode == CAN_DO_ROLL_BYTE_INC) {
-          payload[step->roll_byte_idx] = step->roll_counter++;
-        } else if (step->roll_mode == CAN_DO_ROLL_NIBBLE_INC) {
-          payload[step->roll_byte_idx] =
-              (uint8_t)((payload[step->roll_byte_idx] & 0xF0) |
-                        (step->roll_counter & 0x0F));
-          step->roll_counter = (step->roll_counter + 1) & 0x0F;
-        }
-      }
-      twai_message_t tx_msg = {.identifier = step->tx_can_id,
-                               .extd = step->is_ext ? 1 : 0,
-                               .data_length_code = step->tx_len};
-      memcpy(tx_msg.data, payload, step->tx_len <= 8 ? step->tx_len : 8);
-      can_send((can_bus_t)step->target_bus, &tx_msg, 0);
+  if (act->type == CAN_DO_ACT_WEBHOOK) {
+    ha_webhook_config_t wh_cfg;
+    memset(&wh_cfg, 0, sizeof(wh_cfg));
+    const char *target_url = NULL;
+    if (act->webhook_url[0] != '\0') {
+      target_url = act->webhook_url;
+    } else if (ha_webhooks_get_config(&wh_cfg) == ESP_OK && wh_cfg.enabled && wh_cfg.url_count > 0) {
+      target_url = wh_cfg.urls[0];
+    }
+    if (target_url && target_url[0] != '\0') {
+      ESP_LOGI(TAG, "CAN Do firing webhook action to: %s", target_url);
+    }
+  }
 
-      if (step->delay_ms > 0 && s < (act->step_count - 1)) {
-        vTaskDelay(pdMS_TO_TICKS(step->delay_ms));
+  if (act->type == CAN_DO_ACT_CAN_TX || act->type == 0) {
+    if (act->step_count > 0 && act->steps && s_can_do_action_queue) {
+      can_do_async_job_t job;
+      memset(&job, 0, sizeof(job));
+      job.step_count = (act->step_count > CAN_DO_ASYNC_MAX_STEPS)
+                           ? CAN_DO_ASYNC_MAX_STEPS
+                           : act->step_count;
+      for (uint8_t s = 0; s < job.step_count; s++) {
+        job.steps[s].tx_can_id = act->steps[s].tx_can_id;
+        job.steps[s].state_can_id = act->steps[s].state_can_id;
+        job.steps[s].is_ext = act->steps[s].is_ext;
+        job.steps[s].target_bus = act->steps[s].target_bus;
+        memcpy(job.steps[s].tx_data, act->steps[s].tx_data, 8);
+        memcpy(job.steps[s].tx_mask, act->steps[s].tx_mask, 8);
+        job.steps[s].delay_ms = act->steps[s].delay_ms;
+        job.steps[s].roll_byte_idx = act->steps[s].roll_byte_idx;
+        job.steps[s].roll_mode = act->steps[s].roll_mode;
+      }
+      if (xQueueSend(s_can_do_action_queue, &job, 0) != pdTRUE) {
+        ESP_LOGW(TAG, "CAN Do action queue full, dropped action job");
       }
     }
   }
@@ -440,6 +550,14 @@ static void can_do_execute_rule_actions(can_do_rule_t *rule,
                                         int64_t now_us) {
   if (!rule)
     return;
+
+  if (matched_id && matched_id[0] != '\0') {
+    strlcpy(g_can_do_last_trigger, matched_id, sizeof(g_can_do_last_trigger));
+    g_can_do_last_trigger_us = now_us;
+  } else if (rule->name && rule->name[0] != '\0') {
+    strlcpy(g_can_do_last_trigger, rule->name, sizeof(g_can_do_last_trigger));
+    g_can_do_last_trigger_us = now_us;
+  }
 
   if (rule->exec_mode == CAN_DO_EXEC_TOGGLE) {
     if (!rule->is_active_state) {
@@ -1019,15 +1137,33 @@ static void can_do_parse_single_trigger(cJSON *r, cJSON *trig_obj,
 
   cJSON *cid = trig_obj ? cJSON_GetObjectItem(trig_obj, "can_id")
                         : cJSON_GetObjectItem(r, "can_id");
+  if (!cid && trig_obj) {
+    cid = cJSON_GetObjectItem(trig_obj, "state_can_id");
+  }
+  if (!cid && r) {
+    cid = cJSON_GetObjectItem(r, "state_can_id");
+  }
+  if (!cid && trig_obj) {
+    cid = cJSON_GetObjectItem(trig_obj, "action_can_id");
+  }
+  if (!cid && r) {
+    cid = cJSON_GetObjectItem(r, "action_can_id");
+  }
   cJSON *bus_item = trig_obj ? cJSON_GetObjectItem(trig_obj, "bus")
                              : cJSON_GetObjectItem(r, "bus");
   cJSON *from_p = trig_obj ? cJSON_GetObjectItem(trig_obj, "from_payload")
-                           : cJSON_GetObjectItem(r, "from_payload");
+                            : cJSON_GetObjectItem(r, "from_payload");
   cJSON *to_p = trig_obj ? cJSON_GetObjectItem(trig_obj, "to_payload") : NULL;
   if (!to_p && trig_obj)
     to_p = cJSON_GetObjectItem(trig_obj, "match_payload");
+  if (!to_p && trig_obj)
+    to_p = cJSON_GetObjectItem(trig_obj, "payload");
+  if (!to_p)
+    to_p = cJSON_GetObjectItem(r, "to_payload");
   if (!to_p)
     to_p = cJSON_GetObjectItem(r, "match_payload");
+  if (!to_p)
+    to_p = cJSON_GetObjectItem(r, "payload");
 
   if (cid && cid->valuestring && strlen(cid->valuestring) > 0) {
     trig->can_id = strtoul(cid->valuestring, NULL, 0);
@@ -1084,11 +1220,13 @@ static void can_do_parse_step_payload(const char *payload_str,
   step->roll_byte_idx = -1;
   step->roll_mode = CAN_DO_ROLL_NONE;
   step->roll_counter = 0;
-  step->tx_len = 0;
   memset(step->tx_data, 0, sizeof(step->tx_data));
+  memset(step->tx_mask, 0, sizeof(step->tx_mask));
 
-  if (!payload_str || payload_str[0] == '\0')
+  if (!payload_str || payload_str[0] == '\0') {
+    step->tx_len = 8;
     return;
+  }
 
   char buf[128];
   strncpy(buf, payload_str, sizeof(buf) - 1);
@@ -1097,35 +1235,59 @@ static void can_do_parse_step_payload(const char *payload_str,
   char *token = strtok(buf, " \t\r\n");
   uint8_t idx = 0;
   while (token != NULL && idx < 8) {
-    if (strcasecmp(token, "SEQ3") == 0 || strcasecmp(token, "~3") == 0 ||
-        strcasecmp(token, "SQ") == 0) {
+    if (strcmp(token, "*") == 0 || strcmp(token, "**") == 0 || strcmp(token, "?") == 0) {
+      step->tx_data[idx] = 0x00;
+      step->tx_mask[idx] = 0x00;
+    } else if (strcasecmp(token, "SEQ3") == 0 || strcasecmp(token, "~3") == 0 ||
+               strcasecmp(token, "SQ") == 0) {
       step->roll_byte_idx = idx;
       step->roll_mode = CAN_DO_ROLL_SEQ3;
       step->roll_counter = 0;
       step->tx_data[idx] = 0x0F;
+      step->tx_mask[idx] = 0xFF;
     } else if (strcasecmp(token, "INC") == 0 ||
                strcasecmp(token, "ROLL") == 0 || strcmp(token, "++") == 0) {
       step->roll_byte_idx = idx;
       step->roll_mode = CAN_DO_ROLL_BYTE_INC;
       step->roll_counter = 0;
       step->tx_data[idx] = 0x00;
+      step->tx_mask[idx] = 0xFF;
     } else if (strcasecmp(token, "*R") == 0 || strcasecmp(token, "R*") == 0) {
       step->roll_byte_idx = idx;
       step->roll_mode = CAN_DO_ROLL_NIBBLE_INC;
       step->roll_counter = 0;
       step->tx_data[idx] = 0x00;
+      step->tx_mask[idx] = 0x0F;
+    } else if (token[0] == '*' && strlen(token) == 2 && isxdigit((unsigned char)token[1])) {
+      unsigned int val = 0;
+      sscanf(token + 1, "%1x", &val);
+      step->tx_data[idx] = (uint8_t)(val & 0x0F);
+      step->tx_mask[idx] = 0x0F;
+    } else if (token[1] == '*' && strlen(token) == 2 && isxdigit((unsigned char)token[0])) {
+      char hex[2] = {token[0], '\0'};
+      unsigned int val = 0;
+      sscanf(hex, "%1x", &val);
+      step->tx_data[idx] = (uint8_t)((val & 0x0F) << 4);
+      step->tx_mask[idx] = 0xF0;
     } else {
       unsigned int byte_val = 0;
       if (sscanf(token, "%2x", &byte_val) == 1) {
         step->tx_data[idx] = (uint8_t)byte_val;
+        step->tx_mask[idx] = 0xFF;
       } else {
         step->tx_data[idx] = 0x00;
+        step->tx_mask[idx] = 0x00;
       }
     }
     idx++;
     token = strtok(NULL, " \t\r\n");
   }
-  step->tx_len = idx;
+  while (idx < 8) {
+    step->tx_data[idx] = 0x00;
+    step->tx_mask[idx] = 0x00;
+    idx++;
+  }
+  step->tx_len = 8;
 }
 
 static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
@@ -1136,7 +1298,7 @@ static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
 
   cJSON *trig_id = act_obj ? cJSON_GetObjectItem(act_obj, "trigger_id")
                            : cJSON_GetObjectItem(r, "trigger_id");
-  if (trig_id && trig_id->valuestring) {
+  if (trig_id && trig_id->valuestring && strlen(trig_id->valuestring) > 0) {
     strncpy(act->trigger_id, trig_id->valuestring, sizeof(act->trigger_id) - 1);
   } else {
     strcpy(act->trigger_id, "any");
@@ -1155,10 +1317,20 @@ static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
       act->type = CAN_DO_ACT_CLIMATE_TARGET;
     else if (strcmp(act_type_obj->valuestring, "delay") == 0)
       act->type = CAN_DO_ACT_DELAY;
+    else if (strcmp(act_type_obj->valuestring, "webhook") == 0)
+      act->type = CAN_DO_ACT_WEBHOOK;
+    else if (strcmp(act_type_obj->valuestring, "mqtt") == 0)
+      act->type = CAN_DO_ACT_MQTT;
     else
       act->type = CAN_DO_ACT_CAN_TX;
   } else {
     act->type = CAN_DO_ACT_CAN_TX;
+  }
+
+  cJSON *wh_url = act_obj ? cJSON_GetObjectItem(act_obj, "webhook_url")
+                          : cJSON_GetObjectItem(r, "webhook_url");
+  if (wh_url && wh_url->valuestring) {
+    strlcpy(act->webhook_url, wh_url->valuestring, sizeof(act->webhook_url));
   }
 
   cJSON *tt = act_obj ? cJSON_GetObjectItem(act_obj, "target_temp_c")
@@ -1209,6 +1381,18 @@ static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
 
   cJSON *txid = act_obj ? cJSON_GetObjectItem(act_obj, "can_id")
                         : cJSON_GetObjectItem(r, "tx_can_id");
+  if (!txid && act_obj) {
+    txid = cJSON_GetObjectItem(act_obj, "action_can_id");
+  }
+  if (!txid && r) {
+    txid = cJSON_GetObjectItem(r, "action_can_id");
+  }
+  if (!txid && act_obj) {
+    txid = cJSON_GetObjectItem(act_obj, "state_can_id");
+  }
+  if (!txid && r) {
+    txid = cJSON_GetObjectItem(r, "state_can_id");
+  }
   cJSON *act_bus = act_obj ? cJSON_GetObjectItem(act_obj, "bus") : NULL;
   cJSON *act_delay = act_obj ? cJSON_GetObjectItem(act_obj, "delay_ms") : NULL;
   cJSON *steps_arr = act_obj ? cJSON_GetObjectItem(act_obj, "steps") : NULL;
@@ -1216,12 +1400,27 @@ static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
                        : cJSON_GetObjectItem(r, "tx_payload");
 
   uint32_t can_id_val = 0;
+  uint32_t state_can_id_val = 0;
   bool is_ext = false;
   uint8_t target_bus = 0;
   uint32_t delay_val = 10;
 
-  if (txid && txid->valuestring && strlen(txid->valuestring) > 0) {
-    can_id_val = strtoul(txid->valuestring, NULL, 0);
+  cJSON *state_txid = act_obj ? cJSON_GetObjectItem(act_obj, "state_can_id")
+                              : cJSON_GetObjectItem(r, "state_can_id");
+  if (state_txid) {
+    if (state_txid->valuestring && strlen(state_txid->valuestring) > 0) {
+      state_can_id_val = strtoul(state_txid->valuestring, NULL, 0);
+    } else if (cJSON_IsNumber(state_txid)) {
+      state_can_id_val = (uint32_t)state_txid->valuedouble;
+    }
+  }
+
+  if (txid) {
+    if (txid->valuestring && strlen(txid->valuestring) > 0) {
+      can_id_val = strtoul(txid->valuestring, NULL, 0);
+    } else if (cJSON_IsNumber(txid)) {
+      can_id_val = (uint32_t)txid->valuedouble;
+    }
     is_ext = (can_id_val > 0x7FF);
   }
   if (act_bus && cJSON_IsNumber(act_bus))
@@ -1278,6 +1477,7 @@ static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
         for (int r_i = 0; r_i < r_cnt && s_idx < total_steps; r_i++) {
           can_do_sequence_step_t *step = &act->steps[s_idx++];
           step->tx_can_id = can_id_val;
+          step->state_can_id = state_can_id_val;
           step->is_ext = is_ext;
           step->target_bus = target_bus;
           step->delay_ms = step_delay;
@@ -1285,7 +1485,8 @@ static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
           step->roll_byte_idx = parsed_step.roll_byte_idx;
           step->roll_mode = parsed_step.roll_mode;
           step->roll_counter = 0;
-          memcpy(step->tx_data, parsed_step.tx_data, parsed_step.tx_len);
+          memcpy(step->tx_data, parsed_step.tx_data, 8);
+          memcpy(step->tx_mask, parsed_step.tx_mask, 8);
         }
       }
       act->step_count = s_idx;
@@ -1296,6 +1497,7 @@ static void can_do_parse_single_action(cJSON *r, cJSON *act_obj,
     if (act->steps) {
       can_do_sequence_step_t *step = &act->steps[0];
       step->tx_can_id = can_id_val;
+      step->state_can_id = state_can_id_val;
       step->is_ext = is_ext;
       step->target_bus = target_bus;
       step->delay_ms = delay_val;
@@ -1679,6 +1881,19 @@ void can_do_get_stats_json(cJSON *root) {
     cJSON_AddItemToArray(can_do_stats, st);
   }
   cJSON_AddItemToObject(root, "can_do_stats", can_do_stats);
+  if (g_can_do_last_trigger[0] != '\0') {
+    cJSON_AddStringToObject(root, "last_trigger", g_can_do_last_trigger);
+    cJSON_AddNumberToObject(
+        root, "last_trigger_age_ms",
+        (esp_timer_get_time() - g_can_do_last_trigger_us) / 1000);
+    cJSON *triggers_obj = cJSON_CreateObject();
+    if (triggers_obj) {
+      cJSON *trig_info = cJSON_CreateObject();
+      cJSON_AddStringToObject(trig_info, "event_type", "triggered");
+      cJSON_AddItemToObject(triggers_obj, g_can_do_last_trigger, trig_info);
+      cJSON_AddItemToObject(root, "triggers", triggers_obj);
+    }
+  }
   cJSON_AddNumberToObject(root, "capture_mode",
                           (int)g_can_do_rules.capture_mode);
   cJSON_AddBoolToObject(root, "capture_active", can_do_is_capture_active());

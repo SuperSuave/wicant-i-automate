@@ -23,6 +23,7 @@
 #include "can_do.h"
 #include "comm_server.h"
 #include "config_server.h"
+#include "precondition.h"
 #include "driver/gpio.h"
 #include "driver/twai.h"
 #include "esp_event.h"
@@ -76,8 +77,8 @@ static esp_mqtt_client_handle_t client = NULL;
 static char *device_id;
 static char mqtt_sub_topic[128];
 static char mqtt_status_topic[128];
-static char mqtt_cmd_topic[24];
-static char mqtt_rsp_topic[24];
+static char mqtt_cmd_topic[48];
+static char mqtt_rsp_topic[48];
 static uint8_t mqtt_led = 0;
 
 static QueueHandle_t *xmqtt_tx_queue;
@@ -99,6 +100,12 @@ typedef struct {
 static CANFilter *mqtt_canflt_values = NULL;
 static uint32_t mqtt_canflt_size = 0;
 
+static void ha_discovery_task(void *pvParameters) {
+  vTaskDelay(pdMS_TO_TICKS(500));
+  can_do_publish_ha_discovery();
+  vTaskDelete(NULL);
+}
+
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
                                int32_t event_id, void *event_data) {
   ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%ld", base,
@@ -114,20 +121,19 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
     }
 
     esp_mqtt_client_subscribe(client, mqtt_cmd_topic, 0);
-    esp_mqtt_client_subscribe(client, "wican/can_do/trigger", 0);
+    esp_mqtt_client_subscribe(client, "can_do/trigger", 0);
     if (device_id) {
       char can_do_dev_sub[64];
       snprintf(can_do_dev_sub, sizeof(can_do_dev_sub),
-               "wican/%s/can_do/trigger", device_id);
+               "can_do/%s/trigger", device_id);
       esp_mqtt_client_subscribe(client, can_do_dev_sub, 0);
     }
     gpio_set_level(mqtt_led, LED_ON);
     esp_mqtt_client_publish(client, mqtt_status_topic,
                             "{\"status\": \"online\"}", 0, 0, 1);
 
-    can_do_publish_ha_discovery();
-
     xEventGroupSetBits(s_mqtt_event_group, MQTT_CONNECTED_BIT);
+    xTaskCreate(ha_discovery_task, "ha_disc_task", 1024 * 4, NULL, 5, NULL);
     break;
   case MQTT_EVENT_DISCONNECTED:
     ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
@@ -267,7 +273,7 @@ static void mqtt_parse_data(void *handler_args, esp_event_base_t base,
     }
   } else if (strncmp(event->topic, mqtt_cmd_topic, strlen(mqtt_cmd_topic)) ==
              0) {
-    static char cmd_response[32] = {0};
+    static char cmd_response[64] = {0};
 
     root = cJSON_Parse(event->data);
 
@@ -278,37 +284,69 @@ static void mqtt_parse_data(void *handler_args, esp_event_base_t base,
 
     cJSON *cmd = cJSON_GetObjectItem(root, "cmd");
 
-    if (cmd == NULL || !cJSON_IsString(cmd)) {
-      ESP_LOGE(TAG, "Missing or invalid 'cmd' value in JSON");
-      goto end;
-    }
-
-    if (strcmp(cmd->valuestring, "reboot") == 0) {
-      ESP_LOGI(TAG, "Reboot command received");
-      sprintf(cmd_response, "{\"rsp\": \"ok\"}");
-      mqtt_publish(mqtt_rsp_topic, cmd_response, strlen(cmd_response), 0, 0);
-      // Perform the reboot operation here
-      vTaskDelay(pdMS_TO_TICKS(2000));
-      esp_restart();
-    } else if (strcmp(cmd->valuestring, "get_vbatt") == 0) {
-      float vbatt = 0;
-      sleep_mode_get_voltage(&vbatt);
-      sprintf(cmd_response, "{\"battery_voltage\": %f}", vbatt);
-      mqtt_publish(mqtt_rsp_topic, cmd_response, strlen(cmd_response), 0, 0);
-    } else if (strcmp(cmd->valuestring, "get_autopid_data") == 0) {
-      autopid_request_data();
-    } else if (strcmp(cmd->valuestring, "can_do") == 0 ||
-               strcmp(cmd->valuestring, "can_do_trigger") == 0) {
-      cJSON *action = cJSON_GetObjectItem(root, "action");
-      const char *act_val =
-          (action && action->valuestring) ? action->valuestring : "";
-      can_do_process_mqtt_trigger(event->topic, act_val);
-      sprintf(cmd_response, "{\"rsp\": \"ok\"}");
-      mqtt_publish(mqtt_rsp_topic, cmd_response, strlen(cmd_response), 0, 0);
+    if (cmd && cJSON_IsString(cmd)) {
+      if (strcmp(cmd->valuestring, "reboot") == 0) {
+        ESP_LOGI(TAG, "Reboot command received");
+        sprintf(cmd_response, "{\"rsp\": \"ok\"}");
+        mqtt_publish(mqtt_rsp_topic, cmd_response, strlen(cmd_response), 0, 0);
+        // Perform the reboot operation here
+        vTaskDelay(pdMS_TO_TICKS(2000));
+        esp_restart();
+      } else if (strcmp(cmd->valuestring, "get_vbatt") == 0) {
+        float vbatt = 0;
+        sleep_mode_get_voltage(&vbatt);
+        sprintf(cmd_response, "{\"battery_voltage\": %f}", vbatt);
+        mqtt_publish(mqtt_rsp_topic, cmd_response, strlen(cmd_response), 0, 0);
+      } else if (strcmp(cmd->valuestring, "get_autopid_data") == 0) {
+        autopid_request_data();
+      } else if (strcmp(cmd->valuestring, "precondition_toggle") == 0 ||
+                 strcmp(cmd->valuestring, "precondition") == 0) {
+        ESP_LOGI(TAG, "MQTT Precondition toggle received");
+        precondition_toggle_request();
+        sprintf(cmd_response, "{\"rsp\": \"ok\", \"cmd\": \"precondition_toggle\"}");
+        mqtt_publish(mqtt_rsp_topic, cmd_response, strlen(cmd_response), 0, 0);
+      } else if (strcmp(cmd->valuestring, "can_do_action") == 0 ||
+                 strcmp(cmd->valuestring, "test_can_do_action") == 0 ||
+                 strcmp(cmd->valuestring, "action") == 0) {
+        cJSON *action_obj = cJSON_GetObjectItem(root, "action");
+        if (action_obj) {
+          char *act_json = cJSON_PrintUnformatted(action_obj);
+          if (act_json) {
+            can_do_test_single_action_json(act_json);
+            free(act_json);
+          }
+        } else {
+          can_do_test_single_action_json(event->data);
+        }
+        sprintf(cmd_response, "{\"rsp\": \"ok\", \"cmd\": \"action\"}");
+        mqtt_publish(mqtt_rsp_topic, cmd_response, strlen(cmd_response), 0, 0);
+      } else if (strcmp(cmd->valuestring, "can_do") == 0 ||
+                 strcmp(cmd->valuestring, "can_do_trigger") == 0) {
+        cJSON *action = cJSON_GetObjectItem(root, "action");
+        const char *act_val =
+            (action && action->valuestring) ? action->valuestring : "";
+        can_do_process_mqtt_trigger(event->topic, act_val);
+        sprintf(cmd_response, "{\"rsp\": \"ok\"}");
+        mqtt_publish(mqtt_rsp_topic, cmd_response, strlen(cmd_response), 0, 0);
+      } else {
+        can_do_process_mqtt_trigger(event->topic, cmd->valuestring);
+        ESP_LOGI(TAG, "Command received: %s (checked for CAN Do triggers)",
+                 cmd->valuestring);
+      }
     } else {
-      can_do_process_mqtt_trigger(event->topic, cmd->valuestring);
-      ESP_LOGI(TAG, "Command received: %s (checked for CAN Do triggers)",
-               cmd->valuestring);
+      // Check if root payload contains direct CAN Do action fields
+      if (cJSON_GetObjectItem(root, "action_can_id") ||
+          cJSON_GetObjectItem(root, "can_id") ||
+          cJSON_GetObjectItem(root, "state_can_id") ||
+          cJSON_GetObjectItem(root, "actions") ||
+          cJSON_GetObjectItem(root, "steps")) {
+        ESP_LOGI(TAG, "Direct CAN Do action received via MQTT");
+        can_do_test_single_action_json(event->data);
+        sprintf(cmd_response, "{\"rsp\": \"ok\"}");
+        mqtt_publish(mqtt_rsp_topic, cmd_response, strlen(cmd_response), 0, 0);
+      } else {
+        ESP_LOGE(TAG, "Missing or invalid 'cmd' / action payload in JSON");
+      }
     }
   } else if (event->topic != NULL && event->topic_len > 0) {
     char topic_buf[128] = {0};
@@ -318,7 +356,8 @@ static void mqtt_parse_data(void *handler_args, esp_event_base_t base,
     memcpy(topic_buf, event->topic, len);
     topic_buf[len] = '\0';
 
-    if (strstr(topic_buf, "can_do/trigger") != NULL) {
+    if (strstr(topic_buf, "can_do/trigger") != NULL ||
+        strstr(topic_buf, "can_do") != NULL) {
       char payload_buf[128] = {0};
       if (event->data_len > 0) {
         int plen = (event->data_len < (sizeof(payload_buf) - 1))
@@ -370,7 +409,7 @@ static void mqtt_task(void *pvParameters) {
 
   // sprintf(mqtt_topic, "wican/%s/can/rx", device_id);
   strcpy(mqtt_topic, config_server_get_mqtt_rx_topic());
-  sprintf(mqtt_elm327_topic, "wican/%s/elm327", device_id);
+  sprintf(mqtt_elm327_topic, "can_do/%s/elm327", device_id);
 
   while (!wifi_network_is_connected()) {
     vTaskDelay(pdMS_TO_TICKS(1000));
@@ -478,6 +517,9 @@ static void mqtt_task(void *pvParameters) {
           strcat((char *)json_buffer, "]}");
 
           mqtt_publish(mqtt_topic, json_buffer, 0, 0, 0);
+        } else {
+          // Discard frame from queue so task does not spin in an infinite tight loop
+          xQueueReceive(*xmqtt_tx_queue, (void *)&tx_frame, 0);
         }
       } else {
         xQueueReceive(*xmqtt_tx_queue, (void *)&tx_frame, 0);
@@ -662,8 +704,8 @@ void mqtt_init(char *id, uint8_t connected_led, QueueHandle_t *xtx_queue) {
   strcpy(mqtt_sub_topic, config_server_get_mqtt_tx_topic());
 
   strcpy(mqtt_status_topic, config_server_get_mqtt_status_topic());
-  sprintf(mqtt_cmd_topic, "wican/%s/cmd", device_id);
-  sprintf(mqtt_rsp_topic, "wican/%s/cmd", device_id);
+  sprintf(mqtt_cmd_topic, "can_do/%s/cmd", device_id);
+  sprintf(mqtt_rsp_topic, "can_do/%s/rsp", device_id);
   ESP_LOGI(TAG, "device_id: %s, mqtt_cfg.uri: %s", device_id,
            mqtt_cfg.broker.address.uri);
   mqtt_elm327_log = config_server_mqtt_elm327_log();

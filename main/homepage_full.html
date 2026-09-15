@@ -1437,6 +1437,7 @@
         .ha-add-element-dialog {
             width: 100%;
             max-width: 640px;
+            height: 85vh;
             max-height: 85vh;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -2360,6 +2361,184 @@
                 box-shadow: 0 6px 24px rgba(2, 132, 199, 0.7), 0 0 0 5px rgba(2, 132, 199, 0.3) !important;
             }
         }
+.can-do-opt-pill-btn {
+    background: var(--md-sys-color-surface-container);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.can-do-opt-pill-btn:hover {
+    background: var(--md-sys-color-surface-container-high);
+}
+
+.can-do-opt-pill-btn.active {
+    background: var(--ha-primary-color) !important;
+    color: white !important;
+    border-color: var(--ha-primary-color) !important;
+    font-weight: 600;
+}
+
+.can-do-options-grid {
+    display: grid;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.can-do-options-grid.grid-few {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+.can-do-options-grid.grid-many {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+dialog.ha-native-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+.ha-add-element-dialog {
+    max-width: 600px;
+    width: 90vw;
+    margin: 0 auto;
+    position: relative;
+    height: 85vh;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Trigger Mode & Combine Bar --- */
+.can-do-trig-combine-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 0.45rem 0.75rem;
+    margin-bottom: 0.75rem;
+    background: var(--m3-tonal-when-bg, #fff1e5);
+    border: 1px solid var(--m3-tonal-when-border, #fed7aa);
+    border-radius: var(--m3-shape-sm, 6px);
+}
+
+[data-theme="dark"] .can-do-trig-combine-wrap {
+    background: rgba(194, 65, 12, 0.12);
+    border-color: rgba(251, 146, 60, 0.25);
+}
+
+.can-do-trig-mode-group {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.can-do-trig-mode-btn {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--m3-shape-xs, 4px);
+    border: 1px solid var(--border-color);
+    background: var(--md-sys-color-surface-container);
+    color: var(--text-color);
+    transition: var(--transition, all 0.2s ease);
+}
+
+.can-do-trig-mode-btn:hover {
+    background: var(--md-sys-color-surface-container-high);
+}
+
+.can-do-trig-mode-btn.active {
+    background: var(--ha-primary-color, #0284c7) !important;
+    border-color: var(--ha-primary-color, #0284c7) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.3);
+}
+
+/* --- Connector Dividers Between Automation Items --- */
+.can-do-connector-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.35rem 0;
+    user-select: none;
+}
+
+.can-do-connector-line {
+    height: 1.5px;
+    flex: 1;
+    background: var(--border-color);
+}
+.can-do-connector-line.trig { background: var(--m3-tonal-when-border, #fed7aa); }
+.can-do-connector-line.cond { background: var(--m3-tonal-cond-border, #bfdbfe); }
+.can-do-connector-line.act { background: var(--m3-tonal-act-border, #a7f3d0); }
+.can-do-connector-line.choose { background: var(--m3-tonal-choose-border, #99f6e4); }
+.can-do-connector-line.group-and { background: var(--m3-tonal-cond-border, #bfdbfe); }
+.can-do-connector-line.group-or { background: #cbd5e1; }
+
+.can-do-connector-pill {
+    padding: 2px 12px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    border-radius: var(--m3-shape-full, 9999px);
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.can-do-connector-pill.trig {
+    background: var(--m3-tonal-when-bg, #fff1e5);
+    border: 1px solid var(--m3-tonal-when-border, #fed7aa);
+    color: var(--m3-tonal-when-color, #c2410c);
+}
+
+.can-do-connector-pill.trig.active-and {
+    background: #e0f2fe;
+    border: 1px solid #7dd3fc;
+    color: #0369a1;
+}
+
+[data-theme="dark"] .can-do-connector-pill.trig {
+    background: rgba(194, 65, 12, 0.2);
+    border-color: rgba(251, 146, 60, 0.4);
+    color: #fdba74;
+}
+
+[data-theme="dark"] .can-do-connector-pill.trig.active-and {
+    background: rgba(2, 132, 199, 0.2);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #7dd3fc;
+}
+
+.can-do-connector-pill.cond {
+    background: var(--m3-tonal-cond-bg, #e8f2fe);
+    border: 1px solid var(--m3-tonal-cond-border, #bfdbfe);
+    color: var(--m3-tonal-cond-color, #0369a1);
+}
+
+.can-do-connector-pill.act {
+    background: var(--m3-tonal-act-bg, #e6f6f2);
+    border: 1px solid var(--m3-tonal-act-border, #a7f3d0);
+    color: var(--m3-tonal-act-color, #047857);
+}
+
+.can-do-connector-pill.choose {
+    background: var(--m3-tonal-choose-bg, #e0f7fa);
+    border: 1px solid var(--m3-tonal-choose-border, #99f6e4);
+    color: var(--m3-tonal-choose-color, #0f766e);
+}
+
+
 </style>
 
 </head>
@@ -2367,21 +2546,10 @@
 <body onload="Load();">
 
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-        <symbol id="icon-egmpcan-do" viewBox="0 0 48 48">
-            <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-                d="M 3 27 L 5 24 L 13 22 L 20 12 L 32 12 L 37 13.5 L 36 15 L 41 23 L 45 24 L 45 28 L 3 28 Z" />
-            <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
-                d="M 14.5 21.5 L 20.5 14 H 31.5 L 35 21.5 Z" />
-            <line x1="26" y1="14" x2="26" y2="21.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-            <circle cx="12" cy="28" r="3.6" fill="none" stroke="currentColor" stroke-width="2.2" />
-            <circle cx="12" cy="28" r="1.2" fill="currentColor" />
-            <circle cx="36" cy="28" r="3.6" fill="none" stroke="currentColor" stroke-width="2.2" />
-            <circle cx="36" cy="28" r="1.2" fill="currentColor" />
-            <rect x="4" y="24.5" width="2" height="1.5" fill="currentColor" />
-            <polyline fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                points="3,39 9,39 9,35 14,35 14,43 19,43 19,39 27,39 27,34 32,34 32,39 38,39" />
-            <circle cx="42" cy="39" r="2.2" fill="currentColor" />
-        </symbol>
+        <symbol id="icon-can-do" viewBox="200.131 608.994 1637.999 780.1906">
+  <path fill="#fff" fill-rule="evenodd" d="M1645.09 734.16c-7.68 6.147-14.19 11.434-14.46 11.75-.28.316-4.33 3.917-9 8.002-10.74 9.382-49.85 48.515-61.04 61.073-4.65 5.225-8.69 9.725-8.97 10s-2.97 3.425-5.99 7-5.72 6.725-6.01 7-2.53 2.975-4.99 6-4.71 5.725-5 6-2.55 2.975-5.01 6c-2.47 3.025-5.05 6.098-5.74 6.828-.7.731-4.29 5.231-7.98 10-3.69 4.77-6.97 8.897-7.29 9.172-1.1.966-32.79 43.642-41.95 56.5-5.09 7.15-18.37 26.725-29.5 43.5-34.6 52.155-41.86 63.715-66.83 106.495-9.82 16.82-24.61 42.92-38.46 67.85-4.44 7.98-5.71 9.59-6.69 8.5-.67-.74-22.08-36.22-47.58-78.85-25.5-42.62-48.16-80.2-50.37-83.49-11.47-17.165-31.74-31.66-53.31-38.126-11.17-3.346-29.86-3.855-40.29-1.096-27.01 7.144-49.16 29.28-59.76 59.722-3.01 8.63-4.76 15.99-3.8 15.99.29 0 1.71-2.36 3.16-5.25 7.42-14.78 22.66-27.37 38.38-31.69 22.97-6.314 48.12 2.55 63.53 22.4 2.54 3.27 28.73 46.24 58.2 95.5 29.47 49.25 55.69 92.92 58.26 97.04 2.58 4.13 9.33 15.38 15.01 25.01 17.89 30.31 20.17 34 21.04 34 .47 0 4.11-5.97 8.08-13.25 3.98-7.29 12.71-23.15 19.41-35.25 6.7-12.11 13.53-24.48 15.19-27.51 1.65-3.02 4.27-7.75 5.82-10.5 1.54-2.75 6.71-11.97 11.48-20.5 14.1-25.2 17.08-30.51 25.82-46 3.57-6.32 8.15-14.42 10.18-18 5.7-10.04 16.33-28.82 23.36-41.25 3.49-6.18 8.83-15.52 11.86-20.75 3.02-5.22 6.62-11.52 8-14 12-21.48 58.1-99.311 68.72-115.995 2.62-4.125 8.52-13.575 13.09-21 31.19-50.597 71.07-109.347 105.57-155.531 9.55-12.784 10.74-14.469 10.17-14.469-.19 0-6.63 5.029-14.31 11.175" style="stroke-width:1"/>
+  <path fill-rule="evenodd" d="M1804.63 610.112c-18.22 2.086-37.2 5.255-47.25 7.89-20.24 5.307-29.53 8.296-45.03 14.5-18.38 7.355-60.33 28.983-61.55 31.733-.19.413-.77.75-1.3.75-.9 0-14.09 8.584-17.73 11.541-.9.73-6.37 4.801-12.14 9.048-5.78 4.247-10.73 7.992-11 8.322-.28.33-2.15 1.829-4.16 3.33-2.02 1.501-4.27 3.3-5 3.998-.74.699-3.8 3.293-6.81 5.765-21.97 18.053-70.28 66.55-87.66 87.996-1.56 1.925-3.52 4.175-4.37 5-.84.825-3.55 3.975-6.01 7-2.45 3.025-4.7 5.725-4.99 6s-2.55 2.975-5.01 6c-2.47 3.025-5.05 6.101-5.75 6.837-.7.735-2.5 2.985-4.01 5-1.5 2.014-3.3 4.264-4 5-.69.735-2.49 2.985-3.99 5-1.5 2.014-2.97 3.888-3.26 4.163s-2.08 2.525-3.98 5-3.71 4.725-4.02 5c-.32.275-1.66 2.075-2.98 4s-2.68 3.725-3.02 4c-1.25 1.015-19.79 25.997-31.17 42-6.45 9.075-12.1 16.95-12.56 17.5-.45.55-3.73 5.275-7.28 10.5-3.54 5.225-7.01 10.095-7.71 10.821-.69.727-1.26 1.708-1.26 2.179s-.58 1.452-1.29 2.179c-1.05 1.081-8.86 12.634-12.72 18.821-1.1 1.762-13.72 21.426-22.46 35.005-3.36 5.22-12.17 19.71-19.57 32.2-7.4 12.48-13.69 22.7-13.96 22.7-.43.01-25.39-41.39-30.08-49.87-.86-1.57-2.32-3.99-3.23-5.38s-2.51-4.019-3.56-5.841c-10.82-18.836-25.66-41.789-32.86-50.814-2.42-3.025-5.79-7.3-7.5-9.5-6.65-8.539-23.63-24.401-32.27-30.147-33.75-22.429-75.58-28.898-116-17.937-31.51 8.545-60.02 28.984-81.98 58.768-4.87 6.614-6.36 9.029-13.559 21.964-4.27 7.672-11.96 25.248-11.96 27.325 0 .775-.4 1.654-.88 1.953-.49.3-1.13 1.564-1.43 2.809-.55 2.26-1.9 7.15-3.81 13.77-2.36 8.16-5.38 23.04-6.79 33.49-2.7 19.9-3.09 31.01-3.09 87.89 0 58.38-.07 60.73-2.03 65.96-1.92 5.15-4.22 8.27-8.55 11.65-4.79 3.74-8.08 4-50.74 4h-41.67l-.51-277.495-105.95-.255c-58.27-.14-106.3.105-106.74.544-.44.438-.84 277.206-.84 277.206h-102.97V938.976l-107.25.254-107.25.255-.51 277.485-135.49.51v56.01h191l1-278.005 102.5-.518v279.023h213.99l.51-278.505h102l1 278.005s146.02-.31 149.25-1.25c2.34-.69 6.16-1.78 8.5-2.43 5.66-1.55 16.18-6.48 21.75-10.17 5.45-3.61 18.759-16.47 19.559-18.9.31-.96 1.12-2.31 1.8-3 1.74-1.78 7.25-13.34 9.18-19.26 4.05-12.47 4.42-19.57 4.44-84.8.01-37.58.43-65.7 1.05-70 4.35-30.47 8.1-44.4 17.12-63.6 9.6-20.456 26.55-40.116 42.35-49.147 8.68-4.961 14.56-7.332 26.5-10.688 7.65-2.15 32.38-2.13 40.21.033 5.16 1.424 7.57 2.345 15.79 6.032 10.3 4.618 30.75 23.325 39 35.675 2.39 3.575 4.61 6.725 4.92 7 1.38 1.196 3.1 5.158 2.6 5.972-.31.489-.03 1.215.62 1.613q1.17.7245.36-.585c-.54-.866-.42-1.068.34-.595.64.392 1.16 1.361 1.16 2.154s.34 1.445.75 1.449 1.25 1.017 1.86 2.247c1.77 3.55 98.39 164.14 99.32 165.08.47.46 3.3-3.59 6.31-9 13.85-24.93 28.65-51.02 38.46-67.84 24.97-42.78 32.23-54.34 66.83-106.495 11.13-16.775 24.41-36.35 29.5-43.5 9.16-12.858 40.85-55.534 41.95-56.5.32-.275 3.6-4.402 7.29-9.172 3.69-4.769 7.28-9.269 7.98-10 .69-.73 3.27-3.803 5.74-6.828 2.46-3.025 4.72-5.725 5.01-6s2.54-2.975 5-6 4.7-5.725 4.99-6 2.99-3.425 6.01-7 5.71-6.725 5.99-7 4.32-4.775 8.97-10c11.19-12.558 50.3-51.691 61.04-61.073 4.67-4.085 8.72-7.678 9-7.985.5-.563 25.27-20.392 27.94-22.373 2.1-1.555 1.12-.094-9.34 13.9-9.44 12.641-17.71 23.967-28.13 38.531-19.81 27.688-57.33 84.376-77.44 117-4.57 7.425-10.47 16.875-13.09 21-10.62 16.684-56.72 94.515-68.72 115.995-1.38 2.48-4.98 8.78-8 14-3.03 5.23-8.37 14.57-11.86 20.75-7.03 12.43-17.66 31.21-23.36 41.25-9.7 17.09-19.37 34.28-36 64-4.77 8.53-9.94 17.75-11.48 20.5-1.55 2.75-4.17 7.48-5.82 10.5-1.66 3.03-8.49 15.4-15.19 27.51-6.7 12.1-15.43 27.96-19.41 35.25-3.97 7.28-7.62 13.25-8.1 13.25-.76 0-4.94-6.82-26.34-43-2.76-4.68-7.13-11.88-9.7-16.01-2.57-4.12-28.78-47.79-58.25-97.04-29.47-49.26-55.66-92.23-58.2-95.5-5.98-7.7-13.29-13.68-22.02-18.03-29.81-14.845-63.84-2.98-80.34 28-3.99 7.5-3.97 8.45.1 4.59 1.79-1.7 6.01-4.42 9.39-6.05 11.16-5.38 24.3-3.58 34.24 4.72 3.48 2.9 11.12 13.39 11.12 15.26 0 .58.45 1.05 1 1.05s1 .49 1 1.08c0 .58 1.35 3.03 3 5.42 1.65 2.4 3 4.66 3 5.03s.85 1.86 1.88 3.32c1.04 1.46 2.8 4.28 3.91 6.27 4.25 7.6 4.72 8.4 5.21 8.88.27.28 1.15 1.63 1.95 3 .8 1.38 11.34 18.93 23.41 39 12.07 20.08 22.74 37.91 23.7 39.62s2.36 4.19 3.1 5.5c.73 1.31 1.56 2.61 1.84 2.88.27.28 1.06 1.52 1.75 2.75.69 1.24 1.81 3.27 2.5 4.5.69 1.24 1.47 2.48 1.75 2.75.27.28 1.15 1.63 1.95 3 .8 1.38 7.28 12.18 14.41 24 7.12 11.83 13.74 22.91 14.7 24.62s2.36 4.18 3.1 5.5c.73 1.31 1.56 2.61 1.84 2.89.27.27 1.06 1.51 1.75 2.75.69 1.23 1.81 3.26 2.5 4.5.69 1.23 1.47 2.47 1.75 2.75.27.27 1.15 1.62 1.95 3 .8 1.37 7.28 12.17 14.4 24 18.13 30.08 17.67 29.31 18.31 31.25.31.96.97 1.75 1.46 1.75.48 0 .88.48.88 1.06 0 .59 1.35 3.04 3 5.44 1.65 2.39 3 4.64 3 5 0 .35 1.35 2.6 3 5 1.65 2.39 3 4.66 3 5.02 0 .37.85 1.86 1.88 3.32 1.04 1.46 2.84 4.34 4 6.41 4.75 8.41 6.2 10.87 14.97 25.51 5.03 8.4 9.15 15.71 9.15 16.25 0 2.9 2.94.22 5.79-5.26 1.79-3.44 4.29-8.05 5.56-10.25 3.07-5.33 8.14-14.52 12.41-22.5 1.91-3.58 4.54-8.42 5.86-10.75 1.31-2.34 3.5-6.28 4.88-8.75l5-9 5-9 5-9c1.37-2.48 3.57-6.42 4.88-8.75 1.31-2.34 3.95-7.22 5.87-10.84 1.91-3.62 4.16-7.67 4.99-9s3.08-5.34 5.01-8.91c1.93-3.58 5.28-9.66 7.46-13.5 5.02-8.89 8.62-15.3 11.79-21l5-9 5-9.01 5-9 5-9 5-9c1.37-2.47 3.69-6.63 5.14-9.25 1.46-2.61 4-7.22 5.65-10.25 1.65-3.02 3.33-5.94 3.75-6.5.41-.55 1.92-3.13 3.35-5.75 1.44-2.61 3.78-6.88 5.21-9.5 1.44-2.61 2.95-5.19 3.36-5.75.41-.55 2.1-3.47 3.75-6.5 1.65-3.02 4.01-7.3 5.24-9.5 1.24-2.19 3.22-5.8 4.4-8 1.18-2.19 2.37-4.22 2.65-4.5.27-.27 1.47-2.3 2.65-4.5 3.19-5.92 5.7-10.38 9.21-16.29 1.73-2.91 3.14-5.45 3.14-5.65 0-.19 1.88-3.43 4.17-7.2 5.92-9.73 10.85-18.56 11.51-20.61.3-.96.95-1.75 1.44-1.75.48 0 .88-.43.88-.97s2.7-5.5 6-11.03c3.3-5.52 6-10.48 6-11.02s.45-.98 1-.98 1-.43 1-.97 2.77-5.6 6.15-11.25c5.77-9.65 7.07-11.87 11.69-20.025 1.02-1.788 6.35-10.675 11.85-19.75s14.23-23.475 19.39-32c5.17-8.525 9.73-15.65 10.16-15.833.42-.184.76-.753.76-1.266 0-.916 2.06-4.28 12.66-20.641 2.94-4.532 5.34-8.489 5.34-8.792 0-.304.45-1.096 1-1.76.76-.92 16.07-24.27 26.03-39.708.53-.825 3.28-5.08 6.11-9.456 2.82-4.376 5.71-8.541 6.43-9.256.71-.715 1.58-2.197 1.93-3.294s1.02-1.994 1.5-1.994c.47 0 1.15-.897 1.5-1.994s1.17-2.559 1.83-3.25 4.1-5.531 7.64-10.756c3.55-5.225 6.84-9.95 7.3-10.5.47-.55 3.5-4.825 6.73-9.5s6.25-8.95 6.7-9.5 4.18-5.725 8.28-11.5 7.72-10.725 8.04-11 1.66-2.075 2.98-4 2.67-3.725 3-4 1.68-2.075 3-4 2.67-3.725 2.99-4c.33-.275 3.5-4.325 7.05-9s7.03-9.101 7.72-9.837c.7-.735 2.5-2.985 4-5 1.5-2.014 2.97-3.888 3.26-4.163s2.08-2.525 3.98-5 3.69-4.725 3.99-5c.29-.275 2.55-2.975 5-6 2.46-3.025 5.16-6.175 6.01-7 .84-.825 3.55-3.975 6.01-7s5.6-6.632 6.98-8.015 5.87-6.333 9.98-11c9.74-11.053 43.43-44.734 53.02-53.017 4.13-3.557 8.85-7.703 10.5-9.213l3.01-2.746-13 .13c-7.15.071-16.38.516-20.5.988" style="stroke-width:1;fill:#0284c7"/>
++</symbol>
         <symbol id="icon-dashboard" viewBox="0 0 24 24">
             <path fill="currentColor"
                 d="M19 5v2h-4V5h4m0 6v8h-4v-8h4m-10-6v8H5V5h4m0 12v2H5v-2h4m10-14h-4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m0 6h-4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2M9 3H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m0 12H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2Z" />
@@ -2525,7 +2693,7 @@
         </button>
         <button class="tablinks" onclick="openTab(event, 'automate')">
             <svg class="icon">
-                <use href="#icon-egmpcan-do" />
+                <use href="#icon-can-do" />
             </svg> <b>CAN Do</b>
         </button>
         <button class="tablinks" onclick="openTab(event, 'autopid_tab')">
@@ -2630,7 +2798,7 @@
         <div id="automate" class="tabcontent">
             <div class="section-title can-do-header-title">
                 <svg class="can-do-header-icon">
-                    <use href="#icon-egmpcan-do" />
+                    <use href="#icon-can-do" />
                 </svg>
                 <span>CAN Do Automations</span>
             </div>
@@ -2675,9 +2843,15 @@
                     </div>
                 </div>
                 <div class="settings-row">
-                    <div class="settings-label"><span class="settings-title">WebHook URL</span></div>
+                    <div class="settings-label"><span class="settings-title">Primary WebHook URL</span></div>
                     <div class="settings-control"><input type="text" id="webhook_url"
                             placeholder="http://homeassistant.local:8123/..."
+                            oninput="enableAutoStoreButton();submit_enable();"></div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label"><span class="settings-title">Fallback WebHook URL</span></div>
+                    <div class="settings-control"><input type="text" id="webhook_url_fallback"
+                            placeholder="https://my-nabucasa-url.ui.nabu.casa/..."
                             oninput="enableAutoStoreButton();submit_enable();"></div>
                 </div>
                 <div class="settings-row">
@@ -2693,6 +2867,9 @@
                             <option value="changed">Changed Values Only</option>
                         </select>
                     </div>
+                </div>
+                <div class="settings-row" style="justify-content: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" id="btn_save_webhook" onclick="saveWebhookSettings(this)" class="dash-action-btn" style="padding: 6px 18px; font-size: 0.85rem; font-weight: 600;">Save Webhook Settings</button>
                 </div>
             </div>
 
@@ -2751,6 +2928,9 @@
                         </label>
                     </div>
                 </div>
+                <div class="settings-row" style="justify-content: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" onclick="postConfig(this)" class="dash-action-btn" style="padding: 6px 18px; font-size: 0.85rem; font-weight: 600;">Save Destination Settings</button>
+                </div>
             </div>
 
             <div id="automate_table">
@@ -2760,8 +2940,7 @@
                 <button onclick="addRowAutoTable()" class="dash-outline-btn"><svg class="icon">
                         <use href="#icon-plus" />
                     </svg> New Custom PID</button>
-                <button id="custom_pid_store" onclick="storeAutoTableData()" class="dash-action-btn store" disabled>Save
-                    Configuration</button>
+                <button id="custom_pid_store" onclick="storeAutoTableData()" class="dash-action-btn store" disabled>Save Custom PIDs</button>
             </div>
         </div>
 
@@ -2802,7 +2981,7 @@
                 <div class="settings-row">
                     <div class="settings-label"><span class="settings-title">Wireless Mode</span></div>
                     <div class="settings-control">
-                        <select id="wifi_mode">
+                        <select id="wifi_mode" onchange="submit_enable();">
                             <option value="AP">Access Point Only</option>
                             <option value="APStation">AP + Station</option>
                         </select>
@@ -2811,14 +2990,16 @@
                 <div class="settings-row">
                     <div class="settings-label"><span class="settings-title">AP Channel</span></div>
                     <div class="settings-control">
-                        <select id="ap_ch_value">
-                            <option value="6">6</option>
+                        <select id="ap_ch_value" onchange="submit_enable();">
+                            <option value="1">1</option>
+                            <option value="6" selected>6</option>
+                            <option value="11">11</option>
                         </select>
                     </div>
                 </div>
                 <div class="settings-row">
                     <div class="settings-label"><span class="settings-title">AP Password</span></div>
-                    <div class="settings-control"><input type="text" id="ap_pass_value" value="Testpass"></div>
+                    <div class="settings-control"><input type="text" id="ap_pass_value" value="Testpass" oninput="submit_enable();"></div>
                 </div>
                 <div class="settings-row">
                     <div class="settings-label">
@@ -2831,6 +3012,9 @@
                             <span class="ha-slider"></span>
                         </label>
                     </div>
+                </div>
+                <div class="settings-row" style="justify-content: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" onclick="postConfig(this)" class="dash-action-btn" style="padding: 6px 18px; font-size: 0.85rem; font-weight: 600;">Save Wi-Fi Settings</button>
                 </div>
             </div>
 
@@ -2855,6 +3039,73 @@
                         </label>
                     </div>
                 </div>
+                <div id="mqtt_en_div">
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">MQTT Server URL</span></div>
+                        <div class="settings-control"><input type="text" id="mqtt_url" placeholder="192.168.1.100" oninput="submit_enable();"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">Port</span></div>
+                        <div class="settings-control"><input type="number" id="mqtt_port" value="1883" oninput="submit_enable();"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">Username</span></div>
+                        <div class="settings-control"><input type="text" id="mqtt_user" placeholder="Optional" oninput="submit_enable();"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">Password</span></div>
+                        <div class="settings-control"><input type="password" id="mqtt_pass" placeholder="Optional" oninput="submit_enable();"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">Keep Alive (s)</span></div>
+                        <div class="settings-control"><input type="number" id="keep_alive" value="60" oninput="submit_enable();"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">Enable Transmit (TX) Topic</span></div>
+                        <div class="settings-control">
+                            <label class="ha-switch">
+                                <input type="checkbox" id="mqtt_tx_en_checkbox" onchange="txCheckBoxChanged(); submit_enable();">
+                                <span class="ha-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">TX Topic</span></div>
+                        <div class="settings-control"><input type="text" id="mqtt_tx_topic" placeholder="wican/can/tx" oninput="submit_enable();"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">Enable Receive (RX) Topic</span></div>
+                        <div class="settings-control">
+                            <label class="ha-switch">
+                                <input type="checkbox" id="mqtt_rx_en_checkbox" onchange="rxCheckBoxChanged(); submit_enable();">
+                                <span class="ha-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">RX Topic</span></div>
+                        <div class="settings-control"><input type="text" id="mqtt_rx_topic" placeholder="wican/can/rx" oninput="submit_enable();"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">Status Topic</span></div>
+                        <div class="settings-control"><input type="text" id="mqtt_status_topic" placeholder="wican/status" oninput="submit_enable();"></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <span class="settings-title">ELM327 Log</span>
+                            <span class="settings-desc" style="cursor: pointer; text-decoration: underline;" onclick="alert_elm327();">What is this?</span>
+                        </div>
+                        <div class="settings-control">
+                            <select id="mqtt_elm327_log" onchange="submit_enable();">
+                                <option value="disable">Disable</option>
+                                <option value="enable">Enable</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-row" style="justify-content: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" onclick="postConfig(this)" class="dash-action-btn" style="padding: 6px 18px; font-size: 0.85rem; font-weight: 600;">Save MQTT Settings</button>
+                </div>
             </div>
 
             <div class="section-title">Bluetooth Low Energy (BLE)</div>
@@ -2871,7 +3122,10 @@
                 <div class="settings-row">
                     <div class="settings-label"><span class="settings-title">BLE Passkey</span></div>
                     <div class="settings-control"><input type="number" id="ble_pass_value" value="000000" min="0"
-                            max="999999"></div>
+                            max="999999" oninput="submit_enable();"></div>
+                </div>
+                <div class="settings-row" style="justify-content: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" onclick="postConfig(this)" class="dash-action-btn" style="padding: 6px 18px; font-size: 0.85rem; font-weight: 600;">Save BLE Settings</button>
                 </div>
             </div>
         </div>
@@ -2900,6 +3154,18 @@
                     </div>
                 </div>
                 <div class="settings-row">
+                    <div class="settings-label"><span class="settings-title">Protocol</span></div>
+                    <div class="settings-control">
+                        <select id="protocol" onchange="updatePortFromProtocol(); submit_enable();">
+                            <option value="realdash66">realdash66</option>
+                            <option value="slcan">slcan</option>
+                            <option value="savvycan">SavvyCAN/Lens</option>
+                            <option value="elm327">elm327</option>
+                            <option value="auto_pid">AutoPID</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-row">
                     <div class="settings-label"><span class="settings-title">Port Type</span></div>
                     <div class="settings-control">
                         <select id="port_type">
@@ -2911,6 +3177,9 @@
                 <div class="settings-row">
                     <div class="settings-label"><span class="settings-title">Network Port</span></div>
                     <div class="settings-control"><input type="number" id="tcp_port_value" value="3333"></div>
+                </div>
+                <div class="settings-row" style="justify-content: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" onclick="postConfig(this)" class="dash-action-btn" style="padding: 6px 18px; font-size: 0.85rem; font-weight: 600;">Save CAN Settings</button>
                 </div>
             </div>
 
@@ -2988,6 +3257,9 @@
                             oninput="document.getElementById('sleep_time_value').textContent = this.value; submit_enable();">
                     </div>
                 </div>
+                <div class="settings-row" style="justify-content: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" onclick="postConfig(this)" class="dash-action-btn" style="padding: 6px 18px; font-size: 0.85rem; font-weight: 600;">Save Power Settings</button>
+                </div>
             </div>
 
             <div class="section-title">Configuration Backup &amp; Restore</div>
@@ -3010,7 +3282,7 @@
 
             <div class="section-title">Firmware &amp; OTA Update</div>
             <div class="settings-card">
-                <form id="ota_form" method="POST" action="/update" enctype="multipart/form-data">
+                <form id="ota_form" method="POST" action="/upload/ota.bin" enctype="multipart/form-data">
                     <div class="settings-row">
                         <div class="settings-label">
                             <span class="settings-title">OTA Firmware File</span>
@@ -3033,49 +3305,32 @@
                 </div>
             </div>
         </div>
-
-        <input id="submit_button" type="button" onclick="postConfig()" value="Submit Changes" class="dash-action-btn"
-            disabled style="margin-top: 1rem;" />
     </div>
 
     <script>
 /* === js/network.js === */
-(function () {
-    function resolveSafeUrl(url) {
-        if (typeof url !== 'string') return url;
-        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('ws://') || url.startsWith('wss://') || url.startsWith('data:')) {
-            return url;
-        }
-        const clean = url.startsWith('/') ? url : ('/' + url);
-        if (window.location.protocol === 'blob:' || window.location.protocol === 'file:' || !window.location.host) {
-            const base = (window.location.origin && window.location.origin !== 'null' && window.location.origin.startsWith('http'))
-                ? window.location.origin
-                : 'https://wican.local';
-            return base + clean;
-        }
-        return clean;
+// --- NETWORK & URL HELPERS ---
+
+function resolveSafeUrl(url) {
+    if (typeof url !== 'string') return url;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('ws://') || url.startsWith('wss://') || url.startsWith('data:')) {
+        return url;
     }
+    return url.startsWith('/') ? url : ('/' + url);
+}
 
-    const origXhrOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-        const safe = resolveSafeUrl(url);
-        return origXhrOpen.call(this, method, safe, ...rest);
-    };
-
-    const origFetch = window.fetch;
-    window.fetch = function (input, init) {
-        if (typeof input === 'string') {
-            input = resolveSafeUrl(input);
-        }
-        return origFetch.call(this, input, init);
-    };
-})();
 
 /* === js/ui.js === */
 // --- GENERAL UI, TABS, THEMES & NOTIFICATIONS ---
 
 function escapeHtml(str) {
-    return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 function showNotification(message, color = "blue", duration = 4000) {
@@ -3107,34 +3362,44 @@ function submit_enable() {
 
     const bleEl = document.getElementById("ble_status");
     const apAutoDisable = document.getElementById("ap_auto_disable");
+    const warn = document.getElementById("ble_warning_div");
+    const mqttEl = document.getElementById("mqtt_en");
+    const mqttDiv = document.getElementById("mqtt_en_div");
 
     if (bleEl) {
         if (isAp) {
-            bleEl.disabled = false;
+            if (mqttEl && mqttEl.checked) {
+                bleEl.disabled = true;
+                bleEl.checked = false;
+            } else {
+                bleEl.disabled = false;
+            }
             if (apAutoDisable) apAutoDisable.disabled = true;
         } else {
             bleEl.disabled = true;
             bleEl.checked = false;
+            if (apAutoDisable) apAutoDisable.disabled = false;
         }
+    }
 
-        const warn = document.getElementById("ble_warning_div");
-        const mqttEl = document.getElementById("mqtt_en");
-        const mqttDiv = document.getElementById("mqtt_en_div");
-
-        if (!bleEl.checked) {
-            if (warn) warn.style.display = "block";
-            if (mqttEl) { mqttEl.checked = false; mqttEl.disabled = true; }
-            if (mqttDiv) mqttDiv.style.display = "none";
-        } else {
-            if (warn) warn.style.display = "none";
-            if (mqttEl) mqttEl.disabled = false;
+    if (bleEl && bleEl.checked) {
+        if (warn) warn.style.display = "block";
+        if (mqttEl) {
+            mqttEl.checked = false;
+            mqttEl.disabled = true;
+        }
+        if (mqttDiv) mqttDiv.style.display = "none";
+    } else {
+        if (warn) warn.style.display = "none";
+        if (mqttEl) {
+            mqttEl.disabled = false;
+            if (mqttDiv) {
+                mqttDiv.style.display = mqttEl.checked ? "block" : "none";
+            }
         }
     }
 
     if (typeof updateStaNetworksUI === "function") updateStaNetworksUI();
-
-    const submitBtn = document.getElementById("submit_button");
-    if (submitBtn) submitBtn.disabled = false;
 }
 
 function initAppTheme() {
@@ -3218,11 +3483,6 @@ function openTab(evt, tabName) {
         closeSidebarDrawer();
     }
 
-    const submitBtn = document.getElementById("submit_button");
-    if (submitBtn) {
-        const configTabs = ["autopid_tab", "connectivity_tab", "can_hardware_tab", "system_tab"];
-        submitBtn.style.display = configTabs.includes(tabName) ? "inline-block" : "none";
-    }
 
     const canDoFab = document.getElementById("can_do_anchored_save_fab");
     if (canDoFab) {
@@ -3261,15 +3521,25 @@ function closeSidebarDrawer() {
     if (backdrop) backdrop.classList.remove("active");
 }
 
+let _rtfNarrow = null;
+try {
+    if (typeof Intl !== "undefined" && Intl.RelativeTimeFormat) {
+        _rtfNarrow = new Intl.RelativeTimeFormat('en', { style: 'narrow', numeric: 'always' });
+    }
+} catch (e) { }
+
 function formatAge(ageMs) {
+    if (ageMs === undefined || ageMs === null || isNaN(ageMs)) return "0s";
     const seconds = Math.max(0, Math.round(ageMs / 1000));
     if (seconds < 60) return `${seconds}s`;
 
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m`;
+    if (minutes < 60) {
+        return _rtfNarrow ? _rtfNarrow.format(-minutes, 'minute').replace(' ago', '').replace(' ', '') : `${minutes}m`;
+    }
 
     const hours = Math.floor(minutes / 60);
-    return `${hours}h`;
+    return _rtfNarrow ? _rtfNarrow.format(-hours, 'hour').replace(' ago', '').replace(' ', '') : `${hours}h`;
 }
 
 function initActiveTab() {
@@ -3296,6 +3566,7 @@ function initActiveTab() {
         if (defaultBtn) defaultBtn.click();
     }
 }
+
 
 /* === js/wifi.js === */
 // --- MULTI-NETWORK STA CONFIG HELPERS ---
@@ -3598,7 +3869,7 @@ async function uploadCfg() {
     }
 }
 
-function postConfig() {
+function postConfig(btn) {
     var obj = {};
     const bools = ["webhook_en", "grouping", "autopid_polling", "ap_auto_disable", "mqtt_en", "ble_status", "sleep_status"];
     bools.forEach(id => {
@@ -3609,7 +3880,6 @@ function postConfig() {
     const getVal = (id, fallback = "") => document.getElementById(id)?.value || fallback;
 
     obj["wifi_mode"] = getVal("wifi_mode");
-    obj["webhook_en"] = getVal("webhook_en");
     obj["ap_ch"] = getVal("ap_ch_value");
 
     if (typeof updateLegacyStaFields === "function") updateLegacyStaFields();
@@ -3627,11 +3897,17 @@ function postConfig() {
     obj["can_fwd_mode"] = getVal("can_fwd_mode");
     obj["port_type"] = getVal("port_type");
     obj["port"] = getVal("tcp_port_value");
-    obj["ap_pass"] = getVal("ap_pass_value");
-    obj["protocol"] = getVal("protocol");
-    obj["ble_pass"] = getVal("ble_pass_value");
-    obj["ble_status"] = getVal("ble_status");
-    obj["sleep_status"] = getVal("sleep_status");
+
+    const apPassEl = document.getElementById("ap_pass_value");
+    if (apPassEl) {
+        let ap_pass = apPassEl.value;
+        obj["ap_pass"] = ap_pass;
+    }
+
+    obj["protocol"] = getVal("protocol", "savvycan");
+
+    let ble_pass = getVal("ble_pass_value");
+    obj["ble_pass"] = ble_pass && ble_pass.trim() !== "" ? ble_pass : "123456";
     obj["sleep_volt"] = getVal("sleep_volt");
     obj["sleep_time"] = getVal("sleep_time");
     obj["batt_alert"] = getVal("batt_alert");
@@ -3648,7 +3924,6 @@ function postConfig() {
     obj["batt_alert_time"] = getVal("batt_alert_time");
     obj["batt_mqtt_user"] = getVal("batt_mqtt_user");
     obj["batt_mqtt_pass"] = getVal("batt_mqtt_pass");
-    obj["mqtt_en"] = getVal("mqtt_en");
 
     let raw_mqtt_url = getVal("mqtt_url").replace(/^mqtt:\/\//, "");
     obj["mqtt_url"] = mqtt_txt.concat(raw_mqtt_url);
@@ -3657,7 +3932,6 @@ function postConfig() {
     obj["mqtt_pass"] = getVal("mqtt_pass");
     obj["keep_alive"] = getVal("keep_alive");
     obj["mqtt_tx_topic"] = getVal("mqtt_tx_topic");
-    obj["ap_auto_disable"] = getVal("ap_auto_disable");
     obj["mqtt_tx_en"] = document.getElementById("mqtt_tx_en_checkbox")?.checked ? "enable" : "disable";
     obj["mqtt_rx_topic"] = getVal("mqtt_rx_topic");
     obj["mqtt_rx_en"] = document.getElementById("mqtt_rx_en_checkbox")?.checked ? "enable" : "disable";
@@ -3667,11 +3941,44 @@ function postConfig() {
     obj["precon_button"] = getVal("precon_button", "sw_star");
     obj["precon_press"] = getVal("precon_press", "short");
 
+    let origText = "";
+    if (btn) {
+        origText = btn.textContent || btn.value;
+        btn.textContent = "Saving...";
+        btn.disabled = true;
+    }
+
     const xhttp = new XMLHttpRequest();
     xhttp.onload = function () {
-        if (typeof showNotification === "function") showNotification(this.responseText, "green");
-        const subBtn = document.getElementById("submit_button");
-        if (subBtn) subBtn.disabled = true;
+        if (this.status >= 200 && this.status < 300) {
+            if (typeof showNotification === "function") showNotification(this.responseText || "Settings saved successfully", "green");
+            if (btn) {
+                btn.textContent = "✓ Saved!";
+                setTimeout(() => {
+                    btn.textContent = origText;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        } else {
+            if (typeof showNotification === "function") showNotification("Failed to save settings: " + (this.responseText || "Server Error"), "red");
+            if (btn) {
+                btn.textContent = "✕ Error";
+                setTimeout(() => {
+                    btn.textContent = origText;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+    };
+    xhttp.onerror = function () {
+        if (typeof showNotification === "function") showNotification("Failed to save settings: Connection Error", "red");
+        if (btn) {
+            btn.textContent = "✕ Error";
+            setTimeout(() => {
+                btn.textContent = origText;
+                btn.disabled = false;
+            }, 2000);
+        }
     };
     xhttp.open("POST", "/store_config");
     xhttp.setRequestHeader("Content-Type", "application/json");
@@ -3696,17 +4003,62 @@ function Load() {
                     if (el && val !== undefined) el.value = val;
                 };
 
+                setElVal("wifi_mode", obj.wifi_mode || "AP");
+                setElVal("ap_ch_value", obj.ap_ch || "6");
                 setElVal("ap_pass_value", obj.ap_pass || "Testpass");
+                setElVal("can_datarate", obj.can_datarate || "500K");
+                setElVal("can_mode", obj.can_mode || "normal");
+                setElVal("port_type", obj.port_type || "tcp");
+                setElVal("protocol", obj.protocol || "savvycan");
                 setElVal("tcp_port_value", obj.port || "3333");
+                
+                updatePortFromProtocol();
+                
                 setElVal("ble_pass_value", obj.ble_pass || "000000");
                 setElVal("sleep_volt", obj.sleep_volt || "13.2");
+                setElVal("sleep_time", obj.sleep_time || "2");
 
                 const sleepDisp = document.getElementById("sleep_volt_value");
                 if (sleepDisp) sleepDisp.textContent = obj.sleep_volt || "13.2";
+                const sleepTimeDisp = document.getElementById("sleep_time_value");
+                if (sleepTimeDisp) sleepTimeDisp.textContent = obj.sleep_time || "2";
+
+                // Render station networks list
+                if (typeof renderStaNetworksList === "function") {
+                    renderStaNetworksList(obj.sta_networks || []);
+                }
+
+                // MQTT Broker fields
+                let cleanMqttUrl = (obj.mqtt_url || "").replace(/^mqtt:\/\//, "");
+                setElVal("mqtt_url", cleanMqttUrl);
+                setElVal("mqtt_port", obj.mqtt_port || "1883");
+                setElVal("mqtt_user", obj.mqtt_user || "");
+                setElVal("mqtt_pass", obj.mqtt_pass || "");
+                setElVal("keep_alive", obj.keep_alive || "60");
+                setElVal("mqtt_tx_topic", obj.mqtt_tx_topic || "wican/can/tx");
+                setElVal("mqtt_rx_topic", obj.mqtt_rx_topic || "wican/can/rx");
+                setElVal("mqtt_status_topic", obj.mqtt_status_topic || "wican/status");
+                setElVal("mqtt_elm327_log", obj.mqtt_elm327_log || "disable");
+
+                const txCb = document.getElementById("mqtt_tx_en_checkbox");
+                if (txCb) {
+                    txCb.checked = (obj.mqtt_tx_en === "enable");
+                    if (typeof txCheckBoxChanged === "function") txCheckBoxChanged();
+                }
+
+                const rxCb = document.getElementById("mqtt_rx_en_checkbox");
+                if (rxCb) {
+                    rxCb.checked = (obj.mqtt_rx_en === "enable");
+                    if (typeof rxCheckBoxChanged === "function") rxCheckBoxChanged();
+                }
 
                 const mqttDiv = document.getElementById("mqtt_en_div");
                 if (mqttDiv) {
                     mqttDiv.style.display = (obj.mqtt_en === "enable") ? "block" : "none";
+                }
+
+                if (typeof submit_enable === "function") {
+                    submit_enable();
                 }
 
                 if (typeof checkStatus === "function") checkStatus();
@@ -3729,6 +4081,22 @@ function Load() {
         xhttp.send();
     } catch (xhrErr) {
         console.warn("Load XHR initialization error:", xhrErr);
+    }
+}
+
+function updatePortFromProtocol() {
+    const protocol = document.getElementById("protocol");
+    const portInput = document.getElementById("tcp_port_value");
+    const portType = document.getElementById("port_type");
+    
+    if (protocol && protocol.value === "savvycan") {
+        portInput.value = "23";
+        portInput.disabled = true;
+        portType.value = "tcp";
+        portType.disabled = true;
+    } else {
+        portInput.disabled = false;
+        portType.disabled = false;
     }
 }
 
@@ -4775,6 +5143,7 @@ function loadAutoTable(jsonData) {
 
         setElementValue("car_specific", data.car_specific, 'disable');
         setElementValue("webhook_data_mode", data.webhook_data_mode, 'full');
+        if (typeof loadWebhookConfig === "function") loadWebhookConfig();
         setElementValue("ha_discovery", 'disable');
         setElementValue("grouping", data.grouping, 'disable');
         setElementValue("autopid_polling", data.autopid_polling, 'enable');
@@ -4831,6 +5200,114 @@ function loadAutoTable(jsonData) {
     } catch (error) {
         console.error('Error in loadAutoTable:', error);
         showNotification("Error loading table data: " + error.message, "red");
+    }
+}
+
+async function loadWebhookConfig() {
+    try {
+        const res = await fetch('/api/webhook');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const webhookUrlEl = document.getElementById("webhook_url");
+        const webhookUrlFallbackEl = document.getElementById("webhook_url_fallback");
+        const webhookIntervalEl = document.getElementById("webhook_interval");
+        const webhookEnEl = document.getElementById("webhook_en");
+
+        if (webhookUrlEl) {
+            if (data.urls && data.urls.length > 0) {
+                webhookUrlEl.value = data.urls[0] || '';
+                if (webhookUrlFallbackEl && data.urls.length > 1) {
+                    webhookUrlFallbackEl.value = data.urls[1] || '';
+                }
+            } else if (data.url !== undefined) {
+                webhookUrlEl.value = data.url;
+            }
+        }
+        if (webhookEnEl && data.enabled !== undefined) {
+            webhookEnEl.checked = (data.enabled === true);
+        }
+        if (webhookIntervalEl && data.interval !== undefined) {
+            webhookIntervalEl.value = data.interval;
+        }
+
+        const statOk = document.getElementById("webhook_stat_success");
+        const statFail = document.getElementById("webhook_stat_fail");
+        const statStatus = document.getElementById("webhook_stat_status");
+
+        if (statOk && data.success_count !== undefined) statOk.textContent = `OK: ${data.success_count}`;
+        if (statFail && data.fail_count !== undefined) statFail.textContent = `Fail: ${data.fail_count}`;
+        if (statStatus && data.status) statStatus.textContent = `Status: ${data.status}`;
+    } catch (e) {
+        console.warn("Failed to load webhook config:", e);
+    }
+}
+
+async function saveWebhookSettings(btn) {
+    const webhookUrlEl = document.getElementById("webhook_url");
+    const webhookUrlFallbackEl = document.getElementById("webhook_url_fallback");
+    const webhookIntervalEl = document.getElementById("webhook_interval");
+    const webhookEnEl = document.getElementById("webhook_en");
+    if (!webhookUrlEl) return false;
+
+    const wUrl = webhookUrlEl.value.trim();
+    const wUrlFallback = webhookUrlFallbackEl ? webhookUrlFallbackEl.value.trim() : '';
+    const wEn = webhookEnEl ? webhookEnEl.checked : true;
+    const wInt = webhookIntervalEl ? parseInt(webhookIntervalEl.value, 10) : 60;
+
+    if (wEn && wUrl && !wUrl.startsWith("http://") && !wUrl.startsWith("https://")) {
+        if (typeof showNotification === "function") showNotification("Webhook URL must start with http:// or https://", "red", 3500);
+        return false;
+    }
+
+    if (btn) {
+        btn.textContent = "Saving...";
+        btn.disabled = true;
+    }
+
+    try {
+        if (wUrl && (wUrl.startsWith("http://") || wUrl.startsWith("https://"))) {
+            let payload = {
+                url: wUrl,
+                enabled: wEn,
+                interval: isNaN(wInt) || wInt < 1 ? 60 : wInt
+            };
+
+            let urls = [wUrl];
+            if (wUrlFallback && (wUrlFallback.startsWith("http://") || wUrlFallback.startsWith("https://"))) {
+                urls.push(wUrlFallback);
+            }
+            payload.urls = urls;
+
+            const res = await fetch('/api/webhook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error("Status " + res.status);
+        } else if (!wEn) {
+            await fetch('/api/webhook', { method: 'DELETE' });
+        }
+
+        if (btn) {
+            btn.textContent = "✓ Saved!";
+            setTimeout(() => {
+                btn.textContent = "Save Webhook Settings";
+                btn.disabled = false;
+            }, 2000);
+        }
+        if (typeof showNotification === "function") showNotification("Webhook settings saved successfully!", "green", 3000);
+        return true;
+    } catch (e) {
+        if (btn) {
+            btn.textContent = "✕ Error";
+            setTimeout(() => {
+                btn.textContent = "Save Webhook Settings";
+                btn.disabled = false;
+            }, 2000);
+        }
+        if (typeof showNotification === "function") showNotification("Failed to save Webhook settings: " + e.message, "red", 3500);
+        return false;
     }
 }
 
@@ -4983,26 +5460,10 @@ async function storeAutoTableData() {
             ecu_protocol: ecu_protocolValue
         };
 
-        const webhookUrlEl = document.getElementById("webhook_url");
-        const webhookIntervalEl = document.getElementById("webhook_interval");
-        const webhookEnEl = document.getElementById("webhook_en");
-        if (webhookUrlEl) {
-            const wUrl = webhookUrlEl.value.trim();
-            const wEn = webhookEnEl ? (webhookEnEl.value === "enable") : true;
-            const wInt = webhookIntervalEl ? parseInt(webhookIntervalEl.value, 10) : 60;
-            if (wUrl && (wUrl.startsWith("http://") || wUrl.startsWith("https://"))) {
-                await fetch('/api/webhook', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        url: wUrl,
-                        enabled: wEn,
-                        interval: isNaN(wInt) || wInt < 1 ? 60 : wInt
-                    })
-                }).catch(e => console.warn('Webhook save failed', e));
-            } else if (!wUrl && !wEn) {
-                await fetch('/api/webhook', { method: 'DELETE' }).catch(() => { });
-            }
+        // Save webhook settings independently
+        const webhookSuccess = await saveWebhookSettings();
+        if (!webhookSuccess) {
+            throw new Error("Failed to save Webhook settings");
         }
 
         const response = await fetch('store_auto_data', {
@@ -5035,24 +5496,21 @@ window._dashEditMode = false;
 window._lastStatusObj = null;
 window._canDoStateCache = {};
 
-function escapeHtml(str) {
-    return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
 const DASH_WIDGET_CATALOG = {
     batt_12v: {
         id: "batt_12v", name: "12V Auxiliary Battery", icon: "", category: "Power",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-battery-12v"/></svg> 12V Aux Battery</span>
                     <div class="dash-card-actions"><div id="dash_batt_status_badge" class="dash-status"><span class="status-dot green"></span> Healthy</div></div></div>
                     <div><div class="dash-metric-row"><span id="dash_batt_voltage_val" class="dash-metric-val">--.- V</span></div>
                     <div class="dash-progress-track" style="margin-bottom: 0.6rem; height: 4px;"><div id="dash_batt_gauge" class="dash-progress-fill dash-gauge-level-good" style="width: 75%;"></div></div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.4rem;"><span>Low (12.0V)</span><span>Normal (12.6V)</span><span>Charging</span></div></div>`;
+                    <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.4rem;"><span>Low (12.0V)</span><span>Normal (12.6V)</span><span>Charging</span></div></div>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const el = document.getElementById("dash_batt_voltage_val"), bad = document.getElementById("dash_batt_status_badge"), gauge = document.getElementById("dash_batt_gauge");
             if (!obj || obj.batt_voltage === undefined || obj.batt_voltage === null) return;
-            if (el) el.textContent = obj.batt_voltage + " V";
+            if (el) el.textContent = obj.batt_voltage;
             const v = parseFloat(obj.batt_voltage);
             if (!isNaN(v)) {
                 if (bad) {
@@ -5067,12 +5525,13 @@ const DASH_WIDGET_CATALOG = {
     },
     hv_battery: {
         id: "hv_battery", name: "HV Traction Battery", icon: "", category: "EV Battery",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-battery-hv"/></svg> HV Traction Battery</span>
                     <div class="dash-card-actions"><div id="dash_hv_state_badge" class="dash-status"><span class="status-dot blue"></span> Active</div></div></div>
                     <div><div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 0.2rem;"><span id="dash_hv_temp_val" class="dash-metric-val">--.-°C</span><span id="dash_hv_temp_unit_label" class="dash-metric-label">Cell Temp</span></div>
                     <div id="dash_hv_subtext" class="dash-subtext" style="margin-bottom: 0.6rem;">Waiting for CAN bus telemetry...</div>
-                    <div style="padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.4rem;"><div style="display: flex; align-items: baseline; gap: 6px;"><span id="dash_hv_soc_val" class="dash-metric-val" style="font-size: 1.5rem;">--%</span><span class="dash-metric-label">State of Charge</span></div></div></div>`;
+                    <div style="padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.4rem;"><div style="display: flex; align-items: baseline; gap: 6px;"><span id="dash_hv_soc_val" class="dash-metric-val" style="font-size: 1.5rem;">--%</span><span class="dash-metric-label">State of Charge</span></div></div></div>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const hvBadgeEl = document.getElementById("dash_hv_state_badge");
@@ -5090,6 +5549,17 @@ const DASH_WIDGET_CATALOG = {
                 }
             }
             if (tempValEl && obj.battery_temp_valid && obj.battery_temp_min_c !== undefined && obj.battery_temp_max_c !== undefined) {
+                const isImp = (typeof getUnitSystem === 'function' && getUnitSystem() === 'imperial');
+                let minT = parseFloat(obj.battery_temp_min_c);
+                let maxT = parseFloat(obj.battery_temp_max_c);
+                if (isImp) {
+                    minT = (minT * 9/5) + 32;
+                    maxT = (maxT * 9/5) + 32;
+                    tempValEl.textContent = `${minT.toFixed(1)}°F - ${maxT.toFixed(1)}°F`;
+                } else {
+                    tempValEl.textContent = `${minT.toFixed(1)}°C - ${maxT.toFixed(1)}°C`;
+                }
+            } else if (false) {
                 tempValEl.textContent = `${obj.battery_temp_min_c}°C - ${obj.battery_temp_max_c}°C`;
             }
             if (socValEl && obj.battery_soc_valid && obj.battery_soc_pct !== undefined) {
@@ -5102,11 +5572,12 @@ const DASH_WIDGET_CATALOG = {
     },
     precon: {
         id: "precon", name: "EV Preconditioning", icon: "", category: "Quick Action",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-radiator"/></svg> Preconditioning</span>
                     <div class="dash-card-actions"><div id="dash_precon_badge" class="dash-status"><span class="status-dot gray"></span> Inactive</div></div></div>
                     <div><div style="margin-bottom: 0.8rem;"><div class="settings-desc">Heats HV traction battery pack to optimal DC fast charging temperature.</div></div></div>
-                    <button type="button" id="dash_precon_toggle_btn" onclick="preconActivate()" class="dash-outline-btn" style="width: 100%;">Activate Preconditioning</button>`;
+                    <button type="button" id="dash_precon_toggle_btn" onclick="preconActivate()" class="dash-outline-btn" style="width: 100%;">Activate Preconditioning</button>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const preconBadge = document.getElementById("dash_precon_badge"), preconBtn = document.getElementById("dash_precon_toggle_btn");
@@ -5122,12 +5593,13 @@ const DASH_WIDGET_CATALOG = {
     },
     network: {
         id: "network", name: "Network & Wireless", icon: "", category: "System",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-network"/></svg> Network</span>
                     <div class="dash-card-actions"><div id="dash_net_badge" class="dash-status"><span class="status-dot blue"></span> AP Mode</div></div></div>
                     <div><div class="dash-kv-list"><div class="dash-kv-row"><span class="dash-kv-label">Mode:</span><strong id="dash_wifi_mode_text" class="dash-kv-val">AP</strong></div>
                     <div class="dash-kv-row"><span class="dash-kv-label">Station IP:</span><strong id="dash_sta_ip_text" class="dash-kv-val" style="font-family: monospace;">192.168.3.1</strong></div></div></div>
-                    <button type="button" onclick="openTab(event, 'connectivity_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Configure Networks</button>`;
+                    <button type="button" onclick="openTab(event, 'connectivity_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Configure Networks</button>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const modeText = document.getElementById("dash_wifi_mode_text");
@@ -5145,14 +5617,15 @@ const DASH_WIDGET_CATALOG = {
     },
     can_hw: {
         id: "can_hw", name: "CAN Bus Status", icon: "", category: "Hardware",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-broadcast"/></svg> CAN Bus</span>
                     <div class="dash-card-actions"><div id="dash_can_mode_status" class="dash-status"><span class="status-dot green"></span> Normal</div></div></div>
                     <div><div class="dash-kv-list">
                         <div class="dash-kv-row"><span class="dash-kv-label">Bitrate:</span><strong id="dash_can_bitrate_val" class="dash-kv-val">500K</strong></div>
                         <div class="dash-kv-row"><span class="dash-kv-label">TCP/UDP Port:</span><strong id="dash_can_port_val" class="dash-kv-val" style="font-family: monospace;">3333</strong></div>
                     </div></div>
-                    <button type="button" onclick="openTab(event, 'can_hardware_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">CAN Settings</button>`;
+                    <button type="button" onclick="openTab(event, 'can_hardware_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">CAN Settings</button>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) {
             const br = document.getElementById("dash_can_bitrate_val");
@@ -5170,13 +5643,27 @@ const DASH_WIDGET_CATALOG = {
     },
     can_do: {
         id: "can_do", name: "CAN Do Automations", icon: "", category: "Automations",
-        render: function (isEditMode) {
+        render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-play"/></svg> CAN Do Automations</span>
                     <div class="dash-card-actions"><span id="can_do_dash_badge" class="dash-status"><span class="status-dot green"></span> Active</span></div></div>
-                    <div><div class="dash-subtext" style="margin-bottom: 0.8rem;">Automate actions, triggers, and vehicle telemetry hooks.</div></div>
-                    <button type="button" onclick="openTab(event, 'automate')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Open Automations</button>`;
+                    <div><div class="dash-subtext" id="can_do_dash_subtext" style="margin-bottom: 0.8rem;">Automate actions, triggers, and vehicle telemetry hooks.</div></div>
+                    <button type="button" onclick="openTab(event, 'automate')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Open Automations</button>
+                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
-        update: function (obj) { }
+        update: function (obj) { 
+            const badge = document.getElementById("can_do_dash_badge");
+            const subtext = document.getElementById("can_do_dash_subtext");
+            if (typeof getCanDoRules === "function") {
+                const rules = getCanDoRules();
+                const activeCount = rules.filter(r => r.enabled).length;
+                if (badge) {
+                    badge.innerHTML = activeCount > 0 ? `<span class="status-dot green"></span> ${activeCount} Active` : `<span class="status-dot gray"></span> Inactive`;
+                }
+                if (subtext) {
+                    subtext.textContent = `${activeCount} of ${rules.length} automations enabled.`;
+                }
+            }
+        }
     },
     can_state_monitor: {
         id: "can_state_monitor", name: "CAN State Monitor", icon: "", category: "Monitoring",
@@ -5361,15 +5848,15 @@ function updateCanDoStateWidgets() {
                     }
 
                     let stateObj = null;
-                    if (itemDef.can_id) {
-                        const parsed = parseInt(itemDef.can_id, 16);
+                    if (itemDef.state_can_id) {
+                        const parsed = parseInt(itemDef.state_can_id, 16);
                         if (!isNaN(parsed)) {
                             const normKey = "0x" + parsed.toString(16).toUpperCase();
-                            stateObj = states[normKey] || states[normKey.toLowerCase()] || states[itemDef.can_id];
+                            stateObj = states[normKey] || states[normKey.toLowerCase()] || states[itemDef.state_can_id];
                         }
                     }
                     if (!stateObj) {
-                        stateObj = states[itemDef.can_id] || states[itemDef.can_id?.toLowerCase()];
+                        stateObj = states[itemDef.state_can_id] || states[itemDef.state_can_id?.toLowerCase()];
                     }
 
                     if (!stateObj) {
@@ -5556,7 +6043,8 @@ function getCanDoMonitorableItems() {
     if (typeof CAN_DO_CATALOG === "undefined" || !CAN_DO_CATALOG || !Array.isArray(CAN_DO_CATALOG.commands)) return items;
 
     CAN_DO_CATALOG.commands.forEach(cmd => {
-        if (!cmd || !cmd.can_id) return;
+        const canId = cmd.state_can_id || cmd.can_id || cmd.action_can_id;
+        if (!cmd || !canId) return;
         const roles = cmd.roles || [];
         if (roles.length > 0 && !roles.includes("trigger") && !roles.includes("condition")) {
             return;
@@ -5570,7 +6058,7 @@ function getCanDoMonitorableItems() {
                 id: cmd.id || cmd.name,
                 name: cmd.name,
                 category: cmd.category || "General",
-                can_id: cmd.can_id,
+                can_id: canId,
                 match_payload: matchPattern,
                 options: cmd.options
             });
@@ -5901,6 +6389,13 @@ function addDashboardWidget(widgetId) {
         let nextIdx = 0;
         while (layout.includes(`can_state_${nextIdx}`)) nextIdx++;
         const newInstId = `can_state_${nextIdx}`;
+        
+        try {
+            const store = JSON.parse(localStorage.getItem("wican_state_widgets") || "{}");
+            store[newInstId] = [];
+            localStorage.setItem("wican_state_widgets", JSON.stringify(store));
+        } catch(e) {}
+        
         layout.push(newInstId);
         saveDashboardWidgetLayout(layout);
         if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
@@ -5912,6 +6407,13 @@ function addDashboardWidget(widgetId) {
         let nextIdx = 0;
         while (layout.includes(`can_do_btn_${nextIdx}`)) nextIdx++;
         const newInstId = `can_do_btn_${nextIdx}`;
+        
+        try {
+            const store = JSON.parse(localStorage.getItem("wican_dash_can_do_buttons") || "{}");
+            store[newInstId] = [];
+            localStorage.setItem("wican_dash_can_do_buttons", JSON.stringify(store));
+        } catch(e) {}
+        
         layout.push(newInstId);
         saveDashboardWidgetLayout(layout);
         if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
@@ -5949,6 +6451,7 @@ setInterval(() => {
         updateCanDoStateWidgets();
     }
 }, 3000);
+
 
 /* === js/can_do/catalog.js === */
 /* CAN_DO_CATALOG_START - Dynamic GitHub & SPIFFS Catalog Loader */
@@ -6031,6 +6534,46 @@ const CAN_DO_DOMAIN_TAXONOMY = {
     }
 };
 
+function updateDynamicTaxonomy(data) {
+    if (!data || typeof data !== "object") return;
+    if (data.domains && typeof data.domains === "object") {
+        Object.keys(data.domains).forEach(dKey => {
+            if (!CAN_DO_DOMAIN_TAXONOMY[dKey]) {
+                CAN_DO_DOMAIN_TAXONOMY[dKey] = { subdomains: {}, ...data.domains[dKey] };
+            } else {
+                Object.assign(CAN_DO_DOMAIN_TAXONOMY[dKey], data.domains[dKey]);
+                CAN_DO_DOMAIN_TAXONOMY[dKey].subdomains = {
+                    ...CAN_DO_DOMAIN_TAXONOMY[dKey].subdomains,
+                    ...(data.domains[dKey].subdomains || {})
+                };
+            }
+        });
+    }
+    (data.commands || []).forEach(cmd => {
+        const dom = cmd.domain || cmd.category;
+        if (!dom) return;
+        const domKey = dom.toLowerCase().replace(/[^a-z0-9]/g, "_");
+        if (!CAN_DO_DOMAIN_TAXONOMY[domKey]) {
+            CAN_DO_DOMAIN_TAXONOMY[domKey] = {
+                id: domKey,
+                name: cmd.domain_name || dom,
+                icon: cmd.domain_icon || "box",
+                desc: `${cmd.domain_name || dom} controls and sensors`,
+                subdomains: {}
+            };
+        }
+        const sub = cmd.subdomain || "general";
+        const domObj = CAN_DO_DOMAIN_TAXONOMY[domKey];
+        if (!domObj.subdomains[sub]) {
+            domObj.subdomains[sub] = {
+                id: sub,
+                name: cmd.subdomain_name || (sub.charAt(0).toUpperCase() + sub.slice(1).replace(/_/g, " ")),
+                desc: `${sub} commands`
+            };
+        }
+    });
+}
+
 let CAN_DO_CATALOG = {
     catalog_version: "0.0.0",
     vehicles: [],
@@ -6049,7 +6592,9 @@ async function loadCanDoCatalog() {
                 data = mergeCatalogData(data, JSON.parse(customSaved));
             } catch (e) { }
         }
+        data = normalizeCatalogCommands(data);
         CAN_DO_CATALOG = data;
+        updateDynamicTaxonomy(data);
         try {
             localStorage.setItem("wican_can_do_catalog", JSON.stringify(data));
         } catch (e) { }
@@ -6160,6 +6705,37 @@ function syncCatalogFromGitHub(manual = true) {
         .catch(err => {
             showNotification("Could not reach repository (" + catalogUrl + "). Keeping current presets.", "red", 4500);
         });
+}
+
+function normalizeCatalogCommands(data) {
+    if (!data) return data;
+    if (Array.isArray(data.commands)) {
+        data.commands.forEach(cmd => {
+            if (!cmd.state_can_id && cmd.action_can_id) {
+                cmd.state_can_id = cmd.action_can_id;
+            } else if (!cmd.state_can_id && cmd.can_id) {
+                cmd.state_can_id = cmd.can_id;
+            }
+            if (!cmd.action_can_id && cmd.state_can_id) {
+                cmd.action_can_id = cmd.state_can_id;
+            } else if (!cmd.action_can_id && cmd.can_id) {
+                cmd.action_can_id = cmd.can_id;
+            }
+            if (!cmd.can_id) {
+                cmd.can_id = cmd.state_can_id || cmd.action_can_id;
+            }
+            if (Array.isArray(cmd.options)) {
+                cmd.options.forEach(opt => {
+                    if (!opt.state_can_id && opt.action_can_id) opt.state_can_id = opt.action_can_id;
+                    else if (!opt.state_can_id && opt.can_id) opt.state_can_id = opt.can_id;
+                    if (!opt.action_can_id && opt.state_can_id) opt.action_can_id = opt.state_can_id;
+                    else if (!opt.action_can_id && opt.can_id) opt.action_can_id = opt.can_id;
+                    if (!opt.can_id) opt.can_id = opt.state_can_id || opt.action_can_id || cmd.can_id;
+                });
+            }
+        });
+    }
+    return data;
 }
 
 function mergeCatalogData(base, custom) {
@@ -6445,8 +7021,14 @@ function changeUnitSystem(unit, syncToDevice = true) {
 
 function getCommandTaxonomy(cmd) {
     if (!cmd) return { domain: "system_automation", subdomain: "network_integrations" };
-    if (cmd.domain && cmd.subdomain) {
-        return { domain: cmd.domain, subdomain: cmd.subdomain };
+    if (cmd.domain) {
+        return { domain: cmd.domain, subdomain: cmd.subdomain || "general" };
+    }
+    if (cmd.category) {
+        const catKey = cmd.category.toLowerCase().replace(/[^a-z0-9]/g, "_");
+        if (CAN_DO_DOMAIN_TAXONOMY[catKey]) {
+            return { domain: catKey, subdomain: cmd.subdomain || "general" };
+        }
     }
     const id = (cmd.id || "").toLowerCase();
     const name = (cmd.name || "").toLowerCase();
@@ -6521,7 +7103,7 @@ function getCommandTaxonomy(cmd) {
     return { domain: "system_automation", subdomain: "network_integrations" };
 }
 
-const DEFAULT_CAN_DO_CATALOG_URL = "https://raw.githubusercontent.com/SuperSuave/wicant-i-precondition/look-revamp/main/can_do_catalog.json";
+const DEFAULT_CAN_DO_CATALOG_URL = "https://raw.githubusercontent.com/SuperSuave/CAN-Do-Message-Catalog/refs/heads/main/can_do_catalog.json";
 
 function getCanDoCatalogUrl() {
     let url = localStorage.getItem("wican_can_do_catalog_url") || DEFAULT_CAN_DO_CATALOG_URL;
@@ -6545,10 +7127,12 @@ function getFilteredTriggerPresets() {
     if (Array.isArray(CAN_DO_CATALOG.commands)) {
         CAN_DO_CATALOG.commands.forEach(cmd => {
             const roles = cmd.roles || [];
-            const isTrig = roles.length === 0 || roles.includes("trigger");
+            const isPureSoftware = ["webhook", "mqtt", "popup", "climate_target"].includes(cmd.type);
+            const hasCan = !!(cmd.state_can_id || cmd.action_can_id || cmd.can_id || cmd.from_payload || cmd.to_payload || cmd.match_payload);
+            const isTrig = roles.includes("trigger") || (!isPureSoftware && hasCan) || roles.length === 0;
             if (!isTrig) return;
 
-            const targetModels = cmd.supported_models || cmd.vehicle_models || [];
+            const targetModels = cmd.tags || cmd.supported_models || cmd.vehicle_models || [];
             if (
                 targetModels.length === 0 ||
                 targetModels.includes("all") ||
@@ -6560,7 +7144,7 @@ function getFilteredTriggerPresets() {
         });
     } else if (Array.isArray(CAN_DO_CATALOG.trigger_presets)) {
         CAN_DO_CATALOG.trigger_presets.forEach(preset => {
-            const targetModels = preset.supported_models || preset.vehicle_models || [];
+            const targetModels = preset.tags || preset.supported_models || preset.vehicle_models || [];
             if (
                 targetModels.length === 0 ||
                 targetModels.includes("all") ||
@@ -6585,7 +7169,7 @@ function getFilteredConditionPresets() {
             const isCond = roles.length === 0 || roles.includes("condition");
             if (!isCond) return;
 
-            const targetModels = cmd.supported_models || cmd.vehicle_models || [];
+            const targetModels = cmd.tags || cmd.supported_models || cmd.vehicle_models || [];
             if (
                 targetModels.length > 0 &&
                 !targetModels.includes("all") &&
@@ -6604,7 +7188,7 @@ function getFilteredConditionPresets() {
     } else if (CAN_DO_CATALOG && Array.isArray(CAN_DO_CATALOG.condition_presets)) {
         CAN_DO_CATALOG.condition_presets.forEach(cat => {
             const validPresets = (cat.presets || []).filter(preset => {
-                const targetModels = preset.supported_models || preset.vehicle_models || [];
+                const targetModels = preset.tags || preset.supported_models || preset.vehicle_models || [];
                 return (
                     targetModels.length === 0 ||
                     targetModels.includes("all") ||
@@ -6620,7 +7204,7 @@ function getFilteredConditionPresets() {
 
     const categories = Array.from(catsMap.values());
     if (customConds.length > 0) {
-        categories.unshift({ category: "⭐ My Saved Conditions", presets: customConds });
+        categories.unshift({ category: "My Saved Conditions", presets: customConds });
     }
     return categories;
 }
@@ -6636,7 +7220,7 @@ function getFilteredActionPresets() {
             const isAct = roles.length === 0 || roles.includes("action");
             if (!isAct) return;
 
-            const targetModels = cmd.supported_models || cmd.vehicle_models || [];
+            const targetModels = cmd.tags || cmd.supported_models || cmd.vehicle_models || [];
             if (
                 targetModels.length > 0 &&
                 !targetModels.includes("all") &&
@@ -6655,7 +7239,7 @@ function getFilteredActionPresets() {
     } else if (CAN_DO_CATALOG && Array.isArray(CAN_DO_CATALOG.action_presets)) {
         CAN_DO_CATALOG.action_presets.forEach(cat => {
             const validPresets = (cat.presets || []).filter(preset => {
-                const targetModels = preset.supported_models || preset.vehicle_models || [];
+                const targetModels = preset.tags || preset.supported_models || preset.vehicle_models || [];
                 return (
                     targetModels.length === 0 ||
                     targetModels.includes("all") ||
@@ -6671,7 +7255,7 @@ function getFilteredActionPresets() {
 
     const categories = Array.from(catsMap.values());
     if (customActs.length > 0) {
-        categories.unshift({ category: "⭐ My Saved Actions", presets: customActs });
+        categories.unshift({ category: "My Saved Actions", presets: customActs });
     }
     return categories;
 }
@@ -7133,10 +7717,14 @@ function updateCanDoItemConnectors(card) {
     if (trigContainer) {
         trigContainer.querySelectorAll(".can-do-connector-divider").forEach(el => el.remove());
         const trigItems = Array.from(trigContainer.querySelectorAll(".can-do-trigger-item"));
+        const combineMode = card.querySelector(".can-do-trig-combine-mode")?.value || "any";
+        const isAnd = (combineMode === "all" || combineMode === "and" || combineMode === "combo");
+        const modeLabel = isAnd ? "AND" : "OR";
+        const modeClass = isAnd ? "trig active-and" : "trig";
         for (let i = 0; i < trigItems.length - 1; i++) {
             const div = document.createElement("div");
             div.className = "can-do-connector-divider";
-            div.innerHTML = `<span class="can-do-connector-line trig"></span><span class="can-do-connector-pill trig" style="padding: 2px 12px; font-weight: 800;">OR</span><span class="can-do-connector-line trig"></span>`;
+            div.innerHTML = `<span class="can-do-connector-line trig"></span><span class="can-do-connector-pill ${modeClass}" style="padding: 2px 12px; font-weight: 800; cursor: pointer;" title="Click to toggle AND / OR" onclick="toggleCanDoTriggerCombineMode(this)">${modeLabel}</span><span class="can-do-connector-line trig"></span>`;
             trigContainer.insertBefore(div, trigItems[i + 1]);
         }
     }
@@ -7343,7 +7931,10 @@ function updateCanDoRuleSummaryPill(card) {
         }
     });
 
-    const trigText = trigSummaries.length > 0 ? trigSummaries.slice(0, 2).join(" • ") + (trigSummaries.length > 2 ? ` (+${trigSummaries.length - 2})` : "") : "No Trigger";
+    const combineMode = card.querySelector(".can-do-trig-combine-mode")?.value || "any";
+    const isAnd = (combineMode === "all" || combineMode === "and" || combineMode === "combo");
+    const trigJoiner = isAnd ? " + " : " OR ";
+    const trigText = trigSummaries.length > 0 ? trigSummaries.slice(0, 2).join(trigJoiner) + (trigSummaries.length > 2 ? ` (+${trigSummaries.length - 2})` : "") : "No Trigger";
     const condText = condSummaries.length > 0 ? condSummaries.slice(0, 2).join(" • ") + (condSummaries.length > 2 ? ` (+${condSummaries.length - 2})` : "") : "";
     const actText = actSummaries.length > 0 ? actSummaries.slice(0, 2).join(" • ") + (actSummaries.length > 2 ? ` (+${actSummaries.length - 2})` : "") : "No Action";
 
@@ -7413,7 +8004,9 @@ function updateCanDoActivityStats(statsArray) {
         if (st.is_active) {
             const ageSec = (st.age_ms !== undefined && st.age_ms >= 0) ? Math.round(st.age_ms / 1000) : 0;
             let ageStr = `${ageSec}s ago`;
-            if (ageSec > 60) ageStr = `${Math.floor(ageSec / 60)}m ago`;
+            if (ageSec >= 3600) ageStr = `${Math.floor(ageSec / 3600)}h ago`;
+            else if (ageSec >= 60) ageStr = `${Math.floor(ageSec / 60)}m ago`;
+
             badge.className = "can-do-activity-badge active-on";
             badge.textContent = `ON (${st.count}x, ${ageStr})`;
             badge.title = "Rule is currently TOGGLED ON";
@@ -7424,8 +8017,21 @@ function updateCanDoActivityStats(statsArray) {
         } else {
             const ageSec = Math.round(st.age_ms / 1000);
             let ageStr = `${ageSec}s ago`;
-            if (ageSec > 60) ageStr = `${Math.floor(ageSec / 60)}m ago`;
-            badge.textContent = `${st.count}x (${ageStr})`;
+            let badgeText = `${st.count}x (${ageStr})`;
+
+            if (ageSec >= 86400) {
+                const days = Math.floor(ageSec / 86400);
+                ageStr = `${days}d ago`;
+                badgeText = `${st.count}x (${ageStr})`;
+            } else if (ageSec >= 3600) {
+                ageStr = `${Math.floor(ageSec / 3600)}h ago`;
+                badgeText = `${st.count}x Today`;
+            } else if (ageSec >= 60) {
+                ageStr = `${Math.floor(ageSec / 60)}m ago`;
+                badgeText = `${st.count}x (${ageStr})`;
+            }
+
+            badge.textContent = badgeText;
             badge.title = `Fired ${st.count} time(s), last ${ageStr}`;
 
             if (st.age_ms >= 0 && st.age_ms < 4000) {
@@ -7461,17 +8067,30 @@ function extractCanDoActionData(item) {
     const presetPicker = item.querySelector(".can-do-act-preset-picker");
     const selectedPresetVal = presetPicker?.value || "";
     const selectedPresetName = presetPicker?.selectedOptions[0]?.dataset?.name || "";
+    let presetObj = null;
+
+    let optIdx = undefined;
+    let optLabel = undefined;
+    const activeOptBtn = item.querySelector(".can-do-act-options-container .can-do-opt-pill-btn.active");
+    if (activeOptBtn) {
+        if (activeOptBtn.dataset.optIdx !== undefined) optIdx = parseInt(activeOptBtn.dataset.optIdx);
+        if (activeOptBtn.dataset.optLabel) optLabel = activeOptBtn.dataset.optLabel;
+    }
 
     if (actType === "preset") {
         if (selectedPresetVal && typeof getFilteredActionPresets === "function") {
             const parts = selectedPresetVal.split(/[:_]/);
             const cats = getFilteredActionPresets();
-            const presetObj = cats[parseInt(parts[0])]?.presets[parseInt(parts[1])];
+            presetObj = cats[parseInt(parts[0])]?.presets[parseInt(parts[1])];
             if (presetObj) {
-                if (presetObj.type === "climate_target" || presetObj.target_temp_c !== undefined || presetObj.target_temp_f !== undefined) {
+                if (presetObj.type) {
+                    actType = presetObj.type;
+                } else if (presetObj.target_temp_c !== undefined || presetObj.target_temp_f !== undefined) {
                     actType = "climate_target";
-                } else if (presetObj.type === "precondition" || presetObj.precon_mode !== undefined) {
+                } else if (presetObj.precon_mode !== undefined || (presetObj.options && presetObj.options.some(o => o.precon_mode))) {
                     actType = "precondition";
+                } else if (presetObj.popup_message !== undefined || (presetObj.options && presetObj.options.some(o => o.popup || o.popup_message))) {
+                    actType = "popup";
                 } else {
                     actType = "can_tx";
                 }
@@ -7504,10 +8123,18 @@ function extractCanDoActionData(item) {
         passTempF = Math.round(passTempC * 9 / 5 + 32);
     }
 
+    const canIdInput = item.querySelector(".can-do-act-can-id")?.value.trim() || "";
+    const effectiveCanId = canIdInput || (presetObj ? (presetObj.action_can_id || presetObj.can_id || presetObj.state_can_id || "") : "");
+    const stateCanIdInput = item.querySelector(".can-do-act-state-can-id")?.value.trim() || "";
+    const effectiveStateCanId = stateCanIdInput || (presetObj ? (presetObj.state_can_id || "") : "");
+
     return {
         trigger_id: item.querySelector(".can-do-act-trig-id")?.value.trim() || "",
+        preset_id: presetObj ? (presetObj.id || "") : "",
         preset_val: selectedPresetVal,
         preset_name: selectedPresetName,
+        opt_idx: optIdx,
+        opt_label: optLabel,
         popup_message: item.querySelector(".can-do-act-popup-msg")?.value.trim() || "",
         type: actType,
         precon_mode: item.querySelector(".can-do-act-precon-mode")?.value || "persistent",
@@ -7519,7 +8146,9 @@ function extractCanDoActionData(item) {
         climate_zone: item.querySelector(".can-do-act-climate-zone")?.value || "driver",
         climate_sync_on: item.querySelector(".can-do-act-climate-sync")?.checked !== false,
         climate_driver_only: item.querySelector(".can-do-act-climate-drv-only")?.checked === true,
-        can_id: item.querySelector(".can-do-act-can-id")?.value || "",
+        can_id: effectiveCanId,
+        action_can_id: effectiveCanId,
+        state_can_id: effectiveStateCanId,
         steps: steps,
         payload: payloadLines.join("\n"),
         bus: parseInt(item.querySelector(".can-do-act-bus")?.value || "0"),
@@ -8004,32 +8633,12 @@ document.addEventListener("keyup", function (e) {
     }
 }, true);
 
-function initCanDoMutationObserver() {
-    const container = document.getElementById("can_do_rules_container");
-    if (!container || window._can_doObserverAttached) return;
-    window._can_doObserverAttached = true;
-    const observer = new MutationObserver(function (mutations) {
-        if (window._suppressCanDoDirty) return;
-        for (let m of mutations) {
-            if (m.addedNodes.length > 0 || m.removedNodes.length > 0) {
-                if (typeof markCanDoDirty === "function") markCanDoDirty();
-                break;
-            }
-        }
-    });
-    observer.observe(container, { childList: true, subtree: true });
-}
-
-if (document.getElementById("can_do_rules_container")) {
-    initCanDoMutationObserver();
-}
-document.addEventListener("DOMContentLoaded", initCanDoMutationObserver);
-
 document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
         closeCanDoSettingsMenu();
     }
 });
+
 
 /* === js/can_do/dialog.js === */
 function openAddAutomationElementDialog(type, targetContainer, ruleCard, options = {}) {
@@ -8103,22 +8712,25 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
         const { builtIn, custom } = getFilteredTriggerPresets();
         (custom || []).forEach((p, idx) => {
             const tax = getCommandTaxonomy(p);
+            const canId = p.state_can_id || p.action_can_id || p.can_id;
             allItems.push({
                 id: `custom_trig_${idx}`,
                 name: p.name || `Custom Trigger #${idx + 1}`,
-                desc: p.description || (p.can_id ? `CAN ID: ${p.can_id}` : "Saved Trigger Preset"),
+                desc: p.description || (canId ? `CAN ID: ${canId}` : "Saved Trigger Preset"),
                 domain: tax.domain,
                 subdomain: tax.subdomain,
                 icon: "star",
                 options: p.options,
                 onSelect: (stateOpt) => {
+                    const fromP = stateOpt ? (stateOpt.from_payload !== undefined ? stateOpt.from_payload : p.from_payload) : p.from_payload;
+                    const toP = stateOpt ? (stateOpt.to_payload || stateOpt.match_payload || stateOpt.payload || p.to_payload || p.match_payload) : (p.to_payload || p.match_payload);
                     renderCanDoTriggerItem(targetContainer, {
                         source: "preset",
                         id: p.id,
-                        can_id: p.can_id,
-                        bus: p.bus,
-                        from_payload: stateOpt ? stateOpt.from_payload : p.from_payload,
-                        to_payload: stateOpt ? stateOpt.to_payload : p.to_payload
+                        can_id: canId,
+                        bus: p.bus !== undefined ? p.bus : 0,
+                        from_payload: fromP || "",
+                        to_payload: toP || ""
                     });
                 }
             });
@@ -8126,22 +8738,26 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
 
         (builtIn || []).forEach(p => {
             const tax = getCommandTaxonomy(p);
+            const canId = p.state_can_id || p.action_can_id || p.can_id;
+            const idDesc = (p.state_can_id && p.action_can_id) ? `Tx: ${p.action_can_id} · Rx: ${p.state_can_id}` : (p.state_can_id ? `Rx: ${p.state_can_id}` : (p.action_can_id ? `CAN ID: ${p.action_can_id}` : (canId ? `CAN ID: ${canId}` : "Vehicle Trigger")));
             allItems.push({
                 id: p.id || p.name,
                 name: p.name || "Trigger Preset",
-                desc: p.description || (p.can_id ? `CAN ID: ${p.can_id}` : "Vehicle Trigger"),
+                desc: p.description || idDesc,
                 domain: tax.domain,
                 subdomain: tax.subdomain,
                 icon: "",
                 options: p.options,
                 onSelect: (stateOpt) => {
+                    const fromP = stateOpt ? (stateOpt.from_payload !== undefined ? stateOpt.from_payload : p.from_payload) : p.from_payload;
+                    const toP = stateOpt ? (stateOpt.to_payload || stateOpt.match_payload || stateOpt.payload || p.to_payload || p.match_payload) : (p.to_payload || p.match_payload);
                     renderCanDoTriggerItem(targetContainer, {
                         source: "preset",
                         id: p.id,
-                        can_id: p.can_id,
-                        bus: p.bus,
-                        from_payload: stateOpt ? stateOpt.from_payload : p.from_payload,
-                        to_payload: stateOpt ? stateOpt.to_payload : p.to_payload
+                        can_id: canId,
+                        bus: p.bus !== undefined ? p.bus : 0,
+                        from_payload: fromP || "",
+                        to_payload: toP || ""
                     });
                 }
             });
@@ -8162,20 +8778,23 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
         condCats.forEach(cat => {
             (cat.presets || []).forEach(p => {
                 const tax = getCommandTaxonomy(p);
+                const canId = p.state_can_id || p.action_can_id || p.can_id;
+                const idDesc = (p.state_can_id && p.action_can_id) ? `Tx: ${p.action_can_id} · Rx: ${p.state_can_id}` : (p.state_can_id ? `Rx: ${p.state_can_id}` : (p.action_can_id ? `CAN ID: ${p.action_can_id}` : (canId ? `CAN ID: ${canId}` : "Preset Condition")));
                 allItems.push({
                     id: p.id || p.name,
                     name: p.name || "Condition Preset",
-                    desc: p.description || p.expression || (p.can_id ? `CAN ID: ${p.can_id}` : "Preset Condition"),
+                    desc: p.description || p.expression || idDesc,
                     domain: tax.domain,
                     subdomain: tax.subdomain,
                     icon: "",
                     options: p.options,
                     onSelect: (stateOpt) => {
+                        const mP = stateOpt ? (stateOpt.match_payload || stateOpt.to_payload || stateOpt.payload || p.match_payload) : p.match_payload;
                         renderCanDoConditionItem(targetContainer, {
                             type: p.type || "preset",
                             expression: stateOpt ? (stateOpt.expression !== undefined ? stateOpt.expression : p.expression) : p.expression,
-                            can_id: p.can_id,
-                            match_payload: stateOpt ? stateOpt.match_payload : p.match_payload,
+                            can_id: canId,
+                            match_payload: mP,
                             days: p.days,
                             start_time: p.start_time,
                             end_time: p.end_time,
@@ -8202,10 +8821,11 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
         actCats.forEach((cat, catIdx) => {
             (cat.presets || []).forEach((p, pIdx) => {
                 const tax = getCommandTaxonomy(p);
+                const descStr = p.description || (p.action_can_id && p.state_can_id ? `Tx: ${p.action_can_id} · Rx: ${p.state_can_id}` : (p.action_can_id ? `Tx: ${p.action_can_id}` : (p.state_can_id ? `Rx: ${p.state_can_id}` : (p.popup_message || (p.type === "precondition" ? "Precondition Routine" : "Preset Template")))));
                 allItems.push({
                     id: p.id || p.name,
                     name: p.name || "Action Preset",
-                    desc: p.description || (p.can_id ? `CAN ID: ${p.can_id}` : (p.popup_message || "Preset Template")),
+                    desc: descStr,
                     domain: tax.domain,
                     subdomain: tax.subdomain,
                     icon: "",
@@ -8218,15 +8838,7 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
                             if (picker) {
                                 picker.value = `${catIdx}:${pIdx}`;
                                 picker.setAttribute("data-selected-preset", `${catIdx}:${pIdx}`);
-                                applyCanDoActionPreset(picker);
-                            }
-                            if (stateOpt && stateOpt.payload) {
-                                const stepsContainer = lastItem.querySelector(".can-do-payload-steps-container");
-                                if (stepsContainer) {
-                                    stepsContainer.innerHTML = "";
-                                    renderCanDoPayloadStep(stepsContainer, { payload: stateOpt.payload, repeat: 3 });
-                                    renderCanDoPayloadStep(stepsContainer, { payload: "00 00 00 00 00 00 00 00", repeat: 3 });
-                                }
+                                applyCanDoActionPreset(picker, true, stateOpt ? stateOpt.label : undefined);
                             }
                             const titleSpan = lastItem.querySelector(".can-do-subitem-title-act");
                             if (titleSpan && p.name) {
@@ -8239,11 +8851,12 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
         });
     }
 
-    // Create Overlay Element
-    const overlay = document.createElement("div");
-    overlay.className = "ha-add-element-dialog-overlay";
+    // Create Native <dialog> Element
+    const dialog = document.createElement("dialog");
+    dialog.className = "ha-add-element-dialog-overlay ha-native-dialog";
+    dialog.style.cssText = "border: none; padding: 0; background: transparent; max-width: 100vw; max-height: 100vh;";
 
-    overlay.innerHTML = `
+    dialog.innerHTML = `
                         <div class="ha-add-element-dialog" onclick="event.stopPropagation();">
                             <div class="ha-dialog-header">
                                 <div class="ha-dialog-header-top">
@@ -8251,7 +8864,7 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
                                         <span class="can-do-ha-pill ${typeConfig.pillClass}">${typeConfig.pillText}</span>
                                         <h3 class="ha-dialog-title">${typeConfig.title}</h3>
                                     </div>
-                                    <button type="button" class="ha-dialog-close-btn" onclick="this.closest('.ha-add-element-dialog-overlay').remove();" title="Close dialog">✕</button>
+                                    <button type="button" class="ha-dialog-close-btn" onclick="const d = this.closest('dialog'); if (d) { d.close(); d.remove(); }" title="Close dialog">✕</button>
                                 </div>
                                 <div class="ha-dialog-search-wrap">
                                     <svg class="ha-dialog-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -8266,7 +8879,11 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
                         </div>
                     `;
 
-    document.body.appendChild(overlay);
+    document.body.appendChild(dialog);
+    if (typeof dialog.showModal === "function") {
+        dialog.showModal();
+    }
+    const overlay = dialog;
 
     const searchInput = overlay.querySelector(".ha-dialog-search-input");
     const dialogBody = overlay.querySelector("#ha_dialog_body");
@@ -8477,13 +9094,21 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
 
             let stateChipsHTML = "";
             if (item.options && Array.isArray(item.options) && item.options.length > 0) {
+                const maxChips = 5;
+                const visibleOpts = item.options.slice(0, maxChips);
+                const hasMore = item.options.length > maxChips;
                 stateChipsHTML = `
                                     <div class="ha-target-state-chips" onclick="event.stopPropagation();">
-                                        ${item.options.slice(0, 4).map(opt => `
-                                            <span class="ha-target-state-chip" onclick="handleTargetSelection(window._targetItemSelectMap['${item.id}'], window._targetItemOptionMap['${item.id}_${opt.label.replace(/[^a-zA-Z0-9]/g, '')}'])">
+                                        ${visibleOpts.map((opt, optIdx) => `
+                                            <span class="ha-target-state-chip" onclick="handleTargetSelection(window._targetItemSelectMap['${item.id}'], window._targetItemOptionMap['${item.id}'][${optIdx}])">
                                                 ${opt.label}
                                             </span>
                                         `).join("")}
+                                        ${hasMore ? `
+                                            <span class="ha-target-state-chip ha-chip-more" style="opacity: 0.8; font-style: italic;" onclick="handleTargetSelection(window._targetItemSelectMap['${item.id}'], null)">
+                                                +${item.options.length - maxChips} more...
+                                            </span>
+                                        ` : ""}
                                     </div>
                                 `;
             }
@@ -8504,11 +9129,7 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
             window._targetItemSelectMap = window._targetItemSelectMap || {};
             window._targetItemOptionMap = window._targetItemOptionMap || {};
             window._targetItemSelectMap[item.id] = item;
-            if (item.options) {
-                item.options.forEach(opt => {
-                    window._targetItemOptionMap[`${item.id}_${opt.label.replace(/[^a-zA-Z0-9]/g, '')}`] = opt;
-                });
-            }
+            window._targetItemOptionMap[item.id] = item.options || [];
 
             card.onclick = () => {
                 handleTargetSelection(item, null);
@@ -8522,6 +9143,7 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
     }
 
     function handleTargetSelection(item, stateOpt) {
+        if (typeof overlay.close === "function") overlay.close();
         overlay.remove();
         item.onSelect(stateOpt);
         const newElem = targetContainer ? targetContainer.lastElementChild : null;
@@ -8540,16 +9162,13 @@ function openAddAutomationElementDialog(type, targetContainer, ruleCard, options
     searchInput.oninput = () => renderPicker();
 
     overlay.onclick = (e) => {
-        if (e.target === overlay) overlay.remove();
-    };
-
-    const escHandler = (e) => {
-        if (e.key === "Escape") {
+        if (e.target === overlay) {
+            if (typeof overlay.close === "function") overlay.close();
             overlay.remove();
-            document.removeEventListener("keydown", escHandler);
         }
     };
-    document.addEventListener("keydown", escHandler);
+
+    overlay.onclose = () => overlay.remove();
 
     renderPicker();
     setTimeout(() => searchInput.focus(), 60);
@@ -8559,95 +9178,120 @@ function showCanDoHaSettingsModal(btn) {
     const card = btn ? btn.closest(".can-do-rule-card") : null;
     if (!card) return;
 
-    document.querySelectorAll(".can-do-ha-settings-modal-overlay").forEach(el => el.remove());
+    document.querySelectorAll(".can-do-ha-settings-modal-overlay, dialog.ha-native-dialog").forEach(el => {
+        if (el.querySelector("#can_do_modal_ha_expose")) el.remove();
+    });
 
     const ruleName = card.querySelector(".can-do-name")?.value || "CAN Do Automation";
     const currentExpose = card.dataset.haExpose !== undefined ? (card.dataset.haExpose === "true") : true;
     const currentIcon = card.dataset.haIcon || "mdi:car-defrost-rear";
 
-    const overlay = document.createElement("div");
-    overlay.className = "can-do-ha-settings-modal-overlay";
-    overlay.style.cssText = "position: fixed; inset: 0; z-index: 1000000; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 1rem;";
+    const dialog = document.createElement("dialog");
+    dialog.className = "ha-add-element-dialog-overlay ha-native-dialog";
+    dialog.style.cssText = "border: none; padding: 0; background: transparent; max-width: 100vw; max-height: 100vh;";
 
-    overlay.innerHTML = `
-                        <div class="can-do-ha-settings-modal" style="width: 100%; max-width: 460px; box-shadow: 0 20px 45px rgba(0,0,0,0.4); border-radius: var(--m3-shape-lg, 16px); padding: 1.5rem; margin: 0; position: relative;" onclick="event.stopPropagation();">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
-                                <div>
-                                    <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-heading); display: flex; align-items: center; gap: 0.5rem;">
-                                        <span>Home Assistant Integration</span>
-                                    </h3>
-                                    <span style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-top: 3px; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                        "${ruleName}"
-                                    </span>
-                                </div>
-                                <button type="button" class="system-button" style="width: 28px; height: 28px; min-width: 28px; padding: 0; font-size: 0.9rem; border-radius: 50%;" onclick="this.closest('.can-do-ha-settings-modal-overlay').remove();">✕</button>
-                            </div>
+    dialog.innerHTML = `
+        <div class="ha-add-element-dialog" style="max-width: 480px;" onclick="event.stopPropagation();">
+            <div class="ha-dialog-header">
+                <div class="ha-dialog-header-top">
+                    <div class="ha-dialog-title-wrap">
+                        <span class="can-do-ha-pill act-pill">Home Assistant</span>
+                        <h3 class="ha-dialog-title">Home Assistant Integration</h3>
+                    </div>
+                    <button type="button" class="ha-dialog-close-btn" onclick="const d = this.closest('dialog'); if (d) { d.close(); d.remove(); }" title="Close dialog">✕</button>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    "${escapeHtml(ruleName)}"
+                </div>
+            </div>
+            <div class="ha-dialog-body" style="padding: 1.25rem; gap: 1.1rem; display: flex; flex-direction: column;">
+                <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="can_do_modal_ha_expose" ${currentExpose ? "checked" : ""} style="width: 18px; height: 18px; margin-top: 2px; accent-color: var(--md-sys-color-primary); cursor: pointer;">
+                    <div>
+                        <span style="font-weight: 600; font-size: 0.9rem; color: var(--text-heading); display: block;">Expose to Home Assistant</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Creates an interactive button or switch entity via MQTT discovery for this automation rule.</span>
+                    </div>
+                </label>
 
-                            <div style="display: flex; flex-direction: column; gap: 1.1rem;">
-                                <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; user-select: none;">
-                                    <input type="checkbox" id="can_do_modal_ha_expose" ${currentExpose ? "checked" : ""} style="width: 18px; height: 18px; margin-top: 2px; accent-color: var(--md-sys-color-primary); cursor: pointer;">
-                                    <div>
-                                        <span style="font-weight: 600; font-size: 0.9rem; color: var(--text-heading); display: block;">Expose to Home Assistant</span>
-                                        <span style="font-size: 0.75rem; color: var(--text-muted);">Creates an interactive button or switch entity via MQTT discovery for this automation rule.</span>
-                                    </div>
-                                </label>
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; color: var(--text-heading); margin-bottom: 0.35rem;">
+                        Material Design Icon (MDI):
+                    </label>
+                    <input type="text" id="can_do_modal_ha_icon" value="${escapeHtml(currentIcon)}" placeholder="mdi:car-defrost-rear" style="width: 100%; box-sizing: border-box; font-family: monospace; font-size: 0.88rem; padding: 0.45rem 0.6rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-heading);">
+                    <span style="font-size: 0.73rem; color: var(--text-muted); margin-top: 3px; display: block;">Specify any standard icon from <a href="https://pictogrammers.com/library/mdi/" target="_blank" rel="noopener" style="color: var(--md-sys-color-primary); text-decoration: underline;">pictogrammers.com/mdi</a></span>
 
-                                <div>
-                                    <label style="display: block; font-weight: 600; font-size: 0.85rem; color: var(--text-heading); margin-bottom: 0.35rem;">
-                                        Material Design Icon (MDI):
-                                    </label>
-                                    <input type="text" id="can_do_modal_ha_icon" value="${currentIcon}" placeholder="mdi:car-defrost-rear" style="width: 100%; box-sizing: border-box; font-family: monospace; font-size: 0.88rem; padding: 0.45rem 0.6rem; border: 1px solid var(--border-color); border-radius: 6px;">
-                                    <span style="font-size: 0.73rem; color: var(--text-muted); margin-top: 3px; display: block;">Specify any standard icon from <a href="https://pictogrammers.com/library/mdi/" target="_blank" rel="noopener" style="color: var(--md-sys-color-primary); text-decoration: underline;">pictogrammers.com/mdi</a></span>
+                    <div style="margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center;">
+                        <span style="font-size: 0.72rem; font-weight: 600; color: var(--text-muted); margin-right: 2px;">Quick Pick:</span>
+                        <button type="button" class="dash-outline-btn" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-defrost-rear'">Defrost</button>
+                        <button type="button" class="dash-outline-btn" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-electric'">EV Battery</button>
+                        <button type="button" class="dash-outline-btn" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:air-conditioner'">Climate</button>
+                        <button type="button" class="dash-outline-btn" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-door-lock'">Locks</button>
+                        <button type="button" class="dash-outline-btn" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-back'">Trunk</button>
+                        <button type="button" class="dash-outline-btn" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-light-high'">Lights</button>
+                        <button type="button" class="dash-outline-btn" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:flash'">Generic</button>
+                    </div>
+                </div>
 
-                                    <div style="margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center;">
-                                        <span style="font-size: 0.72rem; font-weight: 600; color: var(--text-muted); margin-right: 2px;">Quick Pick:</span>
-                                        <button type="button" class="system-button" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-defrost-rear'">Defrost</button>
-                                        <button type="button" class="system-button" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-electric'">EV Battery</button>
-                                        <button type="button" class="system-button" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:air-conditioner'">Climate</button>
-                                        <button type="button" class="system-button" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-door-lock'">Locks</button>
-                                        <button type="button" class="system-button" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-back'">Trunk</button>
-                                        <button type="button" class="system-button" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:car-light-high'">Lights</button>
-                                        <button type="button" class="system-button" style="padding: 2px 7px; font-size: 0.74rem;" onclick="document.getElementById('can_do_modal_ha_icon').value='mdi:flash'">Generic</button>
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.8rem; border-top: 1px solid var(--border-color); padding-top: 0.9rem;">
-                                    <button type="button" class="system-button" onclick="this.closest('.can-do-ha-settings-modal-overlay').remove();">Cancel</button>
-                                    <button type="button" class="primary-button" style="font-weight: 600; margin: 0;" onclick="saveCanDoHaSettingsModal(this, window._activeHaTargetCard);">Save HA Settings</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.8rem; border-top: 1px solid var(--border-color); padding-top: 0.9rem;">
+                    <button type="button" class="dash-outline-btn" onclick="const d = this.closest('dialog'); if (d) { d.close(); d.remove(); }">Cancel</button>
+                    <button type="button" class="dash-action-btn" style="font-weight: 600; margin: 0;" onclick="saveCanDoHaSettingsModal(this, window._activeHaTargetCard);">Save HA Settings</button>
+                </div>
+            </div>
+        </div>
+    `;
 
     window._activeHaTargetCard = card;
-    document.body.appendChild(overlay);
+    document.body.appendChild(dialog);
+    if (typeof dialog.showModal === "function") {
+        dialog.showModal();
+    }
 
-    overlay.addEventListener("click", (e) => {
-        if (e.target === overlay) overlay.remove();
-    });
+    dialog.onclick = (e) => {
+        if (e.target === dialog) {
+            if (typeof dialog.close === "function") dialog.close();
+            dialog.remove();
+        }
+    };
+    dialog.onclose = () => dialog.remove();
 }
 
 function saveCanDoHaSettingsModal(btn, card) {
     if (!card) {
         card = window._activeHaTargetCard;
     }
-    const modal = btn ? btn.closest(".can-do-ha-settings-modal-overlay") : document.querySelector(".can-do-ha-settings-modal-overlay");
-    if (!card || !modal) return;
+    const dialog = btn ? btn.closest("dialog") : document.querySelector("dialog");
+    if (!card || !dialog) return;
 
-    const exposeCb = modal.querySelector("#can_do_modal_ha_expose");
-    const iconInput = modal.querySelector("#can_do_modal_ha_icon");
+    const exposeCb = dialog.querySelector("#can_do_modal_ha_expose");
+    const iconInput = dialog.querySelector("#can_do_modal_ha_icon");
 
     card.dataset.haExpose = (exposeCb && exposeCb.checked) ? "true" : "false";
     card.dataset.haIcon = (iconInput && iconInput.value.trim()) ? iconInput.value.trim() : "mdi:car-defrost-rear";
 
-    modal.remove();
+    if (typeof dialog.close === "function") dialog.close();
+    dialog.remove();
     autoSaveCanDoRules("Updated Home Assistant settings for " + (card.querySelector(".can-do-name")?.value || "rule"), "blue");
+}
+
+function getExposedCatalogCategories() {
+    try {
+        const saved = localStorage.getItem("wican_ha_exposed_catalog_cats");
+        if (saved) return JSON.parse(saved);
+    } catch (e) { }
+    return { doors: true, locks: true, battery: true, climate: true, seats: false, dynamics: false };
+}
+
+function saveExposedCatalogCategories(cats) {
+    try {
+        localStorage.setItem("wican_ha_exposed_catalog_cats", JSON.stringify(cats));
+    } catch (e) { }
 }
 
 function toggleCanDoGlobalSettingsModal() {
     document.querySelectorAll(".can-do-global-settings-modal-overlay").forEach(el => el.remove());
 
     const currentUnit = getUnitSystem();
+    const exposedCats = getExposedCatalogCategories();
 
     const overlay = document.createElement("div");
     overlay.className = "can-do-global-settings-modal-overlay ha-add-element-dialog-overlay";
@@ -8679,8 +9323,43 @@ function toggleCanDoGlobalSettingsModal() {
                                     <span style="font-size: 0.74rem; color: var(--text-muted);">Trim variants enable vehicle-specific features like ventilated seats, AWD, or HUD.</span>
                                 </div>
 
+                                <!-- Home Assistant Catalog Entity Exposure -->
+                                <div style="border-top: 1px dashed var(--border-color); padding-top: 0.8rem; margin-top: 0.2rem;">
+                                    <label style="font-weight: 600; font-size: 0.88rem; color: var(--text-heading); display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                                        <span>Home Assistant Vehicle State Exposure</span>
+                                    </label>
+                                    <span style="font-size: 0.74rem; color: var(--text-muted); display: block; margin-bottom: 0.6rem;">Select which catalog vehicle signal categories are automatically exposed as Home Assistant sensors:</span>
+
+                                    <div id="ha_cat_exposure_grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.82rem; color: var(--text-heading);">
+                                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                                            <input type="checkbox" id="ha_cat_doors" ${exposedCats.doors ? "checked" : ""} style="accent-color: var(--md-sys-color-primary);">
+                                            <span>Door &amp; Hatch States</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                                            <input type="checkbox" id="ha_cat_locks" ${exposedCats.locks ? "checked" : ""} style="accent-color: var(--md-sys-color-primary);">
+                                            <span>Door Lock Status</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                                            <input type="checkbox" id="ha_cat_battery" ${exposedCats.battery ? "checked" : ""} style="accent-color: var(--md-sys-color-primary);">
+                                            <span>Battery SOC &amp; Charging</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                                            <input type="checkbox" id="ha_cat_climate" ${exposedCats.climate ? "checked" : ""} style="accent-color: var(--md-sys-color-primary);">
+                                            <span>Climate &amp; Temps</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;" id="lbl_ha_cat_seats">
+                                            <input type="checkbox" id="ha_cat_seats" ${exposedCats.seats ? "checked" : ""} style="accent-color: var(--md-sys-color-primary);">
+                                            <span>Seat &amp; Wheel Comfort</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                                            <input type="checkbox" id="ha_cat_dynamics" ${exposedCats.dynamics ? "checked" : ""} style="accent-color: var(--md-sys-color-primary);">
+                                            <span>Gears &amp; Speed</span>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <!-- Imperial / Metric Unit System -->
-                                <div class="ha-form-row" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                <div class="ha-form-row" style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.4rem;">
                                     <label style="font-weight: 600; font-size: 0.85rem; color: var(--text-heading);">Measurement Units:</label>
                                     <select id="can_do_unit_system" class="ha-form-select" onchange="changeUnitSystem(this.value)" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); font-size: 0.88rem; color: var(--text-heading); box-sizing: border-box;">
                                         <option value="metric" ${currentUnit === "metric" ? "selected" : ""}>Metric (°C, km/h, bar, kPa)</option>
@@ -8714,8 +9393,46 @@ function toggleCanDoGlobalSettingsModal() {
     // Populate vehicle make/model/trim dropdowns from catalog
     try {
         populateVehicleDropdowns(getCatalogVehicles());
+        updateVehicleFeatureGatingUI();
     } catch (e) {
         console.error("Error populating vehicle dropdowns:", e);
+    }
+}
+
+function updateVehicleFeatureGatingUI() {
+    try {
+        const modelSel = document.getElementById("can_do_vehicle_model");
+        const trimSel = document.getElementById("can_do_vehicle_trim");
+        if (!modelSel || !trimSel) return;
+
+        const selectedTrimId = trimSel.value || modelSel.value;
+        const vehicles = (typeof getCatalogVehicles === "function") ? getCatalogVehicles() : [];
+        const activeVehicle = vehicles.find(v => v.id === selectedTrimId || v.family === selectedTrimId) || vehicles[0];
+
+        if (activeVehicle && activeVehicle.features) {
+            const seatsCb = document.getElementById("ha_cat_seats");
+            const seatsLbl = document.getElementById("lbl_ha_cat_seats");
+            const hasSeatsFeature = activeVehicle.features.includes("heated_seats") || activeVehicle.features.includes("ventilated_seats") || activeVehicle.features.includes("heated_wheel");
+
+            if (seatsCb) {
+                if (!hasSeatsFeature) {
+                    seatsCb.checked = false;
+                    seatsCb.disabled = true;
+                    if (seatsLbl) {
+                        seatsLbl.style.opacity = "0.5";
+                        seatsLbl.title = "Not supported by selected vehicle trim";
+                    }
+                } else {
+                    seatsCb.disabled = false;
+                    if (seatsLbl) {
+                        seatsLbl.style.opacity = "1.0";
+                        seatsLbl.title = "";
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.warn("Failed to gate HA feature categories by vehicle:", err);
     }
 }
 
@@ -8725,8 +9442,21 @@ function saveCanDoGlobalSettings(btn) {
         if (urlInput) {
             saveCanDoCatalogUrl(urlInput.value);
         }
+
+        const overlay = btn ? btn.closest(".can-do-global-settings-modal-overlay") : document.querySelector(".can-do-global-settings-modal-overlay");
+        if (overlay) {
+            const cats = {
+                doors: overlay.querySelector("#ha_cat_doors")?.checked ?? true,
+                locks: overlay.querySelector("#ha_cat_locks")?.checked ?? true,
+                battery: overlay.querySelector("#ha_cat_battery")?.checked ?? true,
+                climate: overlay.querySelector("#ha_cat_climate")?.checked ?? true,
+                seats: overlay.querySelector("#ha_cat_seats")?.checked ?? false,
+                dynamics: overlay.querySelector("#ha_cat_dynamics")?.checked ?? false
+            };
+            saveExposedCatalogCategories(cats);
+        }
     } catch (e) {
-        console.error("Error saving catalog URL:", e);
+        console.error("Error saving catalog settings:", e);
     }
     const overlay = btn ? btn.closest(".can-do-global-settings-modal-overlay") : document.querySelector(".can-do-global-settings-modal-overlay");
     if (overlay) {
@@ -9139,6 +9869,7 @@ function showAutomationsGlobalMenu(btn, event) {
     setTimeout(() => document.addEventListener("click", closeHandler), 10);
 }
 
+
 /* === js/can_do/rules_engine.js === */
 function addCanDoRuleUI(ruleData = {}, isCollapsed = true, shouldScroll = false, isNew = false) {
     const container = document.getElementById("can_do_rules_container");
@@ -9220,6 +9951,16 @@ function addCanDoRuleUI(ruleData = {}, isCollapsed = true, shouldScroll = false,
                                 </div>
                             </div>
                             <div class="can-do-section-body">
+                                <div class="can-do-trig-combine-wrap">
+                                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                                        <span style="font-size: 0.82rem; font-weight: 700; color: var(--m3-tonal-when-color);">Trigger Mode:</span>
+                                    </div>
+                                    <div class="can-do-trig-mode-group">
+                                        <input type="hidden" class="can-do-trig-combine-mode" value="${(ruleData.trigger_mode === 'all' || ruleData.trigger_mode === 'and' || ruleData.trigger_mode === 'combo') ? 'all' : 'any'}">
+                                        <button type="button" class="system-button can-do-trig-mode-btn ${(!ruleData.trigger_mode || ruleData.trigger_mode === 'any' || ruleData.trigger_mode === 'or') ? 'active' : ''}" onclick="setCanDoTriggerMode(this, 'any')">OR (Any Trigger)</button>
+                                        <button type="button" class="system-button can-do-trig-mode-btn ${(ruleData.trigger_mode === 'all' || ruleData.trigger_mode === 'and' || ruleData.trigger_mode === 'combo') ? 'active' : ''}" onclick="setCanDoTriggerMode(this, 'all')">AND (All Held / Combo)</button>
+                                    </div>
+                                </div>
                                 <div class="can-do-triggers-container can-do-tree-connect"></div>
                                 <button type="button" class="ha-section-add-btn accent-trig" onclick="openAddAutomationElementDialog('trigger', this.closest('.can-do-section-box').querySelector('.can-do-triggers-container'), this.closest('.can-do-rule-card'))">
                                     <svg><use href="#icon-plus"/></svg>
@@ -9444,7 +10185,7 @@ function renderTrigPresetOptionsHTML(selectedIdxStr = "") {
     const { builtIn, custom } = getFilteredTriggerPresets();
     let html = '<option value="">-- Select from Catalog --</option>';
     if (custom.length > 0) {
-        html += '<optgroup label="⭐ My Saved Triggers">';
+        html += '<optgroup label="My Saved Triggers">';
         custom.forEach((p, idx) => {
             const val = `c_${idx}`;
             html += `<option value="${val}" ${selectedIdxStr === val ? "selected" : ""}>${p.name}</option>`;
@@ -9474,48 +10215,93 @@ function renderTrigPresetOptionsHTML(selectedIdxStr = "") {
     return html;
 }
 
-function findMatchingActionPresetVal(data) {
+function findMatchingTriggerPresetVal(data) {
     if (!data) return "";
     if (data.preset_val) return data.preset_val;
+    const { builtIn, custom } = getFilteredTriggerPresets();
+    if (data.id) {
+        const cIdx = custom.findIndex(p => p.id === data.id);
+        if (cIdx !== -1) return `c_${cIdx}`;
+        const bIdx = builtIn.findIndex(p => p.id === data.id);
+        if (bIdx !== -1) return `b_${bIdx}`;
+    }
+    const dataCanId = (data.can_id || data.state_can_id || data.action_can_id || "").toLowerCase();
+    const dataFrom = data.from_payload || "";
+    const dataTo = data.to_payload || data.match_payload || "";
+    if (dataCanId) {
+        for (let i = 0; i < custom.length; i++) {
+            const p = custom[i];
+            const pCanId = (p.state_can_id || p.action_can_id || p.can_id || "").toLowerCase();
+            if (pCanId === dataCanId) {
+                if (!dataTo || p.to_payload === dataTo || p.match_payload === dataTo || (p.options && p.options.some(o => (o.to_payload === dataTo || o.match_payload === dataTo)))) {
+                    return `c_${i}`;
+                }
+            }
+        }
+        for (let i = 0; i < builtIn.length; i++) {
+            const p = builtIn[i];
+            const pCanId = (p.state_can_id || p.action_can_id || p.can_id || "").toLowerCase();
+            if (pCanId === dataCanId) {
+                if (!dataTo || p.to_payload === dataTo || p.match_payload === dataTo || (p.options && p.options.some(o => (o.to_payload === dataTo || o.match_payload === dataTo)))) {
+                    return `b_${i}`;
+                }
+            }
+        }
+    }
+    return "";
+}
+
+function findMatchingActionPresetVal(data) {
+    if (!data) return "";
     const cats = getFilteredActionPresets();
 
-    // 1. Check by explicit preset_name / preset_id
-    if (data.preset_name || data.preset_id) {
+    // 1. Check by explicit preset_id / id / preset_name
+    const targetId = data.preset_id || data.id;
+    const targetName = data.preset_name || data.name;
+    if (targetId || targetName) {
         for (let cIdx = 0; cIdx < cats.length; cIdx++) {
             const cat = cats[cIdx];
             for (let pIdx = 0; pIdx < cat.presets.length; pIdx++) {
                 const p = cat.presets[pIdx];
-                if ((data.preset_id && p.id === data.preset_id) || (data.preset_name && (p.name === data.preset_name || p.name_imperial === data.preset_name))) {
+                if ((targetId && p.id === targetId) || (targetName && (p.name === targetName || p.name_imperial === targetName))) {
                     return `${cIdx}:${pIdx}`;
                 }
             }
         }
     }
 
-    // 2. Smart Fingerprint Match: type / can_id / popup_message / precon_mode
+    // 2. Validate data.preset_val
+    if (data.preset_val) {
+        const parts = data.preset_val.split(/[:_]/);
+        const pObj = cats[parseInt(parts[0])]?.presets[parseInt(parts[1])];
+        if (pObj) return data.preset_val;
+    }
+
+    // 3. Smart Fingerprint Match: type / action_can_id / precon_mode / popup_message
+    const dataCanId = (data.action_can_id || data.can_id || "").toLowerCase();
     for (let cIdx = 0; cIdx < cats.length; cIdx++) {
         const cat = cats[cIdx];
         for (let pIdx = 0; pIdx < cat.presets.length; pIdx++) {
             const p = cat.presets[pIdx];
-            if (p.type === "precondition" && data.type === "precondition") {
-                if (p.precon_mode === (data.precon_mode || "persistent")) return `${cIdx}:${pIdx}`;
+            const pCanId = (p.action_can_id || p.can_id || p.state_can_id || "").toLowerCase();
+
+            if (p.type === "precondition" || (p.options && p.options.some(o => o.precon_mode))) {
+                if (data.type === "precondition" || data.precon_mode) return `${cIdx}:${pIdx}`;
             }
-            if (p.type === "climate_target" && (data.type === "climate_target" || data.target_temp_c !== undefined)) {
+            if ((p.type === "climate_target" || p.target_temp_c !== undefined) && (data.type === "climate_target" || data.target_temp_c !== undefined)) {
                 return `${cIdx}:${pIdx}`;
             }
-            if (p.type === "popup" && (data.type === "popup" || data.popup_message)) {
-                if (p.popup_message && data.popup_message && (p.popup_message === data.popup_message || p.popup_message_imperial === data.popup_message)) {
-                    return `${cIdx}:${pIdx}`;
-                }
+            if ((p.type === "popup" || p.popup_message || (p.options && p.options.some(o => o.popup || o.popup_message))) && (data.type === "popup" || data.popup_message)) {
+                if (p.popup_message && (p.popup_message === data.popup_message || p.popup_message_imperial === data.popup_message)) return `${cIdx}:${pIdx}`;
+                if (p.options && p.options.some(o => (o.popup && o.popup === data.popup_message) || (o.popup_message && o.popup_message === data.popup_message))) return `${cIdx}:${pIdx}`;
             }
-            if (p.can_id && data.can_id && p.can_id.toLowerCase() === data.can_id.toLowerCase()) {
-                if (p.popup_message && data.popup_message && p.popup_message === data.popup_message) {
-                    return `${cIdx}:${pIdx}`;
+
+            if (pCanId && dataCanId && pCanId === dataCanId) {
+                if (p.options && Array.isArray(p.options)) {
+                    if (data.opt_label && p.options.some(o => o.label === data.opt_label)) return `${cIdx}:${pIdx}`;
+                    if (data.payload && p.options.some(o => (o.payload && data.payload.includes(o.payload)) || (o.steps && o.steps.some(s => data.payload.includes(s.payload))))) return `${cIdx}:${pIdx}`;
                 }
-                if (p.options && Array.isArray(p.options) && data.payload) {
-                    const hasMatchingPayload = p.options.some(o => o.payload && data.payload.includes(o.payload));
-                    if (hasMatchingPayload) return `${cIdx}:${pIdx}`;
-                }
+                return `${cIdx}:${pIdx}`;
             }
         }
     }
@@ -9554,12 +10340,14 @@ function findMatchingConditionPresetVal(data) {
             }
         }
     }
+    const dataCanId = (data.can_id || data.state_can_id || "").toLowerCase();
     for (let cIdx = 0; cIdx < cats.length; cIdx++) {
         const cat = cats[cIdx];
         for (let pIdx = 0; pIdx < cat.presets.length; pIdx++) {
             const p = cat.presets[pIdx];
+            const pCanId = (p.state_can_id || p.action_can_id || p.can_id || "").toLowerCase();
             if (p.type === "speed_zero" && data.type === "speed_zero") return `${cIdx}:${pIdx}`;
-            if (p.can_id && data.can_id && p.can_id.toLowerCase() === data.can_id.toLowerCase()) {
+            if (pCanId && dataCanId && pCanId === dataCanId) {
                 if (!p.match_payload || p.match_payload === data.match_payload) return `${cIdx}:${pIdx}`;
                 if (p.options && Array.isArray(p.options) && data.match_payload) {
                     const hasMatch = p.options.some(o => o.match_payload === data.match_payload);
@@ -9616,9 +10404,9 @@ function applyCanDoCondPreset(selectElem, notify = true) {
         const exp = item.querySelector(".can-do-cond-expr");
         if (exp) exp.value = preset.expression;
     }
-    if (preset.can_id) {
+    if (preset.state_can_id) {
         const cid = item.querySelector(".can-do-cond-can-id");
-        if (cid) cid.value = preset.can_id;
+        if (cid) cid.value = preset.state_can_id;
     }
     if (preset.match_payload) {
         setByteGridString(item, "can-do-cond-can", preset.match_payload);
@@ -9757,9 +10545,10 @@ function applyCanDoTrigPreset(selectElem, notify = true) {
     }
 
     if (preset) {
-        if (preset.can_id) {
+        const triggerCanId = preset.state_can_id || preset.action_can_id || preset.can_id;
+        if (triggerCanId) {
             const cid = item.querySelector(".can-do-trig-can-id");
-            if (cid) cid.value = preset.can_id;
+            if (cid) cid.value = triggerCanId;
         }
         if (preset.bus !== undefined) {
             const b = item.querySelector(".can-do-trig-bus");
@@ -9768,8 +10557,9 @@ function applyCanDoTrigPreset(selectElem, notify = true) {
         if (preset.from_payload !== undefined) {
             setByteGridString(item, "can-do-trig-from", preset.from_payload);
         }
-        if (preset.to_payload !== undefined) {
-            setByteGridString(item, "can-do-trig-to", preset.to_payload);
+        const toP = preset.to_payload !== undefined ? preset.to_payload : (preset.match_payload !== undefined ? preset.match_payload : preset.payload);
+        if (toP !== undefined) {
+            setByteGridString(item, "can-do-trig-to", toP);
         }
         if (preset.id) {
             const idInput = item.querySelector(".can-do-trig-id");
@@ -9855,7 +10645,13 @@ function applyCanDoTrigOptionPill(btn, pType, pIdx, optIdx) {
 
     // Apply payloads to byte grids
     if (opt.from_payload !== undefined) setByteGridString(item, "can-do-trig-from", opt.from_payload);
-    if (opt.to_payload !== undefined) setByteGridString(item, "can-do-trig-to", opt.to_payload);
+    const optTo = opt.to_payload !== undefined ? opt.to_payload : (opt.match_payload !== undefined ? opt.match_payload : opt.payload);
+    if (optTo !== undefined) setByteGridString(item, "can-do-trig-to", optTo);
+    const optCanId = opt.state_can_id || opt.action_can_id || opt.can_id;
+    if (optCanId) {
+        const cid = item.querySelector(".can-do-trig-can-id");
+        if (cid) cid.value = optCanId;
+    }
 
     showNotification(`Selected ${preset.name}: ${opt.label}`, "blue", 2500);
     const card = item.closest(".can-do-rule-card");
@@ -9910,7 +10706,7 @@ function toggleCanDoItemDetails(btn) {
 
             const showClimate = preset && (preset.type === "climate_target" || preset.target_temp_c !== undefined || preset.target_temp_f !== undefined);
             const showPrecon = newOpen && preset && (preset.type === "precondition" || preset.precon_mode !== undefined);
-            const showCan = newOpen && preset && (preset.type === "can_tx" || preset.can_id !== undefined || preset.steps !== undefined || (preset.options && preset.options.some(o => o.payload)));
+            const showCan = newOpen && preset && (preset.type === "can_tx" || (preset.action_can_id !== undefined || preset.state_can_id !== undefined) || preset.steps !== undefined || (preset.options && preset.options.some(o => o.payload)));
             const showPopup = newOpen && preset && (preset.type === "popup" || preset.popup_message !== undefined || (preset.options && preset.options.some(o => o.popup)));
             const showGeneral = newOpen && (!preset || (!showClimate && !showPrecon));
 
@@ -10533,7 +11329,30 @@ function setCanDoTriggerMode(btn, mode) {
     const hidden = group.querySelector(".can-do-trig-combine-mode");
     if (hidden) hidden.value = mode;
     const card = btn.closest(".can-do-rule-card");
-    if (card) updateCanDoRuleSummaryPill(card);
+    if (card) {
+        updateCanDoItemConnectors(card);
+        updateCanDoRuleSummaryPill(card);
+        if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
+    }
+}
+
+function toggleCanDoTriggerCombineMode(pillElem) {
+    const card = pillElem.closest(".can-do-rule-card");
+    if (!card) return;
+    const hidden = card.querySelector(".can-do-trig-combine-mode");
+    const current = hidden?.value || "any";
+    const next = (current === "all" || current === "and" || current === "combo") ? "any" : "all";
+    if (hidden) hidden.value = next;
+    const group = card.querySelector(".can-do-trig-mode-group");
+    if (group) {
+        group.querySelectorAll(".can-do-trig-mode-btn").forEach(btn => {
+            const isAnyBtn = btn.getAttribute("onclick")?.includes("'any'");
+            btn.classList.toggle("active", next === "any" ? isAnyBtn : !isAnyBtn);
+        });
+    }
+    updateCanDoItemConnectors(card);
+    updateCanDoRuleSummaryPill(card);
+    if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
 }
 
 function cloneCanDoTriggerItem(btn) {
@@ -10572,32 +11391,26 @@ function renderCanDoTriggerItem(container, data = {}) {
         }
     });
 
-    // Match initial preset index if data.id matches a known preset
+    // Match initial preset index if data matches a known preset
     const { builtIn, custom } = getFilteredTriggerPresets();
-    let selectedPresetVal = "";
+    let selectedPresetVal = findMatchingTriggerPresetVal(data);
     let matchedPreset = null;
-    if (data.id) {
-        const cIdx = custom.findIndex(p => p.id === data.id);
-        if (cIdx !== -1) {
-            selectedPresetVal = `c_${cIdx}`;
-            matchedPreset = custom[cIdx];
-        } else {
-            const bIdx = builtIn.findIndex(p => p.id === data.id);
-            if (bIdx !== -1) {
-                selectedPresetVal = `b_${bIdx}`;
-                matchedPreset = builtIn[bIdx];
-            }
-        }
+    if (selectedPresetVal.startsWith("c_")) {
+        const cIdx = parseInt(selectedPresetVal.replace("c_", ""));
+        matchedPreset = custom[cIdx];
+    } else if (selectedPresetVal.startsWith("b_")) {
+        const bIdx = parseInt(selectedPresetVal.replace("b_", ""));
+        matchedPreset = builtIn[bIdx];
     }
     if (!selectedPresetVal && (source === "preset" || !data.source) && builtIn.length > 0) {
         selectedPresetVal = "b_0";
         matchedPreset = builtIn[0];
     }
 
-    const canId = data.can_id || (matchedPreset ? matchedPreset.can_id : "0x448");
+    const canId = data.can_id || (matchedPreset ? (matchedPreset.state_can_id || matchedPreset.action_can_id || matchedPreset.can_id) : "0x448");
     const busVal = data.bus !== undefined ? data.bus : (matchedPreset && matchedPreset.bus !== undefined ? matchedPreset.bus : 0);
     const fromPayload = data.from_payload !== undefined ? data.from_payload : (matchedPreset ? (matchedPreset.from_payload || "") : "");
-    const toPayload = data.to_payload !== undefined ? data.to_payload : (data.match_payload !== undefined ? data.match_payload : (matchedPreset ? (matchedPreset.to_payload || "") : ""));
+    const toPayload = data.to_payload !== undefined ? data.to_payload : (data.match_payload !== undefined ? data.match_payload : (matchedPreset ? (matchedPreset.to_payload || matchedPreset.match_payload || "") : ""));
 
     itemDiv.innerHTML = `
                     <div class="can-do-subitem-header trig-header" onclick="toggleCanDoItemBody(this, event)" style="cursor: pointer;">
@@ -10931,7 +11744,7 @@ function renderCanDoConditionItem(container, data = {}) {
     } else if (data.match_payload) {
         cats.forEach((cat, catIdx) => {
             cat.presets.forEach((p, pIdx) => {
-                if (p.can_id && p.can_id === data.can_id && p.match_payload === data.match_payload) {
+                if (p.state_can_id && p.state_can_id === data.can_id && p.match_payload === data.match_payload) {
                     selectedPresetVal = `${catIdx}:${pIdx}`;
                     matchedPreset = p;
                 }
@@ -10943,7 +11756,7 @@ function renderCanDoConditionItem(container, data = {}) {
         matchedPreset = cats[0].presets[0];
     }
 
-    const canId = data.can_id || (matchedPreset ? matchedPreset.can_id : "0x448");
+    const canId = data.can_id || (matchedPreset ? matchedPreset.state_can_id : "0x448");
     const matchPayload = data.match_payload || (matchedPreset ? (matchedPreset.match_payload || "") : "");
 
     itemDiv.innerHTML = `
@@ -11828,11 +12641,25 @@ function renderCanDoActionItem(container, data = {}) {
                             <!-- CAN ID -->
                             <div class="ha-form-row act-field-can ${type === "can_tx" ? "" : "hidden"}">
                                 <div class="ha-form-label-col">
-                                    <span class="ha-form-label">Response CAN ID (Hex)</span>
-                                    <span class="ha-form-sublabel">Arbitration ID to transmit on vehicle CAN network.</span>
+                                    <span class="ha-form-label">Action CAN ID (Tx)</span>
+                                    <span class="ha-form-sublabel">Arbitration ID transmitted to the vehicle bus.</span>
                                 </div>
                                 <div class="ha-form-control-col">
-                                    <input type="text" class="ha-form-input can-do-act-can-id" value="${data.can_id || "0x652"}" placeholder="0x652" oninput="updateCanDoRuleSummaryPill(this.closest('.can-do-rule-card'))">
+                                    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                                        <input type="text" class="ha-form-input can-do-act-can-id" value="${data.action_can_id || data.can_id || "0x652"}" placeholder="0x652" oninput="updateCanDoRuleSummaryPill(this.closest('.can-do-rule-card'))">
+                                        <span class="can-do-act-state-note" style="font-size: 0.76rem; color: var(--text-muted); white-space: nowrap;"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- State CAN ID -->
+                            <div class="ha-form-row act-field-can ${type === "can_tx" ? "" : "hidden"}">
+                                <div class="ha-form-label-col">
+                                    <span class="ha-form-label">State CAN ID (Rx / Feedback)</span>
+                                    <span class="ha-form-sublabel">Optional CAN arbitration ID where vehicle reports resulting state.</span>
+                                </div>
+                                <div class="ha-form-control-col">
+                                    <input type="text" class="ha-form-input can-do-act-state-can-id" value="${data.state_can_id || (matchedPreset ? (matchedPreset.state_can_id || "") : "")}" placeholder="e.g. 0x448 (Optional)" oninput="updateCanDoRuleSummaryPill(this.closest('.can-do-rule-card'))">
                                 </div>
                             </div>
 
@@ -11983,6 +12810,15 @@ function renderCanDoActionItem(container, data = {}) {
         renderCanDoPayloadStep(stepsContainer, { payload: "", repeat: 3 });
     }
     renumberCanDoPayloadSteps(stepsContainer);
+
+    // If preset is selected, initialize preset UI and options container
+    if (type === "preset" && selectedPresetVal) {
+        const picker = itemDiv.querySelector(".can-do-act-preset-picker");
+        if (picker) {
+            const requestedOpt = (data.opt_idx !== undefined) ? data.opt_idx : (data.opt_label || data.selected_option);
+            applyCanDoActionPreset(picker, false, requestedOpt);
+        }
+    }
 }
 
 function toggleCanDoActItemUI(selectElem) {
@@ -12557,10 +13393,80 @@ function addCanDoActionToIfThen(btn, branch) {
     updateCanDoSectionCountBadges(card);
 }
 
-function applyCanDoActionPreset(selectElem) {
+function renderCanDoActionOptionsGrid(preset, activeOptIdx, catIdx, pIdx, isImperial) {
+    const opts = preset.options || [];
+    if (opts.length === 0) return "";
+
+    let groups = null;
+    if (preset.id === "ev_charge_limits" || opts.every(o => o.label.startsWith("AC ") || o.label.startsWith("DC ") || o.label.startsWith("Both "))) {
+        groups = [
+            { title: "Level 2 (AC) Charging Limits", filter: o => o.label.startsWith("AC ") },
+            { title: "DC Fast Charging Limits", filter: o => o.label.startsWith("DC ") },
+            { title: "Combined (AC & DC) Limits", filter: o => o.label.startsWith("Both ") }
+        ];
+    } else if (preset.id.includes("seat") && opts.some(o => o.label.includes("Heat")) && opts.some(o => o.label.includes("Cool"))) {
+        groups = [
+            { title: "Power", filter: o => o.label === "Off" },
+            { title: "Seat Heating", filter: o => o.label.includes("Heat") },
+            { title: "Seat Ventilation", filter: o => o.label.includes("Cool") }
+        ];
+    }
+
+    const renderBtn = (opt, i) => {
+        const label = (isImperial && opt.label_imperial) ? opt.label_imperial : opt.label;
+        const isCur = (i === activeOptIdx);
+        return `
+            <button type="button" class="can-do-state-tile-btn can-do-opt-pill-btn ${isCur ? 'active' : ''}" 
+                data-opt-idx="${i}" data-opt-label="${opt.label}"
+                onclick="applyCanDoOptionPill(this, ${catIdx}, ${pIdx}, ${i})">
+                ${label}
+            </button>
+        `;
+    };
+
+    if (groups) {
+        return `
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+                <div class="can-do-options-label" style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted);">
+                    <span>Select Target Setting:</span>
+                </div>
+                ${groups.map(grp => {
+                    const grpOpts = [];
+                    opts.forEach((o, i) => {
+                        if (grp.filter(o)) grpOpts.push({ opt: o, idx: i });
+                    });
+                    if (grpOpts.length === 0) return "";
+                    return `
+                        <div class="can-do-opt-group" style="background: rgba(0,0,0,0.03); border-radius: 6px; padding: 6px 8px; border: 1px solid var(--border-color);">
+                            <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-heading); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">${grp.title}</div>
+                            <div class="can-do-options-grid grid-many" style="gap: 4px;">
+                                ${grpOpts.map(({ opt, idx }) => renderBtn(opt, idx)).join("")}
+                            </div>
+                        </div>
+                    `;
+                }).join("")}
+            </div>
+        `;
+    }
+
+    const gridClass = opts.length > 4 ? "grid-many" : "grid-few";
+    return `
+        <div style="width: 100%;">
+            <div class="can-do-options-label" style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">
+                <span>Select Target Setting:</span>
+            </div>
+            <div class="can-do-options-grid ${gridClass}">
+                ${opts.map((opt, i) => renderBtn(opt, i)).join("")}
+            </div>
+        </div>
+    `;
+}
+
+function applyCanDoActionPreset(selectElem, notify = true, requestedOpt = undefined) {
     const val = selectElem.value;
     const item = selectElem.closest(".can-do-action-item");
     if (!item) return;
+
     if (!val) {
         item.querySelectorAll(".act-field-climate").forEach(el => el.classList.add("hidden"));
         item.querySelectorAll(".act-field-precon").forEach(el => el.classList.add("hidden"));
@@ -12568,6 +13474,7 @@ function applyCanDoActionPreset(selectElem) {
         item.querySelectorAll(".act-field-popup").forEach(el => el.classList.add("hidden"));
         const optionsBox = item.querySelector(".can-do-act-options-container");
         if (optionsBox) optionsBox.style.display = "none";
+        togglePresetToolbarButtons(item);
         return;
     }
 
@@ -12584,9 +13491,9 @@ function applyCanDoActionPreset(selectElem) {
 
     // Determine which parameter sections to display
     const showClimate = (preset.type === "climate_target" || preset.target_temp_c !== undefined || preset.target_temp_f !== undefined);
-    const showPrecon = (preset.type === "precondition" || preset.precon_mode !== undefined);
-    const showCan = (preset.type === "can_tx" || preset.can_id !== undefined || preset.steps !== undefined || (preset.options && preset.options.some(o => o.payload)));
-    const showPopup = (preset.type === "popup" || preset.popup_message !== undefined || (preset.options && preset.options.some(o => o.popup)));
+    const showPrecon = (preset.type === "precondition" || preset.precon_mode !== undefined || (preset.options && preset.options.some(o => o.precon_mode)));
+    const showCan = (preset.type === "can_tx" || (preset.action_can_id !== undefined || preset.state_can_id !== undefined) || preset.steps !== undefined || (preset.options && preset.options.some(o => o.payload || o.steps)));
+    const showPopup = (preset.type === "popup" || preset.popup_message !== undefined || (preset.options && preset.options.some(o => o.popup || o.popup_message)));
 
     const isDetailsOpen = item.dataset.detailsOpen === "true";
     item.querySelectorAll(".act-field-climate").forEach(el => el.classList.toggle("hidden", !showClimate));
@@ -12596,15 +13503,31 @@ function applyCanDoActionPreset(selectElem) {
 
     const optionsBox = item.querySelector(".can-do-act-options-container");
 
+    // Determine active option index
+    let activeOptIdx = -1;
+    if (preset.options && Array.isArray(preset.options) && preset.options.length > 0) {
+        if (typeof requestedOpt === "number" && requestedOpt >= 0 && requestedOpt < preset.options.length) {
+            activeOptIdx = requestedOpt;
+        } else if (typeof requestedOpt === "string" && requestedOpt) {
+            activeOptIdx = preset.options.findIndex(o => o.label === requestedOpt || o.label_imperial === requestedOpt);
+        }
+        if (activeOptIdx === -1) {
+            activeOptIdx = Math.max(0, preset.options.findIndex(o => o.default === true));
+        }
+    }
+    const activeOpt = (activeOptIdx >= 0) ? preset.options[activeOptIdx] : null;
+
     // Climate Target
     if (showClimate) {
         const tt = item.querySelector(".can-do-act-target-temp");
         if (tt) {
+            const tempValC = activeOpt?.target_temp_c !== undefined ? activeOpt.target_temp_c : preset.target_temp_c;
+            const tempValF = activeOpt?.target_temp_f !== undefined ? activeOpt.target_temp_f : preset.target_temp_f;
             if (isImperial) {
-                const f = preset.target_temp_f !== undefined ? preset.target_temp_f : (preset.target_temp_c !== undefined ? Math.round(preset.target_temp_c * 9 / 5 + 32) : 72);
+                const f = tempValF !== undefined ? tempValF : (tempValC !== undefined ? Math.round(tempValC * 9 / 5 + 32) : 72);
                 tt.value = Math.min(82, Math.max(62, f));
             } else {
-                const c = preset.target_temp_c !== undefined ? preset.target_temp_c : (preset.target_temp_f !== undefined ? Math.round(((preset.target_temp_f - 32) * 5 / 9) * 2) / 2 : 21.0);
+                const c = tempValC !== undefined ? tempValC : (tempValF !== undefined ? Math.round(((tempValF - 32) * 5 / 9) * 2) / 2 : 21.0);
                 tt.value = Math.min(28.0, Math.max(17.0, c));
             }
         }
@@ -12630,28 +13553,44 @@ function applyCanDoActionPreset(selectElem) {
     }
 
     // Preconditioning
-    if (preset.precon_mode) {
+    const preconMode = activeOpt?.precon_mode || preset.precon_mode;
+    if (preconMode) {
         const pm = item.querySelector(".can-do-act-precon-mode");
-        if (pm) pm.value = preset.precon_mode;
+        if (pm) pm.value = preconMode;
     }
-    if (preset.precon_press) {
+    const preconPress = activeOpt?.precon_press || preset.precon_press;
+    if (preconPress) {
         const pp = item.querySelector(".can-do-act-precon-press");
-        if (pp) pp.value = preset.precon_press;
+        if (pp) pp.value = preconPress;
     }
 
     // Popup message
-    if (preset.popup_message !== undefined) {
+    const popMsg = activeOpt ? ((isImperial && (activeOpt.popup_message_imperial || activeOpt.popup_imperial)) ? (activeOpt.popup_message_imperial || activeOpt.popup_imperial) : (activeOpt.popup_message || activeOpt.popup)) : ((isImperial && preset.popup_message_imperial) ? preset.popup_message_imperial : preset.popup_message);
+    if (popMsg !== undefined) {
         const pop = item.querySelector(".can-do-act-popup-msg");
-        if (pop) {
-            pop.value = (isImperial && preset.popup_message_imperial) ? preset.popup_message_imperial : preset.popup_message;
-        }
+        if (pop) pop.value = popMsg;
     }
 
     // CAN ID, bus, delay
-    if (preset.can_id) {
+    const effectiveCanId = activeOpt?.action_can_id || preset.action_can_id || preset.can_id || preset.state_can_id;
+    if (effectiveCanId) {
         const cid = item.querySelector(".can-do-act-can-id");
-        if (cid) cid.value = preset.can_id;
+        if (cid) cid.value = effectiveCanId;
     }
+    const targetStateCanId = activeOpt?.state_can_id || preset.state_can_id || "";
+    const scid = item.querySelector(".can-do-act-state-can-id");
+    if (scid && targetStateCanId) {
+        scid.value = targetStateCanId;
+    }
+    const stateNote = item.querySelector(".can-do-act-state-note");
+    if (stateNote) {
+        if (targetStateCanId) {
+            stateNote.innerHTML = `<span class="ha-status-pill green" style="font-size: 0.72rem; padding: 1px 6px;">Rx: ${targetStateCanId}</span>`;
+        } else {
+            stateNote.innerHTML = "";
+        }
+    }
+
     if (preset.bus !== undefined) {
         const b = item.querySelector(".can-do-act-bus");
         if (b) b.value = preset.bus.toString();
@@ -12678,76 +13617,50 @@ function applyCanDoActionPreset(selectElem) {
         if (wu) wu.value = preset.webhook_url;
     }
 
-    // Check if preset has options
+    // Populate steps & options UI
+    const stepsContainer = item.querySelector(".can-do-payload-steps-container");
     if (preset.options && Array.isArray(preset.options) && preset.options.length > 0) {
-        const defaultOptIdx = Math.max(0, preset.options.findIndex(o => o.default === true));
         if (optionsBox) {
             optionsBox.style.display = "block";
-            const gridClass = preset.options.length > 4 ? "grid-many" : "grid-few";
-            optionsBox.innerHTML = `
-                            <div style="width: 100%;">
-                                <div class="can-do-options-label">
-                                    <span>Target Value:</span>
-                                </div>
-                                <div class="can-do-options-grid ${gridClass}">
-                                    ${preset.options.map((opt, i) => {
-                const label = (isImperial && opt.label_imperial) ? opt.label_imperial : opt.label;
-                const isCur = (i === defaultOptIdx);
-                return `
-                                        <button type="button" class="can-do-state-tile-btn can-do-opt-pill-btn ${isCur ? 'active' : ''}" 
-                                            onclick="applyCanDoOptionPill(this, ${catIdx}, ${pIdx}, ${i})">
-                                            ${label}
-                                        </button>
-                                        `;
-            }).join("")}
-                                </div>
-                            </div>`;
+            optionsBox.innerHTML = renderCanDoActionOptionsGrid(preset, activeOptIdx, catIdx, pIdx, isImperial);
         }
-        const activeOpt = preset.options[defaultOptIdx] || preset.options[0];
-        if (activeOpt && activeOpt.payload) {
-            const stepsContainer = item.querySelector(".can-do-payload-steps-container");
-            if (stepsContainer) {
-                stepsContainer.innerHTML = "";
+        if (stepsContainer && activeOpt) {
+            stepsContainer.innerHTML = "";
+            if (activeOpt.steps && Array.isArray(activeOpt.steps)) {
+                activeOpt.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
+            } else if (activeOpt.payload) {
                 renderCanDoPayloadStep(stepsContainer, { payload: activeOpt.payload, repeat: 3 });
-                renderCanDoPayloadStep(stepsContainer, { payload: "00 00 00 00 00 00 00 00", repeat: 3 });
+            } else if (preset.steps && Array.isArray(preset.steps)) {
+                preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
             }
-        }
-        if (activeOpt && (activeOpt.target_temp_c !== undefined || activeOpt.target_temp_f !== undefined)) {
-            const tt = item.querySelector(".can-do-act-target-temp");
-            if (tt) {
-                if (isImperial) {
-                    const f = activeOpt.target_temp_f !== undefined ? activeOpt.target_temp_f : Math.round(activeOpt.target_temp_c * 9 / 5 + 32);
-                    tt.value = Math.min(82, Math.max(62, f));
-                } else {
-                    const c = activeOpt.target_temp_c !== undefined ? activeOpt.target_temp_c : Math.round(((activeOpt.target_temp_f - 32) * 5 / 9) * 2) / 2;
-                    tt.value = Math.min(28.0, Math.max(17.0, c));
-                }
-            }
-        }
-        if (activeOpt) {
-            const pop = item.querySelector(".can-do-act-popup-msg");
-            if (pop) {
-                if (isImperial && activeOpt.popup_imperial) pop.value = activeOpt.popup_imperial;
-                else if (activeOpt.popup) pop.value = activeOpt.popup;
-            }
+            renumberCanDoPayloadSteps(stepsContainer);
         }
     } else {
         if (optionsBox) {
             optionsBox.innerHTML = "";
             optionsBox.style.display = "none";
         }
-        if (preset.steps && Array.isArray(preset.steps)) {
-            const stepsContainer = item.querySelector(".can-do-payload-steps-container");
-            if (stepsContainer) {
-                stepsContainer.innerHTML = "";
-                preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
-            }
+        if (stepsContainer && preset.steps && Array.isArray(preset.steps)) {
+            stepsContainer.innerHTML = "";
+            preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
+            renumberCanDoPayloadSteps(stepsContainer);
         }
     }
 
+    // Update Header Title with active option badge
+    const titleSpan = item.querySelector(".can-do-subitem-title-act");
     const pName = (isImperial && preset.name_imperial) ? preset.name_imperial : preset.name;
-    showNotification("Applied action template: " + pName, "green", 3500);
+    const optLabel = activeOpt ? ((isImperial && activeOpt.label_imperial) ? activeOpt.label_imperial : activeOpt.label) : "";
+    if (titleSpan) {
+        titleSpan.innerHTML = `<span>${pName}</span>${optLabel ? ` <span class="ha-status-pill blue" style="font-size: 0.72rem; padding: 1px 7px;">${optLabel}</span>` : ""}`;
+    }
+
+    if (notify) showNotification("Applied action template: " + pName + (optLabel ? " (" + optLabel + ")" : ""), "green", 3500);
     togglePresetToolbarButtons(item);
+    const card = item.closest(".can-do-rule-card");
+    if (card && typeof updateCanDoRuleSummaryPill === "function") {
+        updateCanDoRuleSummaryPill(card);
+    }
 }
 
 function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
@@ -12762,20 +13675,35 @@ function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
     // Update active tile styling
     const box = item.querySelector(".can-do-act-options-container");
     if (box) {
-        box.querySelectorAll(".can-do-opt-pill-btn").forEach((b, i) => {
-            b.classList.toggle("active", i === optIdx);
+        box.querySelectorAll(".can-do-opt-pill-btn").forEach((b) => {
+            const idx = parseInt(b.dataset.optIdx);
+            b.classList.toggle("active", idx === optIdx);
             b.removeAttribute("style");
         });
     }
 
-    // Apply payload to byte steps (3x burst + idle release)
-    if (opt.payload) {
-        const stepsContainer = item.querySelector(".can-do-payload-steps-container");
-        if (stepsContainer) {
-            stepsContainer.innerHTML = "";
+    // Apply payload to byte steps
+    const stepsContainer = item.querySelector(".can-do-payload-steps-container");
+    if (stepsContainer) {
+        stepsContainer.innerHTML = "";
+        if (opt.steps && Array.isArray(opt.steps)) {
+            opt.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
+        } else if (opt.payload) {
             renderCanDoPayloadStep(stepsContainer, { payload: opt.payload, repeat: 3 });
-            renderCanDoPayloadStep(stepsContainer, { payload: "00 00 00 00 00 00 00 00", repeat: 3 });
+        } else if (preset.steps && Array.isArray(preset.steps)) {
+            preset.steps.forEach(s => renderCanDoPayloadStep(stepsContainer, s));
         }
+        renumberCanDoPayloadSteps(stepsContainer);
+    }
+
+    // Apply preconditioning mode / press
+    if (opt.precon_mode) {
+        const pm = item.querySelector(".can-do-act-precon-mode");
+        if (pm) pm.value = opt.precon_mode;
+    }
+    if (opt.precon_press) {
+        const pp = item.querySelector(".can-do-act-precon-press");
+        if (pp) pp.value = opt.precon_press;
     }
 
     // Apply target temp
@@ -12793,16 +13721,36 @@ function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
     }
 
     // Apply popup
-    if (isImperial && opt.popup_imperial) {
-        const pop = item.querySelector(".can-do-act-popup-msg");
-        if (pop) pop.value = opt.popup_imperial;
-    } else if (opt.popup) {
-        const pop = item.querySelector(".can-do-act-popup-msg");
-        if (pop) pop.value = opt.popup;
+    const pop = item.querySelector(".can-do-act-popup-msg");
+    if (pop) {
+        const popupMsg = (isImperial && (opt.popup_message_imperial || opt.popup_imperial)) ? (opt.popup_message_imperial || opt.popup_imperial) : (opt.popup_message || opt.popup);
+        if (popupMsg) pop.value = popupMsg;
     }
 
-    const label = (isImperial && opt.label_imperial) ? opt.label_imperial : opt.label;
+    // Apply CAN ID
+    const targetCanId = opt.action_can_id || preset.action_can_id || preset.can_id || preset.state_can_id;
+    const cid = item.querySelector(".can-do-act-can-id");
+    if (cid && targetCanId) {
+        cid.value = targetCanId;
+    }
+    const targetStateCanId = opt.state_can_id || preset.state_can_id || "";
+    const scid = item.querySelector(".can-do-act-state-can-id");
+    if (scid && targetStateCanId) {
+        scid.value = targetStateCanId;
+    }
+
+    // Update title and pill
+    const titleSpan = item.querySelector(".can-do-subitem-title-act");
     const pName = (isImperial && preset.name_imperial) ? preset.name_imperial : preset.name;
+    const label = (isImperial && opt.label_imperial) ? opt.label_imperial : opt.label;
+    if (titleSpan) {
+        titleSpan.innerHTML = `<span>${pName}</span> <span class="ha-status-pill blue" style="font-size: 0.72rem; padding: 1px 7px;">${label}</span>`;
+    }
+
+    const card = item.closest(".can-do-rule-card");
+    if (card && typeof updateCanDoRuleSummaryPill === "function") {
+        updateCanDoRuleSummaryPill(card);
+    }
     showNotification(`Selected ${pName}: ${label}`, "green", 2500);
 }
 
@@ -12819,6 +13767,7 @@ function insertCanDoPopupToken(elem, token) {
     input.selectionStart = input.selectionEnd = start + token.length;
     input.dispatchEvent(new Event("input", { bubbles: true }));
 }
+
 
 /* === js/can_do/storage.js === */
 // --- CAN DO PERSISTENCE, BACKUP & RESTORE ---
@@ -13258,8 +14207,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof initAppTheme === "function") initAppTheme();
     if (typeof initActiveTab === "function") initActiveTab();
 
-    const submitBtn = document.getElementById("submit_button");
-    if (submitBtn) submitBtn.disabled = true;
 
     // 2. Fetch device time and config
     if (typeof fetchDeviceTime === "function") fetchDeviceTime();
@@ -13291,6 +14238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         canDoFab.style.display = isAutoActive ? "inline-flex" : "none";
     }
 });
+
 </script>
 
     <!-- Home Assistant Style Floating Anchored Save FAB -->

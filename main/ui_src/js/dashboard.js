@@ -7,8 +7,6 @@ window._canDoStateCache = {};
 const DASH_WIDGET_CATALOG = {
     batt_12v: {
         id: "batt_12v", name: "12V Auxiliary Battery", icon: "", category: "Power",
-    batt_12v: {
-        id: "batt_12v", name: "12V Auxiliary Battery", icon: "", category: "Power",
         render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-battery-12v"/></svg> 12V Aux Battery</span>
                     <div class="dash-card-actions"><div id="dash_batt_status_badge" class="dash-status"><span class="status-dot green"></span> Healthy</div></div></div>
@@ -20,7 +18,7 @@ const DASH_WIDGET_CATALOG = {
         update: function (obj) {
             const el = document.getElementById("dash_batt_voltage_val"), bad = document.getElementById("dash_batt_status_badge"), gauge = document.getElementById("dash_batt_gauge");
             if (!obj || obj.batt_voltage === undefined || obj.batt_voltage === null) return;
-            if (el) el.textContent = obj.batt_voltage + " V";
+            if (el) el.textContent = obj.batt_voltage;
             const v = parseFloat(obj.batt_voltage);
             if (!isNaN(v)) {
                 if (bad) {
@@ -59,6 +57,17 @@ const DASH_WIDGET_CATALOG = {
                 }
             }
             if (tempValEl && obj.battery_temp_valid && obj.battery_temp_min_c !== undefined && obj.battery_temp_max_c !== undefined) {
+                const isImp = (typeof getUnitSystem === 'function' && getUnitSystem() === 'imperial');
+                let minT = parseFloat(obj.battery_temp_min_c);
+                let maxT = parseFloat(obj.battery_temp_max_c);
+                if (isImp) {
+                    minT = (minT * 9/5) + 32;
+                    maxT = (maxT * 9/5) + 32;
+                    tempValEl.textContent = `${minT.toFixed(1)}°F - ${maxT.toFixed(1)}°F`;
+                } else {
+                    tempValEl.textContent = `${minT.toFixed(1)}°C - ${maxT.toFixed(1)}°C`;
+                }
+            } else if (false) {
                 tempValEl.textContent = `${obj.battery_temp_min_c}°C - ${obj.battery_temp_max_c}°C`;
             }
             if (socValEl && obj.battery_soc_valid && obj.battery_soc_pct !== undefined) {
@@ -145,11 +154,24 @@ const DASH_WIDGET_CATALOG = {
         render: function (isEditMode, instanceId) {
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-play"/></svg> CAN Do Automations</span>
                     <div class="dash-card-actions"><span id="can_do_dash_badge" class="dash-status"><span class="status-dot green"></span> Active</span></div></div>
-                    <div><div class="dash-subtext" style="margin-bottom: 0.8rem;">Automate actions, triggers, and vehicle telemetry hooks.</div></div>
+                    <div><div class="dash-subtext" id="can_do_dash_subtext" style="margin-bottom: 0.8rem;">Automate actions, triggers, and vehicle telemetry hooks.</div></div>
                     <button type="button" onclick="openTab(event, 'automate')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Open Automations</button>
                     ${renderWidgetEditControlsHTML(instanceId || "can_do", isEditMode)}`;
         },
-        update: function (obj) { }
+        update: function (obj) { 
+            const badge = document.getElementById("can_do_dash_badge");
+            const subtext = document.getElementById("can_do_dash_subtext");
+            if (typeof getCanDoRules === "function") {
+                const rules = getCanDoRules();
+                const activeCount = rules.filter(r => r.enabled).length;
+                if (badge) {
+                    badge.innerHTML = activeCount > 0 ? `<span class="status-dot green"></span> ${activeCount} Active` : `<span class="status-dot gray"></span> Inactive`;
+                }
+                if (subtext) {
+                    subtext.textContent = `${activeCount} of ${rules.length} automations enabled.`;
+                }
+            }
+        }
     },
     can_state_monitor: {
         id: "can_state_monitor", name: "CAN State Monitor", icon: "", category: "Monitoring",
@@ -415,15 +437,15 @@ function updateCanDoStateWidgets() {
                     }
 
                     let stateObj = null;
-                    if (itemDef.can_id) {
-                        const parsed = parseInt(itemDef.can_id, 16);
+                    if (itemDef.state_can_id) {
+                        const parsed = parseInt(itemDef.state_can_id, 16);
                         if (!isNaN(parsed)) {
                             const normKey = "0x" + parsed.toString(16).toUpperCase();
-                            stateObj = states[normKey] || states[normKey.toLowerCase()] || states[itemDef.can_id];
+                            stateObj = states[normKey] || states[normKey.toLowerCase()] || states[itemDef.state_can_id];
                         }
                     }
                     if (!stateObj) {
-                        stateObj = states[itemDef.can_id] || states[itemDef.can_id?.toLowerCase()];
+                        stateObj = states[itemDef.state_can_id] || states[itemDef.state_can_id?.toLowerCase()];
                     }
 
                     if (!stateObj) {
@@ -613,20 +635,25 @@ function getCanDoMonitorableItems() {
     if (typeof CAN_DO_CATALOG !== "undefined" && CAN_DO_CATALOG && Array.isArray(CAN_DO_CATALOG.commands)) {
         CAN_DO_CATALOG.commands.forEach(cmd => {
             if (!cmd) return;
+            const canId = cmd.state_can_id || cmd.can_id || cmd.action_can_id;
+            const roles = cmd.roles || [];
+            if (roles.length > 0 && !roles.includes("trigger") && !roles.includes("condition")) {
+                return;
+            }
             const itemId = cmd.id || cmd.name;
             const matchPattern = cmd.match_payload || cmd.to_payload || cmd.from_payload || (cmd.trigger && (cmd.trigger.from || cmd.trigger.to));
             const hasOptions = Array.isArray(cmd.options) && cmd.options.length > 0;
-            if (cmd.can_id || matchPattern || hasOptions) {
+            if (canId || matchPattern || hasOptions) {
                 items.push({
                     id: itemId,
                     name: cmd.name || itemId,
                     category: cmd.category || "Vehicle Signals",
-                    can_id: cmd.can_id,
+                    can_id: canId,
                     match_payload: matchPattern,
                     options: cmd.options
                 });
                 addedIds.add(itemId);
-                if (cmd.can_id) addedIds.add(cmd.can_id.toLowerCase());
+                if (canId) addedIds.add(String(canId).toLowerCase());
             }
         });
     }
@@ -1022,6 +1049,13 @@ function addDashboardWidget(widgetId) {
         let nextIdx = 0;
         while (layout.includes(`can_state_${nextIdx}`)) nextIdx++;
         const newInstId = `can_state_${nextIdx}`;
+        
+        try {
+            const store = JSON.parse(localStorage.getItem("wican_state_widgets") || "{}");
+            store[newInstId] = [];
+            localStorage.setItem("wican_state_widgets", JSON.stringify(store));
+        } catch(e) {}
+        
         layout.push(newInstId);
         saveDashboardWidgetLayout(layout);
         if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
@@ -1033,6 +1067,13 @@ function addDashboardWidget(widgetId) {
         let nextIdx = 0;
         while (layout.includes(`can_do_btn_${nextIdx}`)) nextIdx++;
         const newInstId = `can_do_btn_${nextIdx}`;
+        
+        try {
+            const store = JSON.parse(localStorage.getItem("wican_dash_can_do_buttons") || "{}");
+            store[newInstId] = [];
+            localStorage.setItem("wican_dash_can_do_buttons", JSON.stringify(store));
+        } catch(e) {}
+        
         layout.push(newInstId);
         saveDashboardWidgetLayout(layout);
         if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();

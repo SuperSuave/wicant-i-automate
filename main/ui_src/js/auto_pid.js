@@ -645,6 +645,7 @@ function loadAutoTable(jsonData) {
 
         setElementValue("car_specific", data.car_specific, 'disable');
         setElementValue("webhook_data_mode", data.webhook_data_mode, 'full');
+        if (typeof loadWebhookConfig === "function") loadWebhookConfig();
         setElementValue("ha_discovery", 'disable');
         setElementValue("grouping", data.grouping, 'disable');
         setElementValue("autopid_polling", data.autopid_polling, 'enable');
@@ -704,13 +705,55 @@ function loadAutoTable(jsonData) {
     }
 }
 
+async function loadWebhookConfig() {
+    try {
+        const res = await fetch('/api/webhook');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const webhookUrlEl = document.getElementById("webhook_url");
+        const webhookUrlFallbackEl = document.getElementById("webhook_url_fallback");
+        const webhookIntervalEl = document.getElementById("webhook_interval");
+        const webhookEnEl = document.getElementById("webhook_en");
+
+        if (webhookUrlEl) {
+            if (data.urls && data.urls.length > 0) {
+                webhookUrlEl.value = data.urls[0] || '';
+                if (webhookUrlFallbackEl && data.urls.length > 1) {
+                    webhookUrlFallbackEl.value = data.urls[1] || '';
+                }
+            } else if (data.url !== undefined) {
+                webhookUrlEl.value = data.url;
+            }
+        }
+        if (webhookEnEl && data.enabled !== undefined) {
+            webhookEnEl.checked = (data.enabled === true);
+        }
+        if (webhookIntervalEl && data.interval !== undefined) {
+            webhookIntervalEl.value = data.interval;
+        }
+
+        const statOk = document.getElementById("webhook_stat_success");
+        const statFail = document.getElementById("webhook_stat_fail");
+        const statStatus = document.getElementById("webhook_stat_status");
+
+        if (statOk && data.success_count !== undefined) statOk.textContent = `OK: ${data.success_count}`;
+        if (statFail && data.fail_count !== undefined) statFail.textContent = `Fail: ${data.fail_count}`;
+        if (statStatus && data.status) statStatus.textContent = `Status: ${data.status}`;
+    } catch (e) {
+        console.warn("Failed to load webhook config:", e);
+    }
+}
+
 async function saveWebhookSettings(btn) {
     const webhookUrlEl = document.getElementById("webhook_url");
+    const webhookUrlFallbackEl = document.getElementById("webhook_url_fallback");
     const webhookIntervalEl = document.getElementById("webhook_interval");
     const webhookEnEl = document.getElementById("webhook_en");
     if (!webhookUrlEl) return false;
 
     const wUrl = webhookUrlEl.value.trim();
+    const wUrlFallback = webhookUrlFallbackEl ? webhookUrlFallbackEl.value.trim() : '';
     const wEn = webhookEnEl ? webhookEnEl.checked : true;
     const wInt = webhookIntervalEl ? parseInt(webhookIntervalEl.value, 10) : 60;
 
@@ -726,14 +769,22 @@ async function saveWebhookSettings(btn) {
 
     try {
         if (wUrl && (wUrl.startsWith("http://") || wUrl.startsWith("https://"))) {
+            let payload = {
+                url: wUrl,
+                enabled: wEn,
+                interval: isNaN(wInt) || wInt < 1 ? 60 : wInt
+            };
+
+            let urls = [wUrl];
+            if (wUrlFallback && (wUrlFallback.startsWith("http://") || wUrlFallback.startsWith("https://"))) {
+                urls.push(wUrlFallback);
+            }
+            payload.urls = urls;
+
             const res = await fetch('/api/webhook', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url: wUrl,
-                    enabled: wEn,
-                    interval: isNaN(wInt) || wInt < 1 ? 60 : wInt
-                })
+                body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error("Status " + res.status);
         } else if (!wEn) {
@@ -912,7 +963,10 @@ async function storeAutoTableData() {
         };
 
         // Save webhook settings independently
-        await saveWebhookSettings();
+        const webhookSuccess = await saveWebhookSettings();
+        if (!webhookSuccess) {
+            throw new Error("Failed to save Webhook settings");
+        }
 
         const response = await fetch('store_auto_data', {
             method: 'POST',

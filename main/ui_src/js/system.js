@@ -172,9 +172,17 @@ function postConfig(btn) {
     obj["can_fwd_mode"] = getVal("can_fwd_mode");
     obj["port_type"] = getVal("port_type");
     obj["port"] = getVal("tcp_port_value");
-    obj["ap_pass"] = getVal("ap_pass_value", "@meatpi#");
+
+    const apPassEl = document.getElementById("ap_pass_value");
+    if (apPassEl) {
+        let ap_pass = apPassEl.value;
+        obj["ap_pass"] = ap_pass;
+    }
+
     obj["protocol"] = getVal("protocol", "savvycan");
-    obj["ble_pass"] = getVal("ble_pass_value", "123456");
+
+    let ble_pass = getVal("ble_pass_value");
+    obj["ble_pass"] = ble_pass && ble_pass.trim() !== "" ? ble_pass : "123456";
     obj["sleep_volt"] = getVal("sleep_volt");
     obj["sleep_time"] = getVal("sleep_time");
     obj["batt_alert"] = getVal("batt_alert");
@@ -217,17 +225,28 @@ function postConfig(btn) {
 
     const xhttp = new XMLHttpRequest();
     xhttp.onload = function () {
-        if (typeof showNotification === "function") showNotification(this.responseText || "Settings saved successfully", "green");
-        if (btn) {
-            btn.textContent = "✓ Saved!";
-            setTimeout(() => {
-                btn.textContent = origText;
-                btn.disabled = false;
-            }, 2000);
+        if (this.status >= 200 && this.status < 300) {
+            if (typeof showNotification === "function") showNotification(this.responseText || "Settings saved successfully", "green");
+            if (btn) {
+                btn.textContent = "✓ Saved!";
+                setTimeout(() => {
+                    btn.textContent = origText;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        } else {
+            if (typeof showNotification === "function") showNotification("Failed to save settings: " + (this.responseText || "Server Error"), "red");
+            if (btn) {
+                btn.textContent = "✕ Error";
+                setTimeout(() => {
+                    btn.textContent = origText;
+                    btn.disabled = false;
+                }, 2000);
+            }
         }
     };
     xhttp.onerror = function () {
-        if (typeof showNotification === "function") showNotification("Failed to save settings", "red");
+        if (typeof showNotification === "function") showNotification("Failed to save settings: Connection Error", "red");
         if (btn) {
             btn.textContent = "✕ Error";
             setTimeout(() => {
@@ -265,7 +284,11 @@ function Load() {
                 setElVal("can_datarate", obj.can_datarate || "500K");
                 setElVal("can_mode", obj.can_mode || "normal");
                 setElVal("port_type", obj.port_type || "tcp");
+                setElVal("protocol", obj.protocol || "savvycan");
                 setElVal("tcp_port_value", obj.port || "3333");
+                
+                updatePortFromProtocol();
+                
                 setElVal("ble_pass_value", obj.ble_pass || "000000");
                 setElVal("sleep_volt", obj.sleep_volt || "13.2");
                 setElVal("sleep_time", obj.sleep_time || "2");
@@ -310,10 +333,7 @@ function Load() {
                 }
 
                 if (typeof submit_enable === "function") {
-                    // Update disabled/enabled states based on wifi_mode & ble
-                    const isAp = (obj.wifi_mode === "AP");
-                    const bleEl = document.getElementById("ble_status");
-                    if (bleEl) bleEl.disabled = !isAp;
+                    submit_enable();
                 }
 
                 if (typeof checkStatus === "function") checkStatus();
@@ -336,6 +356,22 @@ function Load() {
         xhttp.send();
     } catch (xhrErr) {
         console.warn("Load XHR initialization error:", xhrErr);
+    }
+}
+
+function updatePortFromProtocol() {
+    const protocol = document.getElementById("protocol");
+    const portInput = document.getElementById("tcp_port_value");
+    const portType = document.getElementById("port_type");
+    
+    if (protocol && protocol.value === "savvycan") {
+        portInput.value = "23";
+        portInput.disabled = true;
+        portType.value = "tcp";
+        portType.disabled = true;
+    } else {
+        portInput.disabled = false;
+        portType.disabled = false;
     }
 }
 

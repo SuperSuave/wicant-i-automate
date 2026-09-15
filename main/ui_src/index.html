@@ -37,7 +37,7 @@
         </button>
         <button class="tablinks" onclick="openTab(event, 'automate')">
             <svg class="icon">
-                <use href="#icon-egmpcan-do" />
+                <use href="#icon-can-do" />
             </svg> <b>CAN Do</b>
         </button>
         <button class="tablinks" onclick="openTab(event, 'autopid_tab')">
@@ -142,7 +142,7 @@
         <div id="automate" class="tabcontent">
             <div class="section-title can-do-header-title">
                 <svg class="can-do-header-icon">
-                    <use href="#icon-egmpcan-do" />
+                    <use href="#icon-can-do" />
                 </svg>
                 <span>CAN Do Automations</span>
             </div>
@@ -187,9 +187,15 @@
                     </div>
                 </div>
                 <div class="settings-row">
-                    <div class="settings-label"><span class="settings-title">WebHook URL</span></div>
+                    <div class="settings-label"><span class="settings-title">Primary WebHook URL</span></div>
                     <div class="settings-control"><input type="text" id="webhook_url"
                             placeholder="http://homeassistant.local:8123/..."
+                            oninput="enableAutoStoreButton();submit_enable();"></div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label"><span class="settings-title">Fallback WebHook URL</span></div>
+                    <div class="settings-control"><input type="text" id="webhook_url_fallback"
+                            placeholder="https://my-nabucasa-url.ui.nabu.casa/..."
                             oninput="enableAutoStoreButton();submit_enable();"></div>
                 </div>
                 <div class="settings-row">
@@ -488,6 +494,18 @@
                         <select id="can_mode">
                             <option value="normal" selected>Normal</option>
                             <option value="silent">Silent</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label"><span class="settings-title">Protocol</span></div>
+                    <div class="settings-control">
+                        <select id="protocol" onchange="updatePortFromProtocol(); submit_enable();">
+                            <option value="realdash66">realdash66</option>
+                            <option value="slcan">slcan</option>
+                            <option value="savvycan">SavvyCAN/Lens</option>
+                            <option value="elm327">elm327</option>
+                            <option value="auto_pid">AutoPID</option>
                         </select>
                     </div>
                 </div>
