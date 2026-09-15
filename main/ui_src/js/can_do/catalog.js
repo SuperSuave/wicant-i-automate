@@ -748,7 +748,7 @@ function getFilteredConditionPresets() {
 
     const categories = Array.from(catsMap.values());
     if (customConds.length > 0) {
-        categories.unshift({ category: "⭐ My Saved Conditions", presets: customConds });
+        categories.unshift({ category: "My Saved Conditions", presets: customConds });
     }
     return categories;
 }
@@ -799,7 +799,7 @@ function getFilteredActionPresets() {
 
     const categories = Array.from(catsMap.values());
     if (customActs.length > 0) {
-        categories.unshift({ category: "⭐ My Saved Actions", presets: customActs });
+        categories.unshift({ category: "My Saved Actions", presets: customActs });
     }
     return categories;
 }

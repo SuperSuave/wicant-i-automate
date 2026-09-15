@@ -4,7 +4,7 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-## 🧭 Executive Summary: What L1Z3 Built vs. What Was Added Here
+## Executive Summary: What L1Z3 Built vs. What Was Added Here
 
 `L1Z3/wicant-i-precondition:main` established the foundation for E-GMP battery preconditioning:
 * It implemented the preconditioning Hierarchical State Machine (`precondition.c` / `hsm.c`).
@@ -31,7 +31,7 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-## 🗺️ Architectural Delta Diagram
+## Architectural Delta Diagram
 
 ```
                  L1Z3 Upstream Base                         This Fork (SuperSuave)
@@ -48,9 +48,9 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-## 📦 Detailed Component Breakdown
+## Detailed Component Breakdown
 
-### 1. 🤖 "CAN Do" Automation Engine (`autopid.c` & `autopid.h`)
+### 1. "CAN Do" Automation Engine (`autopid.c` & `autopid.h`)
 * **L1Z3 Upstream**: `autopid.c` only contained standard OBD-II PID polling routines and ELM327 emulation.
 * **This Fork**:
   * **Reactive Rule Engine**: Evaluates incoming CAN frames against user-defined trigger patterns with full 8-byte payload wildcards (`*`) and edge transitions (`from_payload` &rarr; `to_payload`).
@@ -64,7 +64,7 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-### 2. ⚡ Preconditioning Decoupling (`precondition.c` & `precondition.h`)
+### 2. Preconditioning Decoupling (`precondition.c` & `precondition.h`)
 * **L1Z3 Upstream**: Preconditioning listened directly to steering wheel button frames on the CAN bus, hardcoding which button activated heating and requiring a firmware rebuild to re-map.
 * **This Fork**:
   * **Decoupled Button Sniffing**: Button sniffing in `precondition_init()` is set to `BUTTON_DISABLED` by default, delegating trigger management entirely to the CAN Do engine.
@@ -74,10 +74,10 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-### 3. 📊 Dynamic Widget Dashboard (`homepage_full.html`)
+### 3. Dynamic Widget Dashboard (`homepage_full.html`)
 * **L1Z3 Upstream**: A static, single-purpose web page with basic precon controls and raw text fields.
 * **This Fork**:
-  * **Dynamic Drag & Drop Grid**: Modular dashboard cards that can be added, removed, or reordered (`▲`/`▼`) via "✏️ Customize".
+  * **Dynamic Drag & Drop Grid**: Modular dashboard cards that can be added, removed, or reordered (`▲`/`▼`) via "Customize".
   * **12V Auxiliary Battery Card**: Real-time voltage display with color-coded health badges (`Good`, `Normal`, `Low`, `Critical`).
   * **HV Traction Battery Card**: State of Charge (SoC %), cell temperatures (min/max/average), telemetry age tracking, and DC fast-charging readiness gate indicator (`Optimal > 21°C / 70°F`).
   * **CAN State Monitor Cards (`/api/can_states`)**:
@@ -86,27 +86,27 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
     * Stale detection badge (>30s) when telemetry is outdated.
   * **CAN Do Action Buttons Card**:
     * Dashboard quick-access buttons to run any automation rule with 1 click.
-    * Custom icons, active execution spinner (`⏳ Executing...`), and success feedback (`✓ Done!`).
+    * Custom icons, active execution spinner ("Executing..."), and success feedback ("Done!").
   * **System Status & Clock Cards**: Wi-Fi status, CAN bitrate, port type, and SNTP clock.
 
 ---
 
-### 4. 🧠 Recursive Logic & Visual Automation Builder
+### 4. Recursive Logic & Visual Automation Builder
 * **L1Z3 Upstream**: No automation builder or logic interface.
 * **This Fork**:
   * **Recursive Condition Blocks (Home Assistant Style)**:
-    * Single dropdown menu offering `📄 Single Condition`, `🔵 AND Block`, `🟣 OR Block`, and `🔴 NOT Block`.
+    * Single dropdown menu offering `Single Condition`, `AND Block`, `OR Block`, and `NOT Block`.
     * Supports arbitrary infinite nesting of logic groups.
-    * Instant 1-click condition conversion via `🔀 Create Block ▼`.
+    * Instant 1-click condition conversion via `Create Block ▼`.
   * **"If - Then - Else" Action Blocks**: Conditional execution within action sequences: runs `THEN` actions if conditions pass, or fallback `ELSE` actions if false.
-  * **"Choose" Action Branching**: Multi-trigger decision trees routing different triggers to distinct action sequences within a single rule card, with smart suggestion banners (`💡 2 Triggers Detected`).
+  * **"Choose" Action Branching**: Multi-trigger decision trees routing different triggers to distinct action sequences within a single rule card, with smart suggestion banners ("2 Triggers Detected").
   * **Interactive Byte Grid Editor**: 8-byte visual bitmask matrix for viewing and editing CAN payloads with wildcards (`*`) and live hex conversion.
   * **Trigger Mode Bar & Multi-State Choice Styling**: Segmented button bar (`Trigger Mode: | Single Trigger | | Combined Triggers |`) with high-contrast active states across all multi-state selectors (`#0284c7` selected vs `#0c4a6e` unselected) for light and dark themes.
   * **Granular Cloning & Backup**: Clone rules, triggers, or actions with 1 click; export or restore individual rules or full suites via JSON.
 
 ---
 
-### 5. 🚗 Vehicle Profiles & Feature Gating (`can_do_catalog.json` & DBCs)
+### 5. Vehicle Profiles & Feature Gating (`can_do_catalog.json` & DBCs)
 * **L1Z3 Upstream**: Generic E-GMP implementation without trim distinctions.
 * **This Fork**:
   * **Curated Vehicle Profiles**: Make, Model, and Trim selectors for Kia EV6 (Light, Wind, GT-Line, GT), Hyundai Ioniq 5 (SE, SEL, Limited, N), Hyundai Ioniq 6, and Genesis GV60.
@@ -117,7 +117,7 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-### 6. 💾 Device Flash Persistence (Cross-Device Sync)
+### 6. Device Flash Persistence (Cross-Device Sync)
 * **L1Z3 Upstream**: Relied entirely on client browser `localStorage`, causing settings to be lost when switching devices (e.g. from laptop to phone).
 * **This Fork**:
   * **WiCAN LittleFS Flash Storage (`/littlefs/can_do.json`)**:
@@ -131,16 +131,16 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-### 7. 🏠 Home Assistant Integration & Inbound MQTT (`mqtt.c`)
+### 7. Home Assistant Integration & Inbound MQTT (`mqtt.c`)
 * **L1Z3 Upstream**: Outbound MQTT telemetry only.
 * **This Fork**:
   * **Inbound MQTT Triggers**: Automations can trigger via MQTT topics (`wican/can_do/trigger` or `wican/<device_id>/can_do/trigger`).
-  * **MQTT Auto-Discovery Buttons**: Check `☑️ Expose as Button Entity to Home Assistant` on any CAN Do rule with custom MDI icon selection (`mdi:car-defrost-rear`, `mdi:car-electric`, `mdi:fan`, `mdi:car-door`, `mdi:car-key`).
+  * **MQTT Auto-Discovery Buttons**: Check "Expose as Button Entity to Home Assistant" on any CAN Do rule with custom MDI icon selection (`mdi:car-defrost-rear`, `mdi:car-electric`, `mdi:fan`, `mdi:car-door`, `mdi:car-key`).
   * **Zero-YAML Setup**: WiCAN publishes standard MQTT Discovery payloads (`homeassistant/button/wican_<id>/can_do_<rule>/config`) with `retain=1`.
 
 ---
 
-### 8. 📶 Network Resilience & Multi-AP Wi-Fi (`wifi_network.c`)
+### 8. Network Resilience & Multi-AP Wi-Fi (`wifi_network.c`)
 * **L1Z3 Upstream**: Single Wi-Fi network configuration only.
 * **This Fork**:
   * **Multi-Network Saved Table**: Configures up to 5 Wi-Fi networks (Garage, Phone Hotspot, Work).
@@ -150,7 +150,7 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-### 9. 🛡️ System Stability & Crash Fixes (`config_server.c`)
+### 9. System Stability & Crash Fixes (`config_server.c`)
 * **L1Z3 Upstream**: Experienced crashes under certain HTTP configuration requests.
 * **This Fork**:
   * **HTTP 500 Fix on `store_config`**: Eliminated file handle leaks and filename rename collisions on LittleFS.
@@ -161,7 +161,7 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-### 10. 🗜️ Gzip Web Asset Pipeline (`tools/minify_html.ps1`)
+### 10. Gzip Web Asset Pipeline (`tools/minify_html.ps1`)
 * **L1Z3 Upstream**: Embedded uncompressed HTML directly into firmware, nearing the 1,740 KB `ota_0` flash partition limit.
 * **This Fork**:
   * Added PowerShell and Python build-time minifiers compressing `main/homepage_full.html` (823 KB) down to `main/homepage.html.gz` (~96 KB, **-88.3% compression**).
@@ -169,7 +169,7 @@ This walkthrough details all the enhancements, subsystems, firmware architecture
 
 ---
 
-## 📑 Direct File Comparison Matrix: L1Z3 vs. This Fork
+## Direct File Comparison Matrix: L1Z3 vs. This Fork
 
 | File Path | Status in L1Z3 | Status in This Fork | Changes Introduced Here |
 | :--- | :--- | :--- | :--- |

@@ -302,7 +302,7 @@ function renderTrigPresetOptionsHTML(selectedIdxStr = "") {
     const { builtIn, custom } = getFilteredTriggerPresets();
     let html = '<option value="">-- Select from Catalog --</option>';
     if (custom.length > 0) {
-        html += '<optgroup label="⭐ My Saved Triggers">';
+        html += '<optgroup label="My Saved Triggers">';
         custom.forEach((p, idx) => {
             const val = `c_${idx}`;
             html += `<option value="${val}" ${selectedIdxStr === val ? "selected" : ""}>${p.name}</option>`;
@@ -3483,15 +3483,15 @@ function renderCanDoActionOptionsGrid(preset, activeOptIdx, catIdx, pIdx, isImpe
     let groups = null;
     if (preset.id === "ev_charge_limits" || opts.every(o => o.label.startsWith("AC ") || o.label.startsWith("DC ") || o.label.startsWith("Both "))) {
         groups = [
-            { title: "🔌 Level 2 (AC) Charging Limits", filter: o => o.label.startsWith("AC ") },
-            { title: "⚡ DC Fast Charging Limits", filter: o => o.label.startsWith("DC ") },
-            { title: "🔄 Combined (AC & DC) Limits", filter: o => o.label.startsWith("Both ") }
+            { title: "Level 2 (AC) Charging Limits", filter: o => o.label.startsWith("AC ") },
+            { title: "DC Fast Charging Limits", filter: o => o.label.startsWith("DC ") },
+            { title: "Combined (AC & DC) Limits", filter: o => o.label.startsWith("Both ") }
         ];
     } else if (preset.id.includes("seat") && opts.some(o => o.label.includes("Heat")) && opts.some(o => o.label.includes("Cool"))) {
         groups = [
             { title: "Power", filter: o => o.label === "Off" },
-            { title: "🔥 Seat Heating", filter: o => o.label.includes("Heat") },
-            { title: "❄️ Seat Ventilation", filter: o => o.label.includes("Cool") }
+            { title: "Seat Heating", filter: o => o.label.includes("Heat") },
+            { title: "Seat Ventilation", filter: o => o.label.includes("Cool") }
         ];
     }
 
