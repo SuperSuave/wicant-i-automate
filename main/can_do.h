@@ -111,8 +111,10 @@ typedef enum {
 typedef struct {
   uint8_t target_bus;   // Target bus to play CAN frame
   uint32_t tx_can_id;   // Response CAN ID
+  uint32_t state_can_id;// Cache state lookup CAN ID
   bool is_ext;          // Extended 29-bit CAN ID flag
   uint8_t tx_data[8];   // Payload bytes to play
+  uint8_t tx_mask[8];   // Byte bitmask (0xFF = static, 0x00 = wildcard/from state cache)
   uint8_t tx_len;       // Payload byte length (0-8)
   uint32_t delay_ms;    // Delay before transmitting next frame
   int8_t roll_byte_idx; // -1 if no rolling byte, or 0..7 index
