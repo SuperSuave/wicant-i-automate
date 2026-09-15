@@ -172,10 +172,14 @@ function updateCanDoItemConnectors(card) {
     if (trigContainer) {
         trigContainer.querySelectorAll(".can-do-connector-divider").forEach(el => el.remove());
         const trigItems = Array.from(trigContainer.querySelectorAll(".can-do-trigger-item"));
+        const combineMode = card.querySelector(".can-do-trig-combine-mode")?.value || "any";
+        const isAnd = (combineMode === "all" || combineMode === "and" || combineMode === "combo");
+        const modeLabel = isAnd ? "AND" : "OR";
+        const modeClass = isAnd ? "trig active-and" : "trig";
         for (let i = 0; i < trigItems.length - 1; i++) {
             const div = document.createElement("div");
             div.className = "can-do-connector-divider";
-            div.innerHTML = `<span class="can-do-connector-line trig"></span><span class="can-do-connector-pill trig" style="padding: 2px 12px; font-weight: 800;">OR</span><span class="can-do-connector-line trig"></span>`;
+            div.innerHTML = `<span class="can-do-connector-line trig"></span><span class="can-do-connector-pill ${modeClass}" style="padding: 2px 12px; font-weight: 800; cursor: pointer;" title="Click to toggle AND / OR" onclick="toggleCanDoTriggerCombineMode(this)">${modeLabel}</span><span class="can-do-connector-line trig"></span>`;
             trigContainer.insertBefore(div, trigItems[i + 1]);
         }
     }
@@ -382,7 +386,10 @@ function updateCanDoRuleSummaryPill(card) {
         }
     });
 
-    const trigText = trigSummaries.length > 0 ? trigSummaries.slice(0, 2).join(" • ") + (trigSummaries.length > 2 ? ` (+${trigSummaries.length - 2})` : "") : "No Trigger";
+    const combineMode = card.querySelector(".can-do-trig-combine-mode")?.value || "any";
+    const isAnd = (combineMode === "all" || combineMode === "and" || combineMode === "combo");
+    const trigJoiner = isAnd ? " + " : " OR ";
+    const trigText = trigSummaries.length > 0 ? trigSummaries.slice(0, 2).join(trigJoiner) + (trigSummaries.length > 2 ? ` (+${trigSummaries.length - 2})` : "") : "No Trigger";
     const condText = condSummaries.length > 0 ? condSummaries.slice(0, 2).join(" • ") + (condSummaries.length > 2 ? ` (+${condSummaries.length - 2})` : "") : "";
     const actText = actSummaries.length > 0 ? actSummaries.slice(0, 2).join(" • ") + (actSummaries.length > 2 ? ` (+${actSummaries.length - 2})` : "") : "No Action";
 
@@ -573,6 +580,8 @@ function extractCanDoActionData(item) {
 
     const canIdInput = item.querySelector(".can-do-act-can-id")?.value.trim() || "";
     const effectiveCanId = canIdInput || (presetObj ? (presetObj.action_can_id || presetObj.can_id || presetObj.state_can_id || "") : "");
+    const stateCanIdInput = item.querySelector(".can-do-act-state-can-id")?.value.trim() || "";
+    const effectiveStateCanId = stateCanIdInput || (presetObj ? (presetObj.state_can_id || "") : "");
 
     return {
         trigger_id: item.querySelector(".can-do-act-trig-id")?.value.trim() || "",
@@ -594,6 +603,7 @@ function extractCanDoActionData(item) {
         climate_driver_only: item.querySelector(".can-do-act-climate-drv-only")?.checked === true,
         can_id: effectiveCanId,
         action_can_id: effectiveCanId,
+        state_can_id: effectiveStateCanId,
         steps: steps,
         payload: payloadLines.join("\n"),
         bus: parseInt(item.querySelector(".can-do-act-bus")?.value || "0"),

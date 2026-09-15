@@ -78,6 +78,16 @@ function addCanDoRuleUI(ruleData = {}, isCollapsed = true, shouldScroll = false,
                                 </div>
                             </div>
                             <div class="can-do-section-body">
+                                <div class="can-do-trig-combine-wrap">
+                                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                                        <span style="font-size: 0.82rem; font-weight: 700; color: var(--m3-tonal-when-color);">Trigger Mode:</span>
+                                    </div>
+                                    <div class="can-do-trig-mode-group">
+                                        <input type="hidden" class="can-do-trig-combine-mode" value="${(ruleData.trigger_mode === 'all' || ruleData.trigger_mode === 'and' || ruleData.trigger_mode === 'combo') ? 'all' : 'any'}">
+                                        <button type="button" class="system-button can-do-trig-mode-btn ${(!ruleData.trigger_mode || ruleData.trigger_mode === 'any' || ruleData.trigger_mode === 'or') ? 'active' : ''}" onclick="setCanDoTriggerMode(this, 'any')">OR (Any Trigger)</button>
+                                        <button type="button" class="system-button can-do-trig-mode-btn ${(ruleData.trigger_mode === 'all' || ruleData.trigger_mode === 'and' || ruleData.trigger_mode === 'combo') ? 'active' : ''}" onclick="setCanDoTriggerMode(this, 'all')">AND (All Held / Combo)</button>
+                                    </div>
+                                </div>
                                 <div class="can-do-triggers-container can-do-tree-connect"></div>
                                 <button type="button" class="ha-section-add-btn accent-trig" onclick="openAddAutomationElementDialog('trigger', this.closest('.can-do-section-box').querySelector('.can-do-triggers-container'), this.closest('.can-do-rule-card'))">
                                     <svg><use href="#icon-plus"/></svg>
@@ -1446,7 +1456,30 @@ function setCanDoTriggerMode(btn, mode) {
     const hidden = group.querySelector(".can-do-trig-combine-mode");
     if (hidden) hidden.value = mode;
     const card = btn.closest(".can-do-rule-card");
-    if (card) updateCanDoRuleSummaryPill(card);
+    if (card) {
+        updateCanDoItemConnectors(card);
+        updateCanDoRuleSummaryPill(card);
+        if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
+    }
+}
+
+function toggleCanDoTriggerCombineMode(pillElem) {
+    const card = pillElem.closest(".can-do-rule-card");
+    if (!card) return;
+    const hidden = card.querySelector(".can-do-trig-combine-mode");
+    const current = hidden?.value || "any";
+    const next = (current === "all" || current === "and" || current === "combo") ? "any" : "all";
+    if (hidden) hidden.value = next;
+    const group = card.querySelector(".can-do-trig-mode-group");
+    if (group) {
+        group.querySelectorAll(".can-do-trig-mode-btn").forEach(btn => {
+            const isAnyBtn = btn.getAttribute("onclick")?.includes("'any'");
+            btn.classList.toggle("active", next === "any" ? isAnyBtn : !isAnyBtn);
+        });
+    }
+    updateCanDoItemConnectors(card);
+    updateCanDoRuleSummaryPill(card);
+    if (typeof autoSaveCanDoRules === "function") autoSaveCanDoRules();
 }
 
 function cloneCanDoTriggerItem(btn) {
@@ -2746,6 +2779,17 @@ function renderCanDoActionItem(container, data = {}) {
                                 </div>
                             </div>
 
+                            <!-- State CAN ID -->
+                            <div class="ha-form-row act-field-can ${type === "can_tx" ? "" : "hidden"}">
+                                <div class="ha-form-label-col">
+                                    <span class="ha-form-label">State CAN ID (Rx / Feedback)</span>
+                                    <span class="ha-form-sublabel">Optional CAN arbitration ID where vehicle reports resulting state.</span>
+                                </div>
+                                <div class="ha-form-control-col">
+                                    <input type="text" class="ha-form-input can-do-act-state-can-id" value="${data.state_can_id || (matchedPreset ? (matchedPreset.state_can_id || "") : "")}" placeholder="e.g. 0x448 (Optional)" oninput="updateCanDoRuleSummaryPill(this.closest('.can-do-rule-card'))">
+                                </div>
+                            </div>
+
                             <!-- Target Bus -->
                             <div class="ha-form-row act-field-can ${type === "can_tx" ? "" : "hidden"}">
                                 <div class="ha-form-label-col">
@@ -3660,10 +3704,15 @@ function applyCanDoActionPreset(selectElem, notify = true, requestedOpt = undefi
         const cid = item.querySelector(".can-do-act-can-id");
         if (cid) cid.value = effectiveCanId;
     }
+    const targetStateCanId = activeOpt?.state_can_id || preset.state_can_id || "";
+    const scid = item.querySelector(".can-do-act-state-can-id");
+    if (scid && targetStateCanId) {
+        scid.value = targetStateCanId;
+    }
     const stateNote = item.querySelector(".can-do-act-state-note");
     if (stateNote) {
-        if (preset.state_can_id) {
-            stateNote.innerHTML = `<span class="ha-status-pill green" style="font-size: 0.72rem; padding: 1px 6px;">Rx: ${preset.state_can_id}</span>`;
+        if (targetStateCanId) {
+            stateNote.innerHTML = `<span class="ha-status-pill green" style="font-size: 0.72rem; padding: 1px 6px;">Rx: ${targetStateCanId}</span>`;
         } else {
             stateNote.innerHTML = "";
         }
@@ -3810,6 +3859,11 @@ function applyCanDoOptionPill(btn, catIdx, pIdx, optIdx) {
     const cid = item.querySelector(".can-do-act-can-id");
     if (cid && targetCanId) {
         cid.value = targetCanId;
+    }
+    const targetStateCanId = opt.state_can_id || preset.state_can_id || "";
+    const scid = item.querySelector(".can-do-act-state-can-id");
+    if (scid && targetStateCanId) {
+        scid.value = targetStateCanId;
     }
 
     // Update title and pill
