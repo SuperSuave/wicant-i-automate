@@ -2278,17 +2278,22 @@ static const httpd_uri_t scan_available_pids_uri = {
 #define CAN_STATES_BUF_SIZE 7168
 
 static esp_err_t can_states_handler(httpd_req_t *req) {
-  /* Take a fast local snapshot of the cache under lock (~2.3 KB memcpy = < 5
-   * µs) */
-  can_state_entry_t snapshot[CAN_STATE_CACHE_SIZE];
+  can_state_entry_t *snapshot = malloc(sizeof(can_state_entry_t) * CAN_STATE_CACHE_SIZE);
+  if (!snapshot) {
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "OOM");
+    return ESP_FAIL;
+  }
 
   can_state_cache_lock();
   const can_state_entry_t *cache = can_state_cache_get();
-  memcpy(snapshot, cache, sizeof(snapshot));
+  if (cache) {
+    memcpy(snapshot, cache, sizeof(can_state_entry_t) * CAN_STATE_CACHE_SIZE);
+  }
   can_state_cache_unlock(); /* Release lock immediately */
 
   char *buf = malloc(CAN_STATES_BUF_SIZE);
   if (!buf) {
+    free(snapshot);
     httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "OOM");
     return ESP_FAIL;
   }
@@ -2333,6 +2338,7 @@ static esp_err_t can_states_handler(httpd_req_t *req) {
   httpd_resp_set_type(req, "application/json");
   httpd_resp_send(req, buf, HTTPD_RESP_USE_STRLEN);
   free(buf);
+  free(snapshot);
   return ESP_OK;
 }
 

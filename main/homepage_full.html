@@ -458,6 +458,55 @@
             border-bottom: 1px solid var(--border-color);
         }
 
+        .dash-widget-edit-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 1rem;
+            padding-top: 0.65rem;
+            border-top: 1px dashed var(--border-color);
+            width: 100%;
+        }
+
+        .dash-widget-edit-bar .dash-widget-btn {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--m3-shape-sm, 6px);
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 0.85rem;
+            line-height: 1;
+            transition: var(--transition);
+        }
+
+        .dash-widget-edit-bar .dash-widget-btn:hover {
+            background: var(--primary-color);
+            color: #ffffff;
+            border-color: var(--primary-color);
+        }
+
+        .dash-widget-edit-bar .dash-widget-del-btn:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+        }
+
+        .dash-widget-edit-bar .dash-widget-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+            display: block;
+        }
+
         .dash-card-title {
             display: flex;
             align-items: center;
@@ -3262,6 +3311,71 @@ dialog.ha-native-dialog::backdrop {
                 </div>
             </div>
 
+            <div class="section-title">Real-Time Clock &amp; Time Sync</div>
+            <div class="settings-card">
+                <div class="settings-row">
+                    <div class="settings-label">
+                        <span class="settings-title">Current Device Time</span>
+                        <span class="settings-desc">Internal system clock (12-hour format M/D/YY).</span>
+                    </div>
+                    <div class="settings-control" style="display: flex; gap: 10px; align-items: center;">
+                        <span id="device_time_display" style="font-family: monospace; font-weight: 700; font-size: 1.05rem; color: var(--text-heading);">--/--/-- --:--:-- --</span>
+                        <span id="device_time_sync_badge" class="badge-yellow">⚠ Unset / Not Synced</span>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">
+                        <span class="settings-title">Sync Clock from Browser</span>
+                        <span class="settings-desc">One-click instant clock setting from browser time.</span>
+                    </div>
+                    <div class="settings-control">
+                        <button type="button" onclick="syncTimeFromBrowser()" class="dash-outline-btn" style="padding: 6px 14px; font-size: 0.85rem;">
+                            Sync from Browser
+                        </button>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">
+                        <span class="settings-title">SNTP Network Time Sync</span>
+                        <span class="settings-desc">Automatically synchronize clock over Wi-Fi network.</span>
+                    </div>
+                    <div class="settings-control">
+                        <select id="sntp_enabled" onchange="toggleSntpFields(this.value);">
+                            <option value="disable">Disable</option>
+                            <option value="enable">Enable</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="sntp_server_row">
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">NTP Server</span></div>
+                        <div class="settings-control">
+                            <input type="text" id="sntp_server" placeholder="pool.ntp.org" value="pool.ntp.org">
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label"><span class="settings-title">Timezone Preset</span></div>
+                        <div class="settings-control">
+                            <select id="tz_preset" onchange="onTzSelectChange(this)">
+                                <option value="UTC0">UTC (Universal Coordinated Time)</option>
+                                <option value="PST8PDT,M3.2.0,M11.1.0">US Pacific (PST/PDT)</option>
+                                <option value="MST7MDT,M3.2.0,M11.1.0">US Mountain (MST/MDT)</option>
+                                <option value="MST7">US Mountain - Arizona (No DST)</option>
+                                <option value="CST6CDT,M3.2.0,M11.1.0">US Central (CST/CDT)</option>
+                                <option value="EST5EDT,M3.2.0,M11.1.0">US Eastern (EST/EDT)</option>
+                                <option value="GMT0BST,M3.5.0/1,M10.5.0">UK London (GMT/BST)</option>
+                                <option value="CET-1CEST,M3.5.0,M10.5.0/3">Central Europe (CET/CEST)</option>
+                                <option value="JST-9">Japan (JST)</option>
+                                <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Australia Eastern (AEST/AEDT)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-row" style="justify-content: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <button type="button" onclick="saveTimeConfigUI()" class="dash-action-btn" style="padding: 6px 18px; font-size: 0.85rem; font-weight: 600;">Save Time Settings</button>
+                </div>
+            </div>
+
             <div class="section-title">Configuration Backup &amp; Restore</div>
             <div class="settings-card">
                 <div class="settings-row">
@@ -4124,13 +4238,16 @@ function fetchDeviceTime() {
         if (data) {
             const disp = document.getElementById("device_time_display");
             const badge = document.getElementById("device_time_sync_badge");
-            if (disp) disp.textContent = data.time_str || "--:--:--";
+            if (disp) disp.textContent = data.time_str || "--/--/-- --:--:-- --";
             if (badge) {
                 badge.className = "";
                 badge.style.background = "";
                 badge.style.color = "";
-                if (data.synced) {
-                    badge.textContent = "✓ Synced";
+                if (data.sntp_synced) {
+                    badge.textContent = "✓ SNTP Synced";
+                    badge.classList.add("badge-green");
+                } else if (data.synced) {
+                    badge.textContent = "✓ Clock Set";
                     badge.classList.add("badge-green");
                 } else {
                     badge.textContent = "⚠ Unset / Not Synced";
@@ -4144,19 +4261,11 @@ function fetchDeviceTime() {
             }
             const srvInput = document.getElementById("sntp_server");
             if (srvInput && data.sntp_server) srvInput.value = data.sntp_server;
-            const tzInput = document.getElementById("sntp_timezone");
             const tzSelect = document.getElementById("tz_preset");
-            if (data.timezone) {
-                if (tzInput) tzInput.value = data.timezone;
-                if (tzSelect) {
-                    const hasOption = Array.from(tzSelect.options).some(o => o.value === data.timezone);
-                    if (hasOption) {
-                        tzSelect.value = data.timezone;
-                        if (tzInput) tzInput.style.display = "none";
-                    } else {
-                        tzSelect.value = "custom";
-                        if (tzInput) tzInput.style.display = "block";
-                    }
+            if (tzSelect && data.timezone) {
+                const hasOption = Array.from(tzSelect.options).some(o => o.value === data.timezone);
+                if (hasOption) {
+                    tzSelect.value = data.timezone;
                 }
             }
         }
@@ -4165,16 +4274,12 @@ function fetchDeviceTime() {
 
 function toggleSntpFields(val) {
     const row = document.getElementById("sntp_server_row");
-    if (row) row.classList.toggle("hidden", val !== "enable");
+    if (row) row.style.display = (val === "enable") ? "block" : "none";
 }
 
 function getSelectedTimezone() {
     const select = document.getElementById("tz_preset");
-    const tzInput = document.getElementById("sntp_timezone");
-    if (select && select.value && select.value !== "custom") {
-        return select.value;
-    }
-    return tzInput?.value?.trim() || "UTC0";
+    return select?.value || "UTC0";
 }
 
 function syncTimeFromBrowser() {
@@ -4212,19 +4317,7 @@ function saveTimeConfigUI() {
 }
 
 function onTzSelectChange(select) {
-    const tzInput = document.getElementById("sntp_timezone");
-    if (select.value === "custom") {
-        if (tzInput) {
-            tzInput.style.display = "block";
-            tzInput.focus();
-        }
-    } else {
-        if (tzInput) {
-            tzInput.style.display = "none";
-            tzInput.value = select.value;
-        }
-        saveTimeConfigUI();
-    }
+    saveTimeConfigUI();
 }
 const applyTzPreset = onTzSelectChange;
 
@@ -5505,7 +5598,7 @@ const DASH_WIDGET_CATALOG = {
                     <div><div class="dash-metric-row"><span id="dash_batt_voltage_val" class="dash-metric-val">--.- V</span></div>
                     <div class="dash-progress-track" style="margin-bottom: 0.6rem; height: 4px;"><div id="dash_batt_gauge" class="dash-progress-fill dash-gauge-level-good" style="width: 75%;"></div></div>
                     <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.4rem;"><span>Low (12.0V)</span><span>Normal (12.6V)</span><span>Charging</span></div></div>
-                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
+                    ${renderWidgetEditControlsHTML(instanceId || "batt_12v", isEditMode)}`;
         },
         update: function (obj) {
             const el = document.getElementById("dash_batt_voltage_val"), bad = document.getElementById("dash_batt_status_badge"), gauge = document.getElementById("dash_batt_gauge");
@@ -5531,7 +5624,7 @@ const DASH_WIDGET_CATALOG = {
                     <div><div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 0.2rem;"><span id="dash_hv_temp_val" class="dash-metric-val">--.-°C</span><span id="dash_hv_temp_unit_label" class="dash-metric-label">Cell Temp</span></div>
                     <div id="dash_hv_subtext" class="dash-subtext" style="margin-bottom: 0.6rem;">Waiting for CAN bus telemetry...</div>
                     <div style="padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.4rem;"><div style="display: flex; align-items: baseline; gap: 6px;"><span id="dash_hv_soc_val" class="dash-metric-val" style="font-size: 1.5rem;">--%</span><span class="dash-metric-label">State of Charge</span></div></div></div>
-                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
+                    ${renderWidgetEditControlsHTML(instanceId || "hv_battery", isEditMode)}`;
         },
         update: function (obj) {
             const hvBadgeEl = document.getElementById("dash_hv_state_badge");
@@ -5577,7 +5670,7 @@ const DASH_WIDGET_CATALOG = {
                     <div class="dash-card-actions"><div id="dash_precon_badge" class="dash-status"><span class="status-dot gray"></span> Inactive</div></div></div>
                     <div><div style="margin-bottom: 0.8rem;"><div class="settings-desc">Heats HV traction battery pack to optimal DC fast charging temperature.</div></div></div>
                     <button type="button" id="dash_precon_toggle_btn" onclick="preconActivate()" class="dash-outline-btn" style="width: 100%;">Activate Preconditioning</button>
-                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
+                    ${renderWidgetEditControlsHTML(instanceId || "precon", isEditMode)}`;
         },
         update: function (obj) {
             const preconBadge = document.getElementById("dash_precon_badge"), preconBtn = document.getElementById("dash_precon_toggle_btn");
@@ -5599,7 +5692,7 @@ const DASH_WIDGET_CATALOG = {
                     <div><div class="dash-kv-list"><div class="dash-kv-row"><span class="dash-kv-label">Mode:</span><strong id="dash_wifi_mode_text" class="dash-kv-val">AP</strong></div>
                     <div class="dash-kv-row"><span class="dash-kv-label">Station IP:</span><strong id="dash_sta_ip_text" class="dash-kv-val" style="font-family: monospace;">192.168.3.1</strong></div></div></div>
                     <button type="button" onclick="openTab(event, 'connectivity_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Configure Networks</button>
-                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
+                    ${renderWidgetEditControlsHTML(instanceId || "network", isEditMode)}`;
         },
         update: function (obj) {
             const modeText = document.getElementById("dash_wifi_mode_text");
@@ -5625,7 +5718,7 @@ const DASH_WIDGET_CATALOG = {
                         <div class="dash-kv-row"><span class="dash-kv-label">TCP/UDP Port:</span><strong id="dash_can_port_val" class="dash-kv-val" style="font-family: monospace;">3333</strong></div>
                     </div></div>
                     <button type="button" onclick="openTab(event, 'can_hardware_tab')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">CAN Settings</button>
-                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
+                    ${renderWidgetEditControlsHTML(instanceId || "can_hw", isEditMode)}`;
         },
         update: function (obj) {
             const br = document.getElementById("dash_can_bitrate_val");
@@ -5648,7 +5741,7 @@ const DASH_WIDGET_CATALOG = {
                     <div class="dash-card-actions"><span id="can_do_dash_badge" class="dash-status"><span class="status-dot green"></span> Active</span></div></div>
                     <div><div class="dash-subtext" id="can_do_dash_subtext" style="margin-bottom: 0.8rem;">Automate actions, triggers, and vehicle telemetry hooks.</div></div>
                     <button type="button" onclick="openTab(event, 'automate')" class="dash-outline-btn" style="width: 100%; border: none; background: rgba(255,255,255,0.04);">Open Automations</button>
-                    ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
+                    ${renderWidgetEditControlsHTML(instanceId || "can_do", isEditMode)}`;
         },
         update: function (obj) { 
             const badge = document.getElementById("can_do_dash_badge");
@@ -5669,21 +5762,63 @@ const DASH_WIDGET_CATALOG = {
         id: "can_state_monitor", name: "CAN State Monitor", icon: "", category: "Monitoring",
         render: function (isEditMode, instanceId) {
             const watched = getWatchedCanDoSignals(instanceId);
-            let itemsHtml = watched.map(w => `
+            const items = (typeof getCanDoMonitorableItems === "function") ? getCanDoMonitorableItems() : [];
+
+            let itemsHtml = watched.map((w, idx) => {
+                const itemDef = items.find(i => i.id === w.catalogId);
+                const displayTitle = escapeHtml(w.customLabel || (itemDef ? itemDef.name : w.catalogId));
+                return `
                 <div class="dash-kv-row">
-                    <span class="dash-kv-label">${escapeHtml(w.customLabel || w.catalogId)}</span>
+                    <span class="dash-kv-label" style="display: flex; align-items: center; gap: 4px;">
+                        ${displayTitle}
+                        ${isEditMode ? `<button type="button" class="dash-widget-btn" onclick="removeWatchedCanDoSignal('${instanceId}', ${idx})" title="Remove signal" style="padding: 1px 5px; font-size: 0.7rem; border: none; background: rgba(239,68,68,0.2); color: #ef4444; border-radius: 4px; cursor: pointer; margin-left: 4px;">✕</button>` : ''}
+                    </span>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <span class="can-do-age-label" style="font-size: 0.7rem; color: var(--text-muted);">Age: --</span>
                         <span class="dash-badge badge-gray can-do-state-badge">Waiting...</span>
                     </div>
                 </div>
-            `).join("");
+            `}).join("");
+
+            let pickerSectionHtml = "";
+            if (isEditMode || watched.length === 0) {
+                const optionsGrouped = {};
+                items.forEach(item => {
+                    const cat = item.category || "General";
+                    if (!optionsGrouped[cat]) optionsGrouped[cat] = [];
+                    optionsGrouped[cat].push(item);
+                });
+
+                let optionsHtml = "";
+                for (const cat in optionsGrouped) {
+                    optionsHtml += `<optgroup label="${escapeHtml(cat)}">`;
+                    optionsGrouped[cat].forEach(item => {
+                        optionsHtml += `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`;
+                    });
+                    optionsHtml += `</optgroup>`;
+                }
+
+                pickerSectionHtml = `
+                    <div style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px dashed var(--border-color); display: flex; flex-direction: column; gap: 6px;">
+                        <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-heading);">Select Signal / CAN State:</div>
+                        <select class="can-do-signal-picker" style="width: 100%; font-size: 0.8rem; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-heading);">
+                            <option value="">-- Select Signal or CAN ID --</option>
+                            ${optionsHtml}
+                        </select>
+                        <div style="display: flex; gap: 6px;">
+                            <input type="text" class="can-do-signal-label" placeholder="Custom Label (optional)" style="flex: 1; font-size: 0.8rem; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-heading);">
+                            <button type="button" class="dash-action-btn" onclick="addWatchedCanDoSignal('${instanceId}', this)" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 600;">+ Add</button>
+                        </div>
+                    </div>`;
+            }
 
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-broadcast"/></svg> State Monitor</span>
                     <div class="dash-card-actions"><div id="can_do_live_indicator_${instanceId}" class="dash-status"><span class="status-dot green"></span> Live</div></div></div>
                     <div><div class="can-do-watched-container dash-kv-list" style="margin-bottom: 0.5rem;">
                         ${itemsHtml || '<div class="dash-subtext">No signals configured to watch.</div>'}
-                    </div></div>
+                    </div>
+                    ${pickerSectionHtml}
+                    </div>
                     ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) { }
@@ -5692,14 +5827,53 @@ const DASH_WIDGET_CATALOG = {
         id: "can_do_buttons", name: "CAN Do Action Buttons", icon: "", category: "Quick Action",
         render: function (isEditMode, instanceId) {
             const buttons = getCanDoActionButtons(instanceId);
+            const availableRules = getAvailableCanDoRulesList();
+
             let btnsHtml = buttons.map((b, idx) => `
-                <button type="button" class="dash-outline-btn" style="width: 100%; margin-bottom: 0.4rem;" onclick="executeDashboardCanDoButton('${instanceId}', ${idx}, this)">
-                    ${escapeHtml(b.customLabel || b.ruleName)}
-                </button>
+                <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 0.4rem;">
+                    <button type="button" class="dash-outline-btn" style="flex: 1;" onclick="executeDashboardCanDoButton('${instanceId}', ${idx}, this)">
+                        ${escapeHtml(b.customLabel || b.ruleName)}
+                    </button>
+                    ${isEditMode ? `<button type="button" class="dash-widget-btn" onclick="removeDashboardCanDoButton('${instanceId}', ${idx})" title="Remove button" style="padding: 4px 8px; font-size: 0.75rem; border: none; background: rgba(239,68,68,0.2); color: #ef4444; border-radius: 4px; cursor: pointer;">✕</button>` : ''}
+                </div>
             `).join("");
 
+            let pickerSectionHtml = "";
+            if (isEditMode || buttons.length === 0) {
+                const optionsGrouped = {};
+                availableRules.forEach(r => {
+                    const cat = r.category || "Automations";
+                    if (!optionsGrouped[cat]) optionsGrouped[cat] = [];
+                    optionsGrouped[cat].push(r);
+                });
+
+                let optionsHtml = "";
+                for (const cat in optionsGrouped) {
+                    optionsHtml += `<optgroup label="${escapeHtml(cat)}">`;
+                    optionsGrouped[cat].forEach(r => {
+                        optionsHtml += `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`;
+                    });
+                    optionsHtml += `</optgroup>`;
+                }
+
+                pickerSectionHtml = `
+                    <div style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px dashed var(--border-color); display: flex; flex-direction: column; gap: 6px;">
+                        <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-heading);">Add Action Button:</div>
+                        <select class="dash-can-do-rule-select" style="width: 100%; font-size: 0.8rem; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-heading);">
+                            <option value="">-- Select Action or Automation --</option>
+                            ${optionsHtml}
+                        </select>
+                        <div style="display: flex; gap: 6px;">
+                            <input type="text" class="dash-can-do-btn-label" placeholder="Button Label (optional)" style="flex: 1; font-size: 0.8rem; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-heading);">
+                            <button type="button" class="dash-action-btn" onclick="addDashboardCanDoButton('${instanceId}', this)" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 600;">+ Add</button>
+                        </div>
+                    </div>`;
+            }
+
             return `<div class="dash-card-header"><span class="dash-card-title"><svg class="icon"><use href="#icon-star"/></svg> Action Buttons</span></div>
-                    <div>${btnsHtml || '<div class="dash-subtext">No quick action buttons added.</div>'}</div>
+                    <div>${btnsHtml || '<div class="dash-subtext">No quick action buttons added.</div>'}
+                    ${pickerSectionHtml}
+                    </div>
                     ${renderWidgetEditControlsHTML(instanceId, isEditMode)}`;
         },
         update: function (obj) { }
@@ -6040,47 +6214,70 @@ function checkStatus() {
 
 function getCanDoMonitorableItems() {
     const items = [];
-    if (typeof CAN_DO_CATALOG === "undefined" || !CAN_DO_CATALOG || !Array.isArray(CAN_DO_CATALOG.commands)) return items;
+    const addedIds = new Set();
 
-    CAN_DO_CATALOG.commands.forEach(cmd => {
-        const canId = cmd.state_can_id || cmd.can_id || cmd.action_can_id;
-        if (!cmd || !canId) return;
-        const roles = cmd.roles || [];
-        if (roles.length > 0 && !roles.includes("trigger") && !roles.includes("condition")) {
-            return;
-        }
+    // 1. Catalog signal definitions
+    if (typeof CAN_DO_CATALOG !== "undefined" && CAN_DO_CATALOG && Array.isArray(CAN_DO_CATALOG.commands)) {
+        CAN_DO_CATALOG.commands.forEach(cmd => {
+            if (!cmd) return;
+            const canId = cmd.state_can_id || cmd.can_id || cmd.action_can_id;
+            const roles = cmd.roles || [];
+            if (roles.length > 0 && !roles.includes("trigger") && !roles.includes("condition")) {
+                return;
+            }
+            const itemId = cmd.id || cmd.name;
+            const matchPattern = cmd.match_payload || cmd.to_payload || cmd.from_payload || (cmd.trigger && (cmd.trigger.from || cmd.trigger.to));
+            const hasOptions = Array.isArray(cmd.options) && cmd.options.length > 0;
+            if (canId || matchPattern || hasOptions) {
+                items.push({
+                    id: itemId,
+                    name: cmd.name || itemId,
+                    category: cmd.category || "Vehicle Signals",
+                    can_id: canId,
+                    match_payload: matchPattern,
+                    options: cmd.options
+                });
+                addedIds.add(itemId);
+                if (canId) addedIds.add(String(canId).toLowerCase());
+            }
+        });
+    }
 
-        const matchPattern = cmd.match_payload || cmd.to_payload || cmd.from_payload;
-        const hasOptions = Array.isArray(cmd.options) && cmd.options.some(o => o.match_payload || o.payload || o.to_payload || o.from_payload);
-
-        if (matchPattern || hasOptions) {
-            items.push({
-                id: cmd.id || cmd.name,
-                name: cmd.name,
-                category: cmd.category || "General",
-                can_id: canId,
-                match_payload: matchPattern,
-                options: cmd.options
-            });
-        }
-    });
-
+    // 2. Custom Condition Presets
     if (typeof getCustomCondPresets === "function") {
         const custom = getCustomCondPresets();
         if (Array.isArray(custom)) {
             custom.forEach((cp, idx) => {
-                if (cp && cp.can_id) {
+                if (cp) {
+                    const cpId = `custom_cond_${idx}`;
                     items.push({
-                        id: `custom_cond_${idx}`,
+                        id: cpId,
                         name: cp.name || `Custom Condition #${idx + 1}`,
                         category: "My Saved Conditions",
                         can_id: cp.can_id,
                         match_payload: cp.match_payload,
                         options: cp.options
                     });
+                    addedIds.add(cpId);
                 }
             });
         }
+    }
+
+    // 3. Live CAN bus states from /api/can_states cache
+    if (window._canDoStateCache && typeof window._canDoStateCache === "object") {
+        Object.keys(window._canDoStateCache).forEach(canIdKey => {
+            const lowKey = canIdKey.toLowerCase();
+            if (!addedIds.has(lowKey) && !addedIds.has(canIdKey)) {
+                items.push({
+                    id: canIdKey,
+                    name: `CAN Frame ${canIdKey}`,
+                    category: "Active CAN Bus IDs (/api/can_states)",
+                    can_id: canIdKey
+                });
+                addedIds.add(lowKey);
+            }
+        });
     }
 
     return items;
@@ -6112,20 +6309,61 @@ function saveCanDoActionButtons(instanceId, list) {
 }
 
 function getAvailableCanDoRulesList() {
-    if (Array.isArray(window._cachedCanDoRules) && window._cachedCanDoRules.length > 0) {
-        return window._cachedCanDoRules.map((r, idx) => ({ id: `rule_${idx}`, name: r.name || `Rule #${idx + 1}`, data: r }));
+    const list = [];
+    const addedNames = new Set();
+
+    // 1. Configured CAN Do automation rules
+    let rules = Array.isArray(window._cachedCanDoRules) ? window._cachedCanDoRules : [];
+    if (rules.length === 0) {
+        const cards = document.querySelectorAll("#can_do_rules_container .can-do-rule-card");
+        if (cards.length > 0) {
+            cards.forEach((c) => {
+                const rData = (typeof extractCanDoRuleData === "function") ? extractCanDoRuleData(c) : null;
+                if (rData) rules.push(rData);
+            });
+        }
     }
-    const cards = document.querySelectorAll("#can_do_rules_container .can-do-rule-card");
-    if (cards.length > 0) {
-        const list = [];
-        cards.forEach((c, idx) => {
-            const rData = (typeof extractCanDoRuleData === "function") ? extractCanDoRuleData(c) : null;
-            if (rData) list.push({ id: `rule_${idx}`, name: rData.name || `Rule #${idx + 1}`, data: rData });
+
+    rules.forEach((r, idx) => {
+        const name = r.name || `Rule #${idx + 1}`;
+        list.push({
+            id: `rule_${idx}`,
+            name: name,
+            category: "Automations",
+            data: r
         });
-        if (list.length > 0) return list;
+        addedNames.add(name.toLowerCase());
+    });
+
+    // 2. Actionable commands from CAN_DO_CATALOG
+    if (typeof CAN_DO_CATALOG !== "undefined" && CAN_DO_CATALOG && Array.isArray(CAN_DO_CATALOG.commands)) {
+        CAN_DO_CATALOG.commands.forEach((cmd, idx) => {
+            if (!cmd) return;
+            const name = cmd.name || cmd.id;
+            if (name && !addedNames.has(name.toLowerCase())) {
+                const ruleData = {
+                    name: name,
+                    enabled: true,
+                    trigger: cmd.trigger || { source: "manual" },
+                    action: cmd.action || { type: "precondition", trigger_id: cmd.id }
+                };
+                list.push({
+                    id: `cat_cmd_${cmd.id || idx}`,
+                    name: name,
+                    category: cmd.category || "Vehicle Actions",
+                    data: ruleData
+                });
+                addedNames.add(name.toLowerCase());
+            }
+        });
     }
-    const defaultRule = (typeof getDefaultPreconditionRule === "function") ? getDefaultPreconditionRule() : {};
-    return [{ id: "rule_0", name: "E-GMP Battery Preconditioning", data: defaultRule }];
+
+    if (list.length === 0) {
+        const defaultRule = (typeof getDefaultPreconditionRule === "function") ? getDefaultPreconditionRule() : {};
+        list.push({ id: "rule_0", name: "E-GMP Battery Preconditioning", category: "Automations", data: defaultRule });
+    }
+
+    return list;
 }
 
 async function executeDashboardCanDoButton(instanceId, idx, btn) {
@@ -6147,11 +6385,18 @@ async function executeDashboardCanDoButton(instanceId, idx, btn) {
     btn.disabled = true;
 
     try {
-        const res = await fetch("/test_can_do_rule", {
+        let res = await fetch("/test_can_do_action", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(ruleData)
         });
+        if (!res.ok) {
+            res = await fetch("/test_can_do_rule", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(ruleData)
+            });
+        }
         if (!res.ok) throw new Error("Status " + res.status);
         btn.innerHTML = `<span>Done!</span>`;
         btn.style.background = "var(--m3-tonal-act-color)";
@@ -7521,8 +7766,11 @@ function getByteGridString(container, prefixClass) {
         }
     });
     if (!hasAny) return "";
-    while (bytes.length > 0 && bytes[bytes.length - 1] === "**") {
-        bytes.pop();
+    // Only strip trailing wildcards for triggers/conditions, NEVER for action payload steps (action steps need all 8 bytes)
+    if (!prefixClass.includes("step")) {
+        while (bytes.length > 0 && bytes[bytes.length - 1] === "**") {
+            bytes.pop();
+        }
     }
     return bytes.join(" ");
 }

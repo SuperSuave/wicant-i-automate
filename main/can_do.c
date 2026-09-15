@@ -81,19 +81,28 @@ static void can_do_action_worker_task(void *pvParameters) {
         can_do_async_step_t *step = &job.steps[s];
         uint8_t payload[8] = {0};
 
-        // 1. Retrieve last known state for this CAN ID from can_state_cache (recorded from live bus)
-        uint32_t lookup_id = (step->state_can_id > 0) ? step->state_can_id : step->tx_can_id;
+        // 1. Retrieve last known state for this transmission CAN ID from can_state_cache (recorded from live bus)
+        uint32_t lookup_id = step->tx_can_id;
+        bool cache_found = false;
         can_state_cache_lock();
         const can_state_entry_t *cache = can_state_cache_get();
         if (cache) {
           for (int c_idx = 0; c_idx < CAN_STATE_CACHE_SIZE; c_idx++) {
-            if (cache[c_idx].id == lookup_id && cache[c_idx].id != 0) {
+            if (cache[c_idx].id == lookup_id && cache[c_idx].id != 0 &&
+                (cache[c_idx].bus == step->target_bus || step->target_bus == 0)) {
               memcpy(payload, cache[c_idx].data, 8);
+              cache_found = true;
               break;
             }
           }
         }
         can_state_cache_unlock();
+
+        // If not yet seen on bus, use known active-low switch defaults where applicable
+        if (!cache_found && step->tx_can_id == 0x4A2) {
+          uint8_t default_4a2[8] = {0x00, 0x00, 0xFF, 0xF3, 0xFF, 0xFF, 0x7F, 0x00};
+          memcpy(payload, default_4a2, 8);
+        }
 
         // 2. Merge step payload with cached state using tx_mask
         for (uint8_t b = 0; b < 8; b++) {
@@ -162,7 +171,7 @@ void can_do_init(const char *device_id_str) {
   if (s_can_do_action_queue == NULL) {
     s_can_do_action_queue = xQueueCreate(8, sizeof(can_do_async_job_t));
     if (s_can_do_action_queue) {
-      xTaskCreate(can_do_action_worker_task, "can_do_act", 3072, NULL, 5, NULL);
+      xTaskCreate(can_do_action_worker_task, "can_do_act", 4096, NULL, 5, NULL);
     }
   }
 

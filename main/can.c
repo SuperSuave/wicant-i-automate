@@ -122,7 +122,7 @@ static uint32_t can_busoff_count[CAN_BUS_COUNT];
 
 static can_state_entry_t s_can_state_cache[CAN_STATE_CACHE_SIZE];
 static SemaphoreHandle_t s_can_state_mutex = NULL;
-static uint8_t s_can_state_count = 0;
+static uint16_t s_can_state_count = 0;
 
 static void can_state_cache_update(const twai_message_t *msg, can_bus_t bus) {
   if (s_can_state_mutex == NULL)
@@ -140,8 +140,21 @@ static void can_state_cache_update(const twai_message_t *msg, can_bus_t bus) {
     }
   }
 
-  if (slot == -1 && s_can_state_count < CAN_STATE_CACHE_SIZE) {
-    slot = s_can_state_count++;
+  if (slot == -1) {
+    if (s_can_state_count < CAN_STATE_CACHE_SIZE) {
+      slot = s_can_state_count++;
+    } else {
+      // Cache is full: evict entry with the oldest timestamp
+      uint32_t oldest_ms = UINT32_MAX;
+      int oldest_slot = 0;
+      for (int i = 0; i < CAN_STATE_CACHE_SIZE; i++) {
+        if (s_can_state_cache[i].timestamp_ms < oldest_ms) {
+          oldest_ms = s_can_state_cache[i].timestamp_ms;
+          oldest_slot = i;
+        }
+      }
+      slot = oldest_slot;
+    }
     s_can_state_cache[slot].id = msg->identifier;
     s_can_state_cache[slot].bus = (uint8_t)bus;
   }

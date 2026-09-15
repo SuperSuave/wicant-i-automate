@@ -68,7 +68,7 @@ bool can_any_enabled(void);
 uint8_t can_get_bitrate(can_bus_t bus);
 void can_flush_rx(void);
 
-#define CAN_STATE_CACHE_SIZE  128
+#define CAN_STATE_CACHE_SIZE  256
 
 typedef struct {
     uint32_t  id;           /* CAN frame identifier (0 = slot empty) */
