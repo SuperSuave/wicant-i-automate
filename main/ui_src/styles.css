@@ -437,6 +437,55 @@
             border-bottom: 1px solid var(--border-color);
         }
 
+        .dash-widget-edit-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 1rem;
+            padding-top: 0.65rem;
+            border-top: 1px dashed var(--border-color);
+            width: 100%;
+        }
+
+        .dash-widget-edit-bar .dash-widget-btn {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--m3-shape-sm, 6px);
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 0.85rem;
+            line-height: 1;
+            transition: var(--transition);
+        }
+
+        .dash-widget-edit-bar .dash-widget-btn:hover {
+            background: var(--primary-color);
+            color: #ffffff;
+            border-color: var(--primary-color);
+        }
+
+        .dash-widget-edit-bar .dash-widget-del-btn:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+        }
+
+        .dash-widget-edit-bar .dash-widget-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+            display: block;
+        }
+
         .dash-card-title {
             display: flex;
             align-items: center;
